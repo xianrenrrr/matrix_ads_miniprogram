@@ -1,4 +1,6 @@
 // app.js
+const config = require('./utils/config.js')
+
 App({
   onLaunch() {
     // 小程序启动时触发
@@ -29,7 +31,7 @@ App({
       userInfo: null,
       templates: [],
       currentTemplate: null,
-      apiBaseUrl: 'https://matrix-ads-backend.onrender.com', // 部署环境API地址
+      apiBaseUrl: config.api.baseUrl, // 使用配置文件中的API地址
       isLoggedIn: false
     }
     
