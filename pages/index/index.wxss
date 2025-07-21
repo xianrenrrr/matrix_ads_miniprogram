@@ -1,0 +1,135 @@
+/* pages/index/index.wxss */
+
+.feature-list {
+  padding: 0;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 0;
+}
+
+.ml-16 {
+  margin-left: 16rpx;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16rpx;
+  margin-bottom: 24rpx;
+}
+
+.stat-card {
+  background-color: #1e293b;
+  border-radius: 12rpx;
+  padding: 32rpx 16rpx;
+  text-align: center;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+}
+
+.stat-number {
+  font-size: 48rpx;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 8rpx;
+}
+
+.stat-label {
+  font-size: 24rpx;
+  color: #94a3b8;
+}
+
+.template-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.template-item {
+  display: flex;
+  background-color: #334155;
+  border-radius: 12rpx;
+  padding: 16rpx;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.template-item:active {
+  transform: scale(0.98);
+  background-color: #475569;
+}
+
+.template-thumbnail {
+  width: 120rpx;
+  height: 80rpx;
+  border-radius: 8rpx;
+  overflow: hidden;
+  background-color: #475569;
+  margin-right: 16rpx;
+  flex-shrink: 0;
+}
+
+.thumbnail-image {
+  width: 100%;
+  height: 100%;
+}
+
+.template-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.template-title {
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #f8fafc;
+  margin-bottom: 4rpx;
+}
+
+.template-desc {
+  font-size: 28rpx;
+  line-height: 1.4;
+}
+
+.template-duration {
+  margin-top: 4rpx;
+}
+
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16rpx;
+}
+
+.action-btn {
+  background-color: #334155;
+  border: none;
+  border-radius: 12rpx;
+  padding: 24rpx 16rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+  transition: all 0.3s ease;
+  color: #f8fafc;
+  font-size: 28rpx;
+}
+
+.action-btn:active {
+  transform: scale(0.95);
+  background-color: #475569;
+}
+
+.action-icon {
+  font-size: 40rpx;
+  margin-bottom: 4rpx;
+}
+
+.action-text {
+  font-size: 24rpx;
+  color: #94a3b8;
+}

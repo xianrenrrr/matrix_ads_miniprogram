@@ -1,0 +1,89 @@
+<!-- pages/index/index.wxml -->
+<view class="page-container">
+  <!-- 加载状态 -->
+  <view wx:if="{{loading}}" class="loading">
+    <view class="loading-spinner"></view>
+  </view>
+
+  <!-- 主要内容 -->
+  <view wx:else class="container">
+    <!-- 欢迎信息 -->
+    <view class="card">
+      <view class="flex justify-between items-center">
+        <view>
+          <view class="card-title">你好，{{userInfo.username || '用户'}}</view>
+          <view class="card-subtitle">开始今天的创作吧</view>
+        </view>
+        <button class="btn btn-primary" bindtap="startRecording">
+          开始录制
+        </button>
+      </view>
+    </view>
+
+    <!-- 统计数据 -->
+    <view class="stats-grid">
+      <view class="stat-card">
+        <view class="stat-number text-primary">{{stats.availableTemplates}}</view>
+        <view class="stat-label">可用模板</view>
+      </view>
+      <view class="stat-card">
+        <view class="stat-number text-success">{{stats.recordedVideos}}</view>
+        <view class="stat-label">已录制</view>
+      </view>
+      <view class="stat-card">
+        <view class="stat-number text-warning">{{stats.publishedVideos}}</view>
+        <view class="stat-label">已发布</view>
+      </view>
+    </view>
+
+    <!-- 最近模板 -->
+    <view class="card">
+      <view class="flex justify-between items-center mb-24">
+        <view class="card-title">最近模板</view>
+        <text class="text-primary" bindtap="viewAllTemplates">查看全部</text>
+      </view>
+      
+      <view wx:if="{{recentTemplates.length === 0}}" class="text-secondary text-center p-32">
+        暂无模板
+      </view>
+      
+      <view wx:else class="template-list">
+        <view 
+          wx:for="{{recentTemplates}}" 
+          wx:key="id" 
+          class="template-item"
+          data-id="{{item.id}}"
+          bindtap="selectTemplate"
+        >
+          <view class="template-thumbnail">
+            <image src="{{item.exampleFrame || '/assets/default-template.jpg'}}" mode="aspectFill" class="thumbnail-image"></image>
+          </view>
+          <view class="template-info">
+            <view class="template-title">{{item.templateTitle || '模板'}}</view>
+            <view class="template-desc text-secondary">{{item.targetAudience || '通用模板'}}</view>
+            <view class="template-duration text-xs text-secondary">{{item.totalVideoLength || 30}}秒 · {{item.tone || '轻松'}}</view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 快速操作 -->
+    <view class="card">
+      <view class="card-title mb-24">快速操作</view>
+      <view class="quick-actions">
+        <button class="action-btn" bindtap="viewAllTemplates">
+          <text class="action-icon">📚</text>
+          <text class="action-text">浏览模板</text>
+        </button>
+        <button class="action-btn" bindtap="startRecording">
+          <text class="action-icon">📹</text>
+          <text class="action-text">开始录制</text>
+        </button>
+        <button class="action-btn" bindtap="handleLogout">
+          <text class="action-icon">🚪</text>
+          <text class="action-text">退出登录</text>
+        </button>
+      </view>
+    </view>
+  </view>
+</view>

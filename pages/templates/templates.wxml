@@ -1,0 +1,133 @@
+<!-- pages/templates/templates.wxml -->
+<view class="templates-container">
+  <!-- 搜索栏 -->
+  <view class="search-section">
+    <view class="search-box">
+      <text class="search-icon">🔍</text>
+      <input 
+        type="text"
+        class="search-input"
+        placeholder="搜索模板..."
+        placeholder-class="search-placeholder"
+        value="{{searchText}}"
+        bindinput="onSearchInput"
+      />
+    </view>
+  </view>
+
+  <!-- 分类筛选 -->
+  <view class="category-section">
+    <scroll-view class="category-scroll" scroll-x="true" show-scrollbar="false">
+      <view class="category-list">
+        <view 
+          wx:for="{{categories}}" 
+          wx:key="id"
+          class="category-item {{selectedCategory === item.id ? 'active' : ''}}"
+          data-category="{{item.id}}"
+          bindtap="selectCategory"
+        >
+          {{item.name}}
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view wx:if="{{loading}}" class="loading-section">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">加载模板中...</text>
+  </view>
+
+  <!-- 模板列表 -->
+  <view wx:else class="templates-list">
+    <view wx:if="{{templates.length === 0}}" class="empty-state">
+      <text class="empty-icon">📝</text>
+      <text class="empty-title">暂无模板</text>
+      <text class="empty-desc">请联系管理员分配模板或在网页端订阅</text>
+    </view>
+
+    <view wx:else class="template-grid">
+      <view 
+        wx:for="{{templates}}" 
+        wx:key="id"
+        class="template-card {{!item.isSubscribed ? 'unsubscribed' : ''}}"
+        data-id="{{item.id}}"
+        bindtap="selectTemplate"
+      >
+        <!-- 模板缩略图 -->
+        <view class="template-thumbnail">
+          <image 
+            src="{{item.thumbnail}}" 
+            mode="aspectFill" 
+            class="thumbnail-image"
+            lazy-load="true"
+          ></image>
+          
+          <!-- 订阅状态标识 -->
+          <view wx:if="{{!item.isSubscribed}}" class="subscription-badge">
+            <text class="badge-text">未订阅</text>
+          </view>
+          
+          <!-- 难度标识 -->
+          <view class="difficulty-badge" style="background-color: {{getDifficultyColor(item.difficulty)}}">
+            <text class="difficulty-text">{{getDifficultyText(item.difficulty)}}</text>
+          </view>
+        </view>
+
+        <!-- 模板信息 -->
+        <view class="template-info">
+          <view class="template-header">
+            <text class="template-title">{{item.templateTitle || '视频模板'}}</text>
+            <view class="template-stats">
+              <text class="stat-item">{{item.sceneCount}}场景</text>
+              <text class="stat-divider">·</text>
+              <text class="stat-item">{{item.duration}}秒</text>
+            </view>
+          </view>
+          
+          <text class="template-description">{{item.targetAudience || '通用模板'}} · {{item.tone || '轻松风格'}}</text>
+          
+          <!-- 标签 -->
+          <view class="template-tags">
+            <text class="tag-item">{{item.videoFormat || '1080p'}}</text>
+            <text class="tag-item">{{item.tone || '轻松'}}</text>
+            <text wx:if="{{item.lightingRequirements}}" class="tag-item">{{item.lightingRequirements}}</text>
+          </view>
+          
+          <!-- 创建者信息 -->
+          <view class="template-footer">
+            <text class="creator-info">内容管理员创建</text>
+            
+            <!-- 操作按钮 -->
+            <view class="template-actions" wx:if="{{item.isSubscribed}}">
+              <button 
+                class="action-btn primary-btn"
+                data-id="{{item.id}}"
+                bindtap="selectTemplate"
+                size="mini"
+              >
+                开始录制
+              </button>
+            </view>
+            
+            <view class="template-actions" wx:else>
+              <button 
+                class="action-btn subscribe-btn"
+                data-id="{{item.id}}"
+                bindtap="subscribeTemplate"
+                size="mini"
+              >
+                去订阅
+              </button>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部提示 -->
+  <view class="bottom-tips">
+    <text class="tip-text">💡 在网页端可以订阅更多模板</text>
+  </view>
+</view>

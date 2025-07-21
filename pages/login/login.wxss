@@ -1,0 +1,401 @@
+/* pages/login/login.wxss */
+
+.login-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  padding: 40rpx 32rpx 60rpx;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 头部 Logo 区域 */
+.header-section {
+  text-align: center;
+  margin-bottom: 80rpx;
+  margin-top: 60rpx;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16rpx;
+}
+
+.logo-icon {
+  font-size: 64rpx;
+  margin-right: 16rpx;
+}
+
+.logo-text {
+  font-size: 48rpx;
+  font-weight: 700;
+  color: #f8fafc;
+  letter-spacing: 2rpx;
+}
+
+.subtitle {
+  font-size: 28rpx;
+  color: #94a3b8;
+  margin-top: 8rpx;
+}
+
+/* 登录方式切换 */
+.login-method-tabs {
+  display: flex;
+  background-color: #334155;
+  border-radius: 16rpx;
+  padding: 8rpx;
+  margin-bottom: 48rpx;
+}
+
+.method-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24rpx 16rpx;
+  border-radius: 12rpx;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.method-tab.active {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.method-tab:not(.active) {
+  color: #94a3b8;
+}
+
+.tab-icon {
+  font-size: 32rpx;
+  margin-bottom: 8rpx;
+}
+
+.tab-text {
+  font-size: 26rpx;
+  font-weight: 500;
+}
+
+/* 表单容器 */
+.form-container {
+  flex: 1;
+}
+
+/* 密码登录表单 */
+.password-login {
+  width: 100%;
+}
+
+.form-group {
+  margin-bottom: 32rpx;
+}
+
+.input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background-color: #334155;
+  border-radius: 12rpx;
+  border: 2rpx solid #475569;
+  transition: border-color 0.3s ease;
+}
+
+.input-group:focus-within {
+  border-color: #3b82f6;
+}
+
+.input-icon {
+  font-size: 32rpx;
+  padding: 0 24rpx;
+  color: #94a3b8;
+}
+
+.form-input {
+  flex: 1;
+  padding: 32rpx 16rpx 32rpx 0;
+  font-size: 32rpx;
+  color: #f8fafc;
+  background: transparent;
+  border: none;
+}
+
+.input-placeholder {
+  color: #64748b;
+}
+
+.password-toggle {
+  padding: 0 24rpx;
+  font-size: 32rpx;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.password-toggle.active {
+  color: #3b82f6;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 48rpx;
+}
+
+.forgot-password {
+  font-size: 28rpx;
+  color: #3b82f6;
+  cursor: pointer;
+}
+
+.login-btn {
+  width: 100%;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 12rpx;
+  padding: 32rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  margin-bottom: 32rpx;
+  transition: all 0.3s ease;
+}
+
+.login-btn:not(.loading):active {
+  transform: scale(0.98);
+  background-color: #2563eb;
+}
+
+.login-btn.loading {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.loading-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.register-hint {
+  text-align: center;
+  margin-top: 24rpx;
+}
+
+.hint-text {
+  font-size: 28rpx;
+  color: #94a3b8;
+  margin-right: 8rpx;
+}
+
+.register-link {
+  font-size: 28rpx;
+  color: #3b82f6;
+  cursor: pointer;
+}
+
+/* 二维码登录 */
+.qrcode-login {
+  width: 100%;
+  text-align: center;
+}
+
+.qr-instruction {
+  margin-bottom: 48rpx;
+}
+
+.instruction-icon {
+  font-size: 80rpx;
+  margin-bottom: 24rpx;
+}
+
+.instruction-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #f8fafc;
+  margin-bottom: 32rpx;
+}
+
+.instruction-steps {
+  text-align: left;
+  max-width: 480rpx;
+  margin: 0 auto;
+}
+
+.step-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24rpx;
+  padding: 16rpx;
+  background-color: rgba(51, 65, 85, 0.5);
+  border-radius: 12rpx;
+}
+
+.step-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48rpx;
+  height: 48rpx;
+  background-color: #3b82f6;
+  color: white;
+  border-radius: 50%;
+  font-size: 24rpx;
+  font-weight: 600;
+  margin-right: 16rpx;
+  flex-shrink: 0;
+}
+
+.step-text {
+  font-size: 28rpx;
+  color: #e2e8f0;
+  line-height: 1.4;
+}
+
+.qr-scan-area {
+  margin: 48rpx auto;
+  width: 300rpx;
+  height: 300rpx;
+  position: relative;
+}
+
+.scan-frame {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background-color: rgba(51, 65, 85, 0.3);
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scan-corner {
+  position: absolute;
+  width: 40rpx;
+  height: 40rpx;
+  border: 4rpx solid #3b82f6;
+}
+
+.scan-corner-tl {
+  top: 16rpx;
+  left: 16rpx;
+  border-right: none;
+  border-bottom: none;
+  border-radius: 8rpx 0 0 0;
+}
+
+.scan-corner-tr {
+  top: 16rpx;
+  right: 16rpx;
+  border-left: none;
+  border-bottom: none;
+  border-radius: 0 8rpx 0 0;
+}
+
+.scan-corner-bl {
+  bottom: 16rpx;
+  left: 16rpx;
+  border-right: none;
+  border-top: none;
+  border-radius: 0 0 0 8rpx;
+}
+
+.scan-corner-br {
+  bottom: 16rpx;
+  right: 16rpx;
+  border-left: none;
+  border-top: none;
+  border-radius: 0 0 8rpx 0;
+}
+
+.scan-hint {
+  font-size: 28rpx;
+  color: #94a3b8;
+  text-align: center;
+}
+
+.scan-btn {
+  width: 100%;
+  background-color: #10b981;
+  color: white;
+  border: none;
+  border-radius: 12rpx;
+  padding: 32rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  margin-bottom: 32rpx;
+  transition: all 0.3s ease;
+}
+
+.scan-btn:not(.loading):active {
+  transform: scale(0.98);
+  background-color: #059669;
+}
+
+.scan-btn.loading {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.qr-tips {
+  background-color: rgba(59, 130, 246, 0.1);
+  border: 2rpx solid rgba(59, 130, 246, 0.3);
+  border-radius: 12rpx;
+  padding: 24rpx;
+  margin-top: 32rpx;
+}
+
+.tip-text {
+  font-size: 26rpx;
+  color: #93c5fd;
+}
+
+/* 帮助和底部 */
+.help-section {
+  text-align: center;
+  margin: 48rpx 0 32rpx;
+}
+
+.help-btn {
+  font-size: 28rpx;
+  color: #64748b;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.help-btn:active {
+  color: #3b82f6;
+}
+
+.footer-section {
+  text-align: center;
+  margin-top: auto;
+  padding-top: 32rpx;
+}
+
+.footer-text {
+  display: block;
+  font-size: 24rpx;
+  color: #64748b;
+  margin-bottom: 8rpx;
+}
+
+.version-text {
+  font-size: 22rpx;
+  color: #475569;
+}
+
+/* 通用按钮样式 */
+.primary-btn {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  box-shadow: 0 4rpx 12rpx rgba(59, 130, 246, 0.3);
+  transition: all 0.3s ease;
+}
+
+.primary-btn:not([disabled]):active {
+  transform: translateY(2rpx);
+  box-shadow: 0 2rpx 8rpx rgba(59, 130, 246, 0.4);
+}

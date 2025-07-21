@@ -1,0 +1,231 @@
+/* app.wxss - 全局样式 */
+page {
+  background-color: #0f172a;
+  color: #f8fafc;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* 容器样式 */
+.container {
+  padding: 32rpx;
+  min-height: 100vh;
+}
+
+.page-container {
+  padding: 0 32rpx;
+  background-color: #0f172a;
+}
+
+/* 卡片样式 */
+.card {
+  background-color: #1e293b;
+  border-radius: 16rpx;
+  padding: 32rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+  margin-bottom: 24rpx;
+}
+
+.card-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #f8fafc;
+  margin-bottom: 8rpx;
+}
+
+.card-subtitle {
+  font-size: 28rpx;
+  color: #94a3b8;
+}
+
+/* 按钮样式 */
+.btn {
+  border-radius: 12rpx;
+  padding: 24rpx 48rpx;
+  font-size: 32rpx;
+  font-weight: 500;
+  text-align: center;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background-color: #3b82f6;
+  color: #ffffff;
+}
+
+.btn-primary:hover {
+  background-color: #2563eb;
+}
+
+.btn-secondary {
+  background-color: #475569;
+  color: #f8fafc;
+}
+
+.btn-secondary:hover {
+  background-color: #334155;
+}
+
+.btn-outline {
+  background-color: transparent;
+  border: 2rpx solid #475569;
+  color: #f8fafc;
+}
+
+.btn-outline:hover {
+  background-color: #475569;
+}
+
+/* 输入框样式 */
+.input {
+  background-color: #334155;
+  border: 2rpx solid #475569;
+  border-radius: 12rpx;
+  padding: 24rpx;
+  font-size: 32rpx;
+  color: #f8fafc;
+  margin-bottom: 24rpx;
+}
+
+.input:focus {
+  border-color: #3b82f6;
+  outline: none;
+}
+
+/* 文本样式 */
+.text-primary {
+  color: #3b82f6;
+}
+
+.text-secondary {
+  color: #94a3b8;
+}
+
+.text-success {
+  color: #10b981;
+}
+
+.text-warning {
+  color: #f59e0b;
+}
+
+.text-danger {
+  color: #ef4444;
+}
+
+.text-lg {
+  font-size: 36rpx;
+}
+
+.text-sm {
+  font-size: 28rpx;
+}
+
+.text-xs {
+  font-size: 24rpx;
+}
+
+/* 布局样式 */
+.flex {
+  display: flex;
+}
+
+.flex-row {
+  flex-direction: row;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+/* 间距样式 */
+.mt-8 { margin-top: 16rpx; }
+.mt-16 { margin-top: 32rpx; }
+.mt-24 { margin-top: 48rpx; }
+.mt-32 { margin-top: 64rpx; }
+
+.mb-8 { margin-bottom: 16rpx; }
+.mb-16 { margin-bottom: 32rpx; }
+.mb-24 { margin-bottom: 48rpx; }
+.mb-32 { margin-bottom: 64rpx; }
+
+.p-8 { padding: 16rpx; }
+.p-16 { padding: 32rpx; }
+.p-24 { padding: 48rpx; }
+.p-32 { padding: 64rpx; }
+
+/* 模板网格样式 */
+.template-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300rpx, 1fr));
+  gap: 24rpx;
+  margin-top: 32rpx;
+}
+
+.template-card {
+  background-color: #1e293b;
+  border-radius: 16rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.template-card:hover {
+  transform: translateY(-4rpx);
+  box-shadow: 0 8rpx 24rpx rgba(59, 130, 246, 0.15);
+}
+
+/* 视频预览样式 */
+.video-preview {
+  width: 100%;
+  height: 400rpx;
+  background-color: #334155;
+  border-radius: 12rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24rpx;
+}
+
+/* 加载动画 */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 64rpx;
+}
+
+.loading-spinner {
+  width: 48rpx;
+  height: 48rpx;
+  border: 4rpx solid #334155;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

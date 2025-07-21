@@ -1,0 +1,338 @@
+/* pages/templates/templates.wxss */
+
+.templates-container {
+  padding: 0 0 120rpx;
+  background-color: #0f172a;
+  min-height: 100vh;
+}
+
+/* 搜索区域 */
+.search-section {
+  padding: 24rpx 32rpx;
+  background-color: #1e293b;
+  border-bottom: 2rpx solid #334155;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  background-color: #334155;
+  border-radius: 12rpx;
+  padding: 0 24rpx;
+  border: 2rpx solid #475569;
+  transition: border-color 0.3s ease;
+}
+
+.search-box:focus-within {
+  border-color: #3b82f6;
+}
+
+.search-icon {
+  font-size: 32rpx;
+  color: #94a3b8;
+  margin-right: 16rpx;
+}
+
+.search-input {
+  flex: 1;
+  padding: 24rpx 0;
+  font-size: 32rpx;
+  color: #f8fafc;
+  background: transparent;
+}
+
+.search-placeholder {
+  color: #64748b;
+}
+
+/* 分类筛选 */
+.category-section {
+  background-color: #1e293b;
+  border-bottom: 2rpx solid #334155;
+}
+
+.category-scroll {
+  width: 100%;
+  white-space: nowrap;
+}
+
+.category-list {
+  display: flex;
+  padding: 16rpx 32rpx;
+  gap: 16rpx;
+}
+
+.category-item {
+  padding: 16rpx 32rpx;
+  background-color: #334155;
+  color: #94a3b8;
+  border-radius: 24rpx;
+  font-size: 28rpx;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+  border: 2rpx solid transparent;
+}
+
+.category-item.active {
+  background-color: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+/* 加载状态 */
+.loading-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120rpx 0;
+}
+
+.loading-spinner {
+  width: 48rpx;
+  height: 48rpx;
+  border: 4rpx solid #334155;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 24rpx;
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: #94a3b8;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120rpx 32rpx;
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 120rpx;
+  margin-bottom: 32rpx;
+}
+
+.empty-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #f8fafc;
+  margin-bottom: 16rpx;
+}
+
+.empty-desc {
+  font-size: 28rpx;
+  color: #94a3b8;
+  line-height: 1.5;
+}
+
+/* 模板列表 */
+.templates-list {
+  padding: 24rpx 32rpx;
+}
+
+.template-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+
+.template-card {
+  background-color: #1e293b;
+  border-radius: 16rpx;
+  overflow: hidden;
+  border: 2rpx solid #334155;
+  transition: all 0.3s ease;
+}
+
+.template-card:active {
+  transform: scale(0.98);
+  border-color: #3b82f6;
+  box-shadow: 0 4rpx 12rpx rgba(59, 130, 246, 0.2);
+}
+
+.template-card.unsubscribed {
+  opacity: 0.7;
+  border-color: #475569;
+}
+
+.template-card.unsubscribed:active {
+  transform: none;
+  border-color: #475569;
+  box-shadow: none;
+}
+
+/* 模板缩略图 */
+.template-thumbnail {
+  position: relative;
+  width: 100%;
+  height: 200rpx;
+  background-color: #334155;
+}
+
+.thumbnail-image {
+  width: 100%;
+  height: 100%;
+}
+
+.subscription-badge {
+  position: absolute;
+  top: 16rpx;
+  left: 16rpx;
+  background-color: rgba(239, 68, 68, 0.9);
+  padding: 8rpx 16rpx;
+  border-radius: 8rpx;
+}
+
+.badge-text {
+  font-size: 22rpx;
+  color: white;
+  font-weight: 500;
+}
+
+.difficulty-badge {
+  position: absolute;
+  top: 16rpx;
+  right: 16rpx;
+  padding: 8rpx 16rpx;
+  border-radius: 8rpx;
+}
+
+.difficulty-text {
+  font-size: 22rpx;
+  color: white;
+  font-weight: 500;
+}
+
+/* 模板信息 */
+.template-info {
+  padding: 24rpx;
+}
+
+.template-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16rpx;
+}
+
+.template-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #f8fafc;
+  flex: 1;
+  margin-right: 16rpx;
+}
+
+.template-stats {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.stat-item {
+  font-size: 24rpx;
+  color: #94a3b8;
+}
+
+.stat-divider {
+  font-size: 24rpx;
+  color: #64748b;
+  margin: 0 8rpx;
+}
+
+.template-description {
+  font-size: 28rpx;
+  color: #94a3b8;
+  line-height: 1.5;
+  margin-bottom: 16rpx;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+/* 标签 */
+.template-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-bottom: 24rpx;
+}
+
+.tag-item {
+  padding: 8rpx 16rpx;
+  background-color: rgba(59, 130, 246, 0.1);
+  color: #93c5fd;
+  border-radius: 24rpx;
+  font-size: 22rpx;
+  border: 2rpx solid rgba(59, 130, 246, 0.2);
+}
+
+/* 模板底部 */
+.template-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.creator-info {
+  font-size: 24rpx;
+  color: #64748b;
+}
+
+.template-actions {
+  flex-shrink: 0;
+}
+
+.action-btn {
+  padding: 16rpx 24rpx;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+  font-weight: 500;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.primary-btn {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.primary-btn:active {
+  background-color: #2563eb;
+  transform: scale(0.95);
+}
+
+.subscribe-btn {
+  background-color: #374151;
+  color: #9ca3af;
+  border: 2rpx solid #4b5563;
+}
+
+.subscribe-btn:active {
+  background-color: #4b5563;
+  transform: scale(0.95);
+}
+
+/* 底部提示 */
+.bottom-tips {
+  text-align: center;
+  padding: 48rpx 32rpx 32rpx;
+}
+
+.tip-text {
+  font-size: 26rpx;
+  color: #64748b;
+}

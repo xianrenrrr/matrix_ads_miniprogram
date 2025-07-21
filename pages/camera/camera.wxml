@@ -1,0 +1,135 @@
+<!-- pages/camera/camera.wxml -->
+<view class="camera-container">
+  <!-- 相机预览 -->
+  <camera 
+    class="camera-preview"
+    device-position="{{cameraPosition}}"
+    flash="{{flashMode}}"
+    binderror="onCameraError"
+  >
+    <!-- 网格覆盖 -->
+    <view wx:if="{{showOverlay && selectedTemplate}}" class="grid-overlay">
+      <view class="grid-line grid-line-v1"></view>
+      <view class="grid-line grid-line-v2"></view>
+      <view class="grid-line grid-line-h1"></view>
+      <view class="grid-line grid-line-h2"></view>
+      
+      <!-- 九宫格场景提示 -->
+      <view class="scene-hints">
+        <view 
+          wx:for="{{gridOverlay}}" 
+          wx:key="index"
+          class="grid-block grid-block-{{item}} active"
+          data-grid="{{item}}"
+        >
+          <text wx:if="{{gridLabels[index]}}" class="grid-label">{{gridLabels[index]}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 录制状态指示器 -->
+    <view wx:if="{{isRecording}}" class="recording-indicator">
+      <view class="recording-dot"></view>
+      <text class="recording-text">录制中</text>
+    </view>
+
+    <!-- 场景信息 -->
+    <view wx:if="{{selectedTemplate}}" class="scene-info">
+      <view class="scene-title">
+        场景 {{currentScene + 1}}/{{selectedTemplate.scenes.length}}: 
+        {{selectedTemplate.scenes[currentScene].sceneTitle}}
+      </view>
+      <view class="scene-time">
+        {{recordTime}}s / {{maxRecordTime}}s
+      </view>
+    </view>
+
+    <!-- 顶部控制栏 -->
+    <view class="top-controls">
+      <view class="control-btn" bindtap="toggleFlash">
+        <text class="control-icon">{{flashMode === 'off' ? '🔦' : flashMode === 'on' ? '💡' : '⚡'}}</text>
+      </view>
+      <view class="control-btn" bindtap="switchCamera">
+        <text class="control-icon">🔄</text>
+      </view>
+      <view class="control-btn" bindtap="toggleOverlay">
+        <text class="control-icon">{{showOverlay ? '📏' : '📐'}}</text>
+      </view>
+    </view>
+  </camera>
+
+  <!-- 脚本提示器 -->
+  <view wx:if="{{selectedTemplate && currentScript}}" class="script-teleprompter">
+    <view class="script-content">
+      <text class="script-text">{{currentScript}}</text>
+    </view>
+  </view>
+
+  <!-- 底部控制栏 -->
+  <view class="bottom-controls">
+    <!-- 场景导航 -->
+    <view wx:if="{{selectedTemplate}}" class="scene-navigation">
+      <button 
+        class="nav-btn {{currentScene === 0 ? 'disabled' : ''}}"
+        disabled="{{currentScene === 0}}"
+        bindtap="prevScene"
+      >
+        上一个
+      </button>
+      
+      <view class="scene-progress">
+        <view 
+          wx:for="{{selectedTemplate.scenes}}" 
+          wx:key="index"
+          class="progress-dot {{index === currentScene ? 'active' : ''}} {{recordedVideos[index] ? 'completed' : ''}}"
+        ></view>
+      </view>
+      
+      <button 
+        class="nav-btn {{currentScene === selectedTemplate.scenes.length - 1 ? 'disabled' : ''}}"
+        disabled="{{currentScene === selectedTemplate.scenes.length - 1}}"
+        bindtap="nextScene"
+      >
+        下一个
+      </button>
+    </view>
+
+    <!-- 录制按钮 -->
+    <view class="record-controls">
+      <button 
+        wx:if="{{!isRecording}}"
+        class="record-btn record-btn-start"
+        bindtap="startRecording"
+        disabled="{{!selectedTemplate}}"
+      >
+        <view class="record-icon"></view>
+      </button>
+      
+      <button 
+        wx:else
+        class="record-btn record-btn-stop"
+        bindtap="stopRecording"
+      >
+        <view class="stop-icon"></view>
+      </button>
+    </view>
+
+    <!-- 完成按钮 -->
+    <view wx:if="{{recordedVideos.length > 0}}" class="finish-controls">
+      <button class="finish-btn" bindtap="finishRecording">
+        完成录制 ({{recordedVideos.length}})
+      </button>
+    </view>
+  </view>
+
+  <!-- 模板选择提示 -->
+  <view wx:if="{{!selectedTemplate}}" class="template-prompt">
+    <view class="prompt-content">
+      <text class="prompt-title">请选择录制模板</text>
+      <text class="prompt-desc">选择合适的模板开始录制</text>
+      <button class="prompt-btn" bindtap="showTemplateSelector">
+        选择模板
+      </button>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,49 @@
+{
+  "pages": [
+    "pages/login/login",
+    "pages/index/index",
+    "pages/templates/templates",
+    "pages/suggestions/suggestions",
+    "pages/camera/camera"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#1e293b",
+    "navigationBarTitleText": "Matrix Ads",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#0f172a"
+  },
+  "tabBar": {
+    "color": "#94a3b8",
+    "selectedColor": "#3b82f6",
+    "backgroundColor": "#1e293b",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/templates/templates",
+        "text": "模板"
+      }
+    ]
+  },
+  "permission": {
+    "scope.camera": {
+      "desc": "用于拍摄视频内容和扫描二维码登录"
+    },
+    "scope.record": {
+      "desc": "用于录制音频内容"
+    },
+    "scope.writePhotosAlbum": {
+      "desc": "用于保存拍摄的视频到相册"
+    }
+  },
+  "requiredBackgroundModes": ["audio"],
+  "networkTimeout": {
+    "request": 60000,
+    "uploadFile": 60000
+  },
+  "debug": true
+}
