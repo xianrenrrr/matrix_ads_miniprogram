@@ -2,27 +2,31 @@
 const config = {
   // API配置
   api: {
-    baseUrl: 'https://api.matrixads.com', // 替换为实际的API地址
+    baseUrl: 'https://matrix-ads-backend.onrender.com', // 替换为实际的API地址
     timeout: 60000,
     
     // API端点
     endpoints: {
       // 认证相关
       login: '/auth/login',
-      validate: '/auth/validate',
-      logout: '/auth/logout',
+      validate: '/auth/validate', 
+      qrLogin: '/qr/validate',
       
-      // 模板相关
-      templates: '/api/templates',
-      templateDetail: '/api/templates/{id}',
+      // 模板相关 (Content Creator endpoints)
+      templates: '/content-creator/templates',
+      templateDetail: '/content-creator/templates/{id}',
+      subscribeTemplate: '/content-creator/users/{userId}/subscribe',
+      subscribedTemplates: '/content-creator/users/{userId}/subscribed-templates',
       
-      // 视频相关
-      uploadVideo: '/api/videos/upload',
-      submissions: '/api/videos/submissions',
+      // 视频相关 (Content Creator endpoints) 
+      uploadVideo: '/content-creator/videos/upload',
+      submissions: '/content-creator/users/{userId}/submissions',
+      checkSubmission: '/content-creator/videos/submission',
       
       // 用户相关
-      profile: '/api/user/profile',
-      settings: '/api/user/settings'
+      profile: '/content-creator/users/{userId}',
+      settings: '/content-creator/users/{userId}/settings',
+      notifications: '/content-creator/users/{userId}/notifications'
     }
   },
   
@@ -73,9 +77,9 @@ const config = {
 const env = 'development' // 'development' | 'production'
 
 if (env === 'development') {
-  config.api.baseUrl = 'http://localhost:8080' // 本地开发环境
+  config.api.baseUrl = 'https://matrix-ads-backend.onrender.com' // 使用实际后端地址
   config.dev.enableDebug = true
-  config.dev.mockApi = true
+  config.dev.mockApi = false
 } else {
   config.dev.enableDebug = false
   config.dev.mockApi = false
