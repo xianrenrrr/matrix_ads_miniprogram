@@ -14,6 +14,9 @@ Page({
     sceneProgress: 0,
     showScriptSidebar: false, // 显示脚本侧边栏
     showRecordingCompleteModal: false, // 显示录制完成弹窗
+    showUploadFailureModal: false, // 显示上传失败弹窗
+    uploadErrorMessage: '', // 上传错误信息
+    pendingUploadData: null, // 待上传的数据
     // 九宫格网格
     gridOverlay: [], // 选中的网格块编号 [1,2,3,4,5,6,7,8,9]
     gridLabels: [], // 每个网格块的标签
@@ -389,6 +392,104 @@ Page({
     this.submitAllVideos()
   },
 
+  // 重试上传
+  retryUpload() {
+    const uploadData = this.data.pendingUploadData
+    if (!uploadData) {
+      wx.showToast({
+        title: '没有待上传的数据',
+        icon: 'none'
+      })
+      return
+    }
+
+    this.setData({ showUploadFailureModal: false })
+    wx.showLoading({ title: '正在重试上传...' })
+    this.performUpload(uploadData)
+  },
+
+  // 下载视频到本地
+  downloadVideoToLocal() {
+    const uploadData = this.data.pendingUploadData
+    if (!uploadData || !uploadData.filePath) {
+      wx.showToast({
+        title: '没有可下载的视频',
+        icon: 'none'
+      })
+      return
+    }
+
+    wx.showLoading({ title: '准备下载...' })
+
+    // 获取当前录制的所有视频
+    const { recordedVideos } = this.data
+    const validVideos = recordedVideos.filter(video => video && video.tempPath)
+
+    if (validVideos.length === 0) {
+      wx.hideLoading()
+      wx.showToast({
+        title: '没有录制的视频',
+        icon: 'none'
+      })
+      return
+    }
+
+    // 逐个保存视频到相册
+    this.saveVideosToAlbum(validVideos, 0)
+  },
+
+  // 递归保存视频到相册
+  saveVideosToAlbum(videos, index) {
+    if (index >= videos.length) {
+      wx.hideLoading()
+      this.setData({ showUploadFailureModal: false })
+      wx.showToast({
+        title: `已保存 ${videos.length} 个视频到相册`,
+        icon: 'success',
+        duration: 3000
+      })
+      return
+    }
+
+    const video = videos[index]
+    wx.saveVideoToPhotosAlbum({
+      filePath: video.tempPath,
+      success: () => {
+        console.log(`视频 ${index + 1} 保存成功:`, video.sceneTitle)
+        // 继续保存下一个视频
+        this.saveVideosToAlbum(videos, index + 1)
+      },
+      fail: (err) => {
+        console.error(`视频 ${index + 1} 保存失败:`, err)
+        
+        if (err.errMsg.includes('auth deny')) {
+          wx.hideLoading()
+          wx.showModal({
+            title: '需要相册权限',
+            content: '请在设置中允许访问相册，以便保存录制的视频',
+            confirmText: '去设置',
+            success: (res) => {
+              if (res.confirm) {
+                wx.openSetting({
+                  success: (settingRes) => {
+                    if (settingRes.authSetting['scope.writePhotosAlbum']) {
+                      // 重新尝试保存
+                      wx.showLoading({ title: '继续保存...' })
+                      this.saveVideosToAlbum(videos, index)
+                    }
+                  }
+                })
+              }
+            }
+          })
+        } else {
+          // 跳过失败的视频，继续保存下一个
+          this.saveVideosToAlbum(videos, index + 1)
+        }
+      }
+    })
+  },
+
   // 返回上一页
   goBack() {
     console.log('返回按钮被点击')
@@ -503,9 +604,26 @@ Page({
     // 这里应该调用视频合并API，暂时模拟上传第一个视频
     const firstVideo = videos[0]
     
+    // 保存上传数据以便重试
+    const uploadData = {
+      videos: videos,
+      template: template,
+      userInfo: userInfo,
+      filePath: firstVideo
+    }
+    
+    this.setData({ pendingUploadData: uploadData })
+    
+    this.performUpload(uploadData)
+  },
+
+  // 执行实际的上传操作
+  performUpload(uploadData) {
+    const { template, userInfo, filePath } = uploadData
+    
     wx.uploadFile({
       url: 'https://matrix-ads-backend.onrender.com/content-creator/videos/upload',
-      filePath: firstVideo,
+      filePath: filePath,
       name: 'video',
       header: {
         'Authorization': `Bearer ${wx.getStorageSync('access_token')}`
@@ -517,10 +635,13 @@ Page({
         description: `使用模板 ${template.templateTitle || '未命名模板'} 录制的视频`
       },
       success: (res) => {
-        console.log('视频上传成功:', res)
+        console.log('视频上传响应:', res)
         wx.hideLoading()
         
         if (res.statusCode === 200) {
+          // 上传成功，清除待上传数据
+          this.setData({ pendingUploadData: null })
+          
           wx.showToast({
             title: '提交成功！',
             icon: 'success',
@@ -534,20 +655,25 @@ Page({
             })
           }, 2000)
         } else {
-          wx.showToast({
-            title: '提交失败',
-            icon: 'none'
-          })
+          // 上传失败，显示失败弹窗
+          this.showUploadFailure(`服务器响应错误 (${res.statusCode})`, res.data || '未知错误')
         }
       },
       fail: (err) => {
         console.error('视频上传失败:', err)
         wx.hideLoading()
-        wx.showToast({
-          title: '上传失败，请重试',
-          icon: 'none'
-        })
+        
+        // 显示上传失败弹窗
+        this.showUploadFailure('网络错误', err.errMsg || '请检查网络连接')
       }
+    })
+  },
+
+  // 显示上传失败弹窗
+  showUploadFailure(errorType, errorDetail) {
+    this.setData({
+      showUploadFailureModal: true,
+      uploadErrorMessage: `${errorType}: ${errorDetail}`
     })
   },
 
