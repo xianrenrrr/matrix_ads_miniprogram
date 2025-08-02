@@ -157,11 +157,12 @@ Page({
   
   // 根据人物位置确定相机方向
   getCameraPosition(personPosition) {
-    // 如果需要拍摄人物，通常使用前置摄像头
-    if (personPosition && personPosition !== 'No Person') {
+    // 默认使用后置摄像头（拍摄其他人或物品）
+    // 只有在特殊情况下才使用前置摄像头（比如自拍场景）
+    if (personPosition && personPosition.includes('自拍') || personPosition === 'Selfie') {
       return 'front'
     }
-    return 'back'
+    return 'back'  // 默认后置摄像头
   },
 
   // 显示模板选择器
