@@ -3,15 +3,7 @@ Page({
   data: {
     templates: [],
     loading: true,
-    searchText: '',
-    selectedCategory: 'all',
-    categories: [
-      { id: 'all', name: '全部' },
-      { id: 'product', name: '产品展示' },
-      { id: 'brand', name: '品牌故事' },
-      { id: 'review', name: '用户评价' },
-      { id: 'tutorial', name: '教程说明' }
-    ]
+    searchText: ''
   },
 
   onLoad() {
@@ -58,8 +50,7 @@ Page({
             duration: template.totalVideoLength || 30,
             sceneCount: (template.scenes && template.scenes.length) || 1,
             difficulty: 'easy', // 可以根据场景数量判断难度
-            thumbnail: (template.scenes && template.scenes[0] && template.scenes[0].exampleFrame) || '/assets/default-template.jpg',
-            category: this.getCategoryFromTemplate(template)
+            thumbnail: (template.scenes && template.scenes[0] && template.scenes[0].exampleFrame) || '/assets/default-template.jpg'
           }))
           
           this.setData({
@@ -98,23 +89,6 @@ Page({
     })
   },
 
-  // 根据模板内容判断分类
-  getCategoryFromTemplate(template) {
-    const title = template.templateTitle || ''
-    const audience = template.targetAudience || ''
-    const combined = (title + audience).toLowerCase()
-    
-    if (combined.includes('产品') || combined.includes('商品') || combined.includes('展示')) {
-      return 'product'
-    } else if (combined.includes('品牌') || combined.includes('故事') || combined.includes('介绍')) {
-      return 'brand'
-    } else if (combined.includes('评价') || combined.includes('反馈') || combined.includes('评论')) {
-      return 'review'
-    } else if (combined.includes('教程') || combined.includes('说明') || combined.includes('使用')) {
-      return 'tutorial'
-    }
-    return 'all'
-  },
 
   // 搜索模板
   onSearchInput(e) {
@@ -122,19 +96,11 @@ Page({
     this.filterTemplates()
   },
 
-  // 选择分类
-  selectCategory(e) {
-    const category = e.currentTarget.dataset.category
-    this.setData({ selectedCategory: category })
-    this.filterTemplates()
-  },
-
   // 过滤模板
   filterTemplates() {
-    // 这里可以实现搜索和分类过滤逻辑
+    // 这里可以实现搜索过滤逻辑
     console.log('过滤模板:', {
-      searchText: this.data.searchText,
-      category: this.data.selectedCategory
+      searchText: this.data.searchText
     })
   },
 

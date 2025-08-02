@@ -184,7 +184,7 @@ Page({
     }
     
     wx.switchTab({
-      url: '/pages/camera/camera'
+      url: '/pages/templates/templates'
     })
   },
 

@@ -15,22 +15,6 @@
     </view>
   </view>
 
-  <!-- 分类筛选 -->
-  <view class="category-section">
-    <scroll-view class="category-scroll" scroll-x="true" show-scrollbar="false">
-      <view class="category-list">
-        <view 
-          wx:for="{{categories}}" 
-          wx:key="id"
-          class="category-item {{selectedCategory === item.id ? 'active' : ''}}"
-          data-category="{{item.id}}"
-          bindtap="selectCategory"
-        >
-          {{item.name}}
-        </view>
-      </view>
-    </scroll-view>
-  </view>
 
   <!-- 加载状态 -->
   <view wx:if="{{loading}}" class="loading-section">
