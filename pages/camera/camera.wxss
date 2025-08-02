@@ -128,7 +128,7 @@
 /* 顶部控制栏 */
 .top-controls {
   position: absolute;
-  top: 40rpx;
+  top: 200rpx;
   left: 32rpx;
   right: 32rpx;
   display: flex;
@@ -167,27 +167,66 @@
   font-weight: bold;
 }
 
-/* 脚本提示器 */
-.script-teleprompter {
+/* 脚本侧边栏 */
+.script-sidebar {
   position: absolute;
-  top: 140rpx;
-  left: 32rpx;
-  right: 32rpx;
-  background-color: rgba(0, 0, 0, 0.8);
-  border-radius: 16rpx;
-  padding: 24rpx;
+  top: 0;
+  right: -300rpx;
+  width: 300rpx;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.9);
   backdrop-filter: blur(10rpx);
-  max-height: 160rpx;
-  overflow-y: auto;
+  transition: right 0.3s ease;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+}
+
+.script-sidebar.show {
+  right: 0;
+}
+
+.script-toggle {
+  position: absolute;
+  top: 50%;
+  left: -40rpx;
+  transform: translateY(-50%);
+  width: 40rpx;
+  height: 80rpx;
+  background-color: rgba(0, 0, 0, 0.8);
+  border-radius: 20rpx 0 0 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24rpx;
 }
 
 .script-content {
-  color: white;
-  line-height: 1.6;
+  flex: 1;
+  padding: 40rpx 24rpx;
+  overflow-y: auto;
 }
 
 .script-text {
-  font-size: 32rpx;
+  color: white;
+  font-size: 28rpx;
+  line-height: 1.6;
+  margin-bottom: 24rpx;
+}
+
+.script-details {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.script-detail {
+  font-size: 24rpx;
+  color: #94a3b8;
+  padding: 12rpx;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 8rpx;
 }
 
 /* 底部控制栏 */
@@ -350,40 +389,254 @@
   font-weight: 500;
 }
 
-/* 场景控制区域 */
-.scene-controls {
-  padding: 32rpx;
-  background-color: rgba(0, 0, 0, 0.8);
-  border-radius: 24rpx 24rpx 0 0;
+/* 脚本提示器样式 */
+.script-teleprompter {
+  cursor: pointer;
 }
 
-.scene-actions {
+.script-hint {
+  display: block;
+  font-size: 20rpx;
+  color: #94a3b8;
+  text-align: center;
+  margin-top: 8rpx;
+}
+
+/* 脚本模态框 */
+.script-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 1000;
   display: flex;
-  gap: 16rpx;
+  align-items: center;
   justify-content: center;
 }
 
-.action-btn {
+.script-modal {
+  background-color: #1e293b;
+  border-radius: 24rpx;
+  width: 90%;
+  max-height: 70%;
+  margin: 32rpx;
+}
+
+.script-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32rpx;
+  border-bottom: 2rpx solid #334155;
+}
+
+.script-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: white;
+}
+
+.script-close {
+  font-size: 48rpx;
+  color: #94a3b8;
+  padding: 16rpx;
+}
+
+.script-body {
+  max-height: 600rpx;
+  padding: 32rpx;
+}
+
+.full-script-text {
+  display: block;
+  font-size: 32rpx;
+  line-height: 1.6;
+  color: white;
+  margin-bottom: 32rpx;
+}
+
+.script-details {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.script-detail {
+  display: block;
+  font-size: 28rpx;
+  color: #94a3b8;
+  padding: 16rpx;
+  background-color: #334155;
+  border-radius: 12rpx;
+}
+
+/* 场景进度指示器 */
+.scene-progress-indicator {
+  display: flex;
+  justify-content: center;
+  gap: 16rpx;
+  margin-bottom: 32rpx;
+}
+
+/* 录制完成弹窗 */
+.recording-complete-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.recording-complete-modal {
+  background-color: #1e293b;
+  border-radius: 24rpx;
+  width: 80%;
+  max-width: 600rpx;
+  margin: 32rpx;
+}
+
+.recording-complete-header {
+  padding: 32rpx 32rpx 16rpx;
+  text-align: center;
+  border-bottom: 2rpx solid #334155;
+}
+
+.recording-complete-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: white;
+}
+
+.recording-complete-body {
+  padding: 24rpx 32rpx;
+  text-align: center;
+}
+
+.recording-complete-text {
+  font-size: 28rpx;
+  color: #94a3b8;
+}
+
+.recording-complete-actions {
+  display: flex;
+  gap: 16rpx;
+  padding: 24rpx 32rpx 32rpx;
+  justify-content: center;
+}
+
+.recording-action-btn {
   flex: 1;
   padding: 24rpx 16rpx;
   border-radius: 12rpx;
   font-size: 28rpx;
-  font-weight: 500;
+  font-weight: 600;
   border: none;
-  max-width: 200rpx;
+  max-width: 150rpx;
 }
 
-.delete-btn {
+.recording-action-btn.retry-btn {
   background-color: #ef4444;
   color: white;
 }
 
-.next-btn {
+.recording-action-btn.continue-btn {
   background-color: #10b981;
   color: white;
 }
 
-.submit-btn {
+.recording-action-btn.finish-btn {
+  background-color: #3b82f6;
+  color: white;
+}
+
+/* 上传失败弹窗 */
+.upload-failure-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.upload-failure-modal {
+  background-color: #1e293b;
+  border-radius: 24rpx;
+  width: 85%;
+  max-width: 600rpx;
+  margin: 32rpx;
+}
+
+.upload-failure-header {
+  padding: 32rpx 32rpx 16rpx;
+  text-align: center;
+  border-bottom: 2rpx solid #334155;
+}
+
+.upload-failure-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #ef4444;
+}
+
+.upload-failure-body {
+  padding: 24rpx 32rpx;
+  text-align: center;
+}
+
+.upload-failure-text {
+  display: block;
+  font-size: 28rpx;
+  color: #94a3b8;
+  margin-bottom: 16rpx;
+  line-height: 1.4;
+}
+
+.upload-failure-detail {
+  display: block;
+  font-size: 24rpx;
+  color: #64748b;
+  background-color: #334155;
+  padding: 12rpx;
+  border-radius: 8rpx;
+  margin-top: 16rpx;
+  line-height: 1.3;
+}
+
+.upload-failure-actions {
+  display: flex;
+  gap: 16rpx;
+  padding: 24rpx 32rpx 32rpx;
+  justify-content: center;
+}
+
+.upload-action-btn {
+  flex: 1;
+  padding: 24rpx 16rpx;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  border: none;
+  max-width: 150rpx;
+}
+
+.upload-action-btn.download-btn {
+  background-color: #10b981;
+  color: white;
+}
+
+.upload-action-btn.retry-btn {
   background-color: #3b82f6;
   color: white;
 }

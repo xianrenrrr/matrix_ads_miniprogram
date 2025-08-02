@@ -12,6 +12,8 @@ Page({
     showOverlay: true,
     currentScript: '',
     sceneProgress: 0,
+    showScriptSidebar: false, // 显示脚本侧边栏
+    showRecordingCompleteModal: false, // 显示录制完成弹窗
     // 九宫格网格
     gridOverlay: [], // 选中的网格块编号 [1,2,3,4,5,6,7,8,9]
     gridLabels: [], // 每个网格块的标签
@@ -243,20 +245,9 @@ Page({
     const recordedVideos = [...this.data.recordedVideos]
     recordedVideos[currentScene] = videoData
     
-    this.setData({ recordedVideos })
-    
-    wx.showModal({
-      title: '录制完成',
-      content: `场景 ${currentScene + 1} 录制完成，是否继续录制下一个场景？`,
-      confirmText: '继续',
-      cancelText: '完成',
-      success: (res) => {
-        if (res.confirm && currentScene + 1 < template.scenes.length) {
-          this.nextScene()
-        } else {
-          this.finishRecording()
-        }
-      }
+    this.setData({ 
+      recordedVideos,
+      showRecordingCompleteModal: true
     })
   },
 
@@ -373,6 +364,29 @@ Page({
   // 切换网格覆盖
   toggleOverlay() {
     this.setData({ showOverlay: !this.data.showOverlay })
+  },
+
+  // 切换脚本侧边栏显示
+  toggleScriptSidebar() {
+    this.setData({ showScriptSidebar: !this.data.showScriptSidebar })
+  },
+
+  // 重录当前场景
+  retakeCurrentScene() {
+    this.setData({ showRecordingCompleteModal: false })
+    this.deleteCurrentScene()
+  },
+
+  // 继续下一场景
+  continueToNextScene() {
+    this.setData({ showRecordingCompleteModal: false })
+    this.nextScene()
+  },
+
+  // 完成所有录制
+  finishAllRecording() {
+    this.setData({ showRecordingCompleteModal: false })
+    this.submitAllVideos()
   },
 
   // 返回上一页

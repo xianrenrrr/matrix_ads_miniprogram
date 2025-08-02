@@ -63,40 +63,31 @@
     </view>
   </camera>
 
-  <!-- 脚本提示器 -->
-  <view wx:if="{{selectedTemplate && currentScript}}" class="script-teleprompter">
+  <!-- 脚本侧边栏 -->
+  <view wx:if="{{selectedTemplate && currentScript}}" class="script-sidebar {{showScriptSidebar ? 'show' : ''}}">
+    <view class="script-toggle" bindtap="toggleScriptSidebar">
+      <text>{{showScriptSidebar ? '>' : '<'}}</text>
+    </view>
     <view class="script-content">
-      <text class="script-text">{{currentScript}}</text>
+      <text class="script-text">{{selectedTemplate.scenes[currentScene].scriptLine}}</text>
+      <view class="script-details">
+        <text class="script-detail">📍 人物位置: {{selectedTemplate.scenes[currentScene].personPosition || '未指定'}}</text>
+        <text class="script-detail">🎬 动作指导: {{selectedTemplate.scenes[currentScene].movementInstructions || '无特殊要求'}}</text>
+        <text class="script-detail">📷 摄像要求: {{selectedTemplate.scenes[currentScene].specificCameraInstructions || '按模板拍摄'}}</text>
+      </view>
     </view>
   </view>
 
+
   <!-- 底部控制栏 -->
   <view class="bottom-controls">
-    <!-- 场景导航 -->
-    <view wx:if="{{selectedTemplate}}" class="scene-navigation">
-      <button 
-        class="nav-btn {{currentScene === 0 ? 'disabled' : ''}}"
-        disabled="{{currentScene === 0}}"
-        bindtap="prevScene"
-      >
-        上一个
-      </button>
-      
-      <view class="scene-progress">
-        <view 
-          wx:for="{{selectedTemplate.scenes}}" 
-          wx:key="index"
-          class="progress-dot {{index === currentScene ? 'active' : ''}} {{recordedVideos[index] ? 'completed' : ''}}"
-        ></view>
-      </view>
-      
-      <button 
-        class="nav-btn {{currentScene === selectedTemplate.scenes.length - 1 ? 'disabled' : ''}}"
-        disabled="{{currentScene === selectedTemplate.scenes.length - 1}}"
-        bindtap="nextScene"
-      >
-        下一个
-      </button>
+    <!-- 场景进度指示器 -->
+    <view wx:if="{{selectedTemplate}}" class="scene-progress-indicator">
+      <view 
+        wx:for="{{selectedTemplate.scenes}}" 
+        wx:key="index"
+        class="progress-dot {{index === currentScene ? 'active' : ''}} {{recordedVideos[index] ? 'completed' : ''}}"
+      ></view>
     </view>
 
     <!-- 录制按钮 -->
@@ -119,34 +110,57 @@
       </button>
     </view>
 
-    <!-- 场景录制完成后的控制 -->
-    <view wx:if="{{!isRecording && recordedVideos[currentScene]}}" class="scene-controls">
-      <view class="scene-actions">
-        <button class="action-btn delete-btn" bindtap="deleteCurrentScene">
-          🗑️ 删除重录
+  </view>
+
+  <!-- 录制完成弹窗 -->
+  <view wx:if="{{showRecordingCompleteModal}}" class="recording-complete-overlay">
+    <view class="recording-complete-modal">
+      <view class="recording-complete-header">
+        <text class="recording-complete-title">录制完成</text>
+      </view>
+      <view class="recording-complete-body">
+        <text class="recording-complete-text">场景 {{currentScene + 1}} 录制完成</text>
+      </view>
+      <view class="recording-complete-actions">
+        <button class="recording-action-btn retry-btn" bindtap="retakeCurrentScene">
+          重新录制
         </button>
         <button 
           wx:if="{{currentScene < selectedTemplate.scenes.length - 1}}"
-          class="action-btn next-btn" 
-          bindtap="nextScene"
+          class="recording-action-btn continue-btn" 
+          bindtap="continueToNextScene"
         >
-          ➡️ 下一场景
+          继续
         </button>
         <button 
           wx:else
-          class="action-btn submit-btn" 
-          bindtap="submitAllVideos"
+          class="recording-action-btn finish-btn" 
+          bindtap="finishAllRecording"
         >
-          ✅ 提交视频
+          完成录制
         </button>
       </view>
     </view>
+  </view>
 
-    <!-- 完成按钮 -->
-    <view wx:if="{{recordedVideos.length > 0}}" class="finish-controls">
-      <button class="finish-btn" bindtap="finishRecording">
-        完成录制 ({{recordedVideos.length}})
-      </button>
+  <!-- 上传失败弹窗 -->
+  <view wx:if="{{showUploadFailureModal}}" class="upload-failure-overlay">
+    <view class="upload-failure-modal">
+      <view class="upload-failure-header">
+        <text class="upload-failure-title">上传失败</text>
+      </view>
+      <view class="upload-failure-body">
+        <text class="upload-failure-text">视频上传遇到问题，您可以选择重试或下载到本地</text>
+        <text class="upload-failure-detail">{{uploadErrorMessage}}</text>
+      </view>
+      <view class="upload-failure-actions">
+        <button class="upload-action-btn download-btn" bindtap="downloadVideoToLocal">
+          下载到本地
+        </button>
+        <button class="upload-action-btn retry-btn" bindtap="retryUpload">
+          重试上传
+        </button>
+      </view>
     </view>
   </view>
 
