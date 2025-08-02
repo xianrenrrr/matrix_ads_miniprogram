@@ -497,10 +497,10 @@ Page({
         'Authorization': `Bearer ${wx.getStorageSync('access_token')}`
       },
       formData: {
-        'templateId': template.id,
-        'userId': userInfo.id,
-        'title': `${template.templateTitle || '视频'} - ${new Date().toLocaleString()}`,
-        'description': `使用模板 ${template.templateTitle || '未命名模板'} 录制的视频`
+        templateId: template.id,
+        userId: userInfo.id,
+        title: `${template.templateTitle || '视频'} - ${new Date().toLocaleString()}`,
+        description: `使用模板 ${template.templateTitle || '未命名模板'} 录制的视频`
       },
       success: (res) => {
         console.log('视频上传成功:', res)
@@ -544,8 +544,8 @@ Page({
       this.setData({ recordTime })
       
       // 获取当前场景的时长限制
-      const currentScene = this.data.selectedTemplate?.scenes[this.data.currentScene]
-      const sceneMaxTime = currentScene?.sceneDuration || this.data.maxRecordTime
+      const currentScene = this.data.selectedTemplate && this.data.selectedTemplate.scenes && this.data.selectedTemplate.scenes[this.data.currentScene]
+      const sceneMaxTime = (currentScene && currentScene.sceneDuration) || this.data.maxRecordTime
       
       // 自动停止录制
       if (recordTime >= sceneMaxTime) {
