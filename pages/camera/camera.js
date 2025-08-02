@@ -603,13 +603,28 @@ Page({
   mergeAndUploadVideos(videos, template, userInfo) {
     // 这里应该调用视频合并API，暂时模拟上传第一个视频
     const firstVideo = videos[0]
+    console.log('准备上传的视频信息:', {
+      videosCount: videos.length,
+      firstVideo: firstVideo,
+      template: template.templateTitle,
+      user: userInfo.id
+    })
+    
+    // 检查视频路径是否有效
+    if (!firstVideo || !firstVideo.tempPath) {
+      wx.showToast({
+        title: '没有可上传的视频文件',
+        icon: 'none'
+      })
+      return
+    }
     
     // 保存上传数据以便重试
     const uploadData = {
       videos: videos,
       template: template,
       userInfo: userInfo,
-      filePath: firstVideo
+      filePath: firstVideo.tempPath  // 使用 tempPath 而不是整个对象
     }
     
     this.setData({ pendingUploadData: uploadData })
@@ -621,21 +636,31 @@ Page({
   performUpload(uploadData) {
     const { template, userInfo, filePath } = uploadData
     
+    console.log('开始上传视频:', {
+      filePath: filePath,
+      templateId: template.id,
+      userId: userInfo.id,
+      url: 'https://matrix-ads-backend.onrender.com/content-creator/videos/upload'
+    })
+    
     wx.uploadFile({
       url: 'https://matrix-ads-backend.onrender.com/content-creator/videos/upload',
       filePath: filePath,
-      name: 'video',
+      name: 'file',  // 修正：使用与web端相同的字段名
       header: {
         'Authorization': `Bearer ${wx.getStorageSync('access_token')}`
       },
       formData: {
         templateId: template.id,
         userId: userInfo.id,
-        title: `${template.templateTitle || '视频'} - ${new Date().toLocaleString()}`,
-        description: `使用模板 ${template.templateTitle || '未命名模板'} 录制的视频`
+        requestApproval: 'true'  // 修正：添加与web端相同的字段
       },
       success: (res) => {
-        console.log('视频上传响应:', res)
+        console.log('视频上传响应完整信息:', {
+          statusCode: res.statusCode,
+          data: res.data,
+          header: res.header
+        })
         wx.hideLoading()
         
         if (res.statusCode === 200) {
@@ -656,11 +681,21 @@ Page({
           }, 2000)
         } else {
           // 上传失败，显示失败弹窗
+          console.error('上传失败详细信息:', {
+            statusCode: res.statusCode,
+            responseData: res.data,
+            responseHeaders: res.header
+          })
           this.showUploadFailure(`服务器响应错误 (${res.statusCode})`, res.data || '未知错误')
         }
       },
       fail: (err) => {
-        console.error('视频上传失败:', err)
+        console.error('视频上传网络失败完整信息:', {
+          errMsg: err.errMsg,
+          errno: err.errno,
+          errCode: err.errCode,
+          error: err
+        })
         wx.hideLoading()
         
         // 显示上传失败弹窗
