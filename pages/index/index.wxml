@@ -54,9 +54,13 @@
             <image src="{{item.exampleFrame || '/assets/default-template.jpg'}}" mode="aspectFill" class="thumbnail-image"></image>
           </view>
           <view class="template-info">
-            <view class="template-title">{{item.templateTitle || '模板'}}</view>
-            <view class="template-desc text-secondary">{{item.targetAudience || '通用模板'}}</view>
-            <view class="template-duration text-xs text-secondary">{{item.totalVideoLength || 30}}秒 · {{item.tone || '轻松'}}</view>
+            <view class="template-title" wx:if="{{item.templateTitle}}">{{item.templateTitle}}</view>
+            <view class="template-desc text-secondary" wx:if="{{item.targetAudience}}">{{item.targetAudience}}</view>
+            <view class="template-duration text-xs text-secondary" wx:if="{{item.totalVideoLength || item.tone}}">
+              <text wx:if="{{item.totalVideoLength}}">{{item.totalVideoLength}}秒</text>
+              <text wx:if="{{item.totalVideoLength && item.tone}}"> · </text>
+              <text wx:if="{{item.tone}}">{{item.tone}}</text>
+            </view>
           </view>
         </view>
       </view>

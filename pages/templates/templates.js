@@ -47,8 +47,8 @@ Page({
           const templates = res.data.map(template => ({
             ...template,
             isSubscribed: true, // 这些都是已订阅的模板
-            duration: template.totalVideoLength || 30,
-            sceneCount: (template.scenes && template.scenes.length) || 1,
+            duration: template.totalVideoLength,
+            sceneCount: (template.scenes && template.scenes.length) || 0,
             difficulty: 'easy', // 可以根据场景数量判断难度
             thumbnail: (template.scenes && template.scenes[0] && template.scenes[0].exampleFrame) || '/assets/default-template.jpg'
           }))

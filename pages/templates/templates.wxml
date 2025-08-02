@@ -59,7 +59,7 @@
         <!-- 模板信息 -->
         <view class="template-info">
           <view class="template-header">
-            <text class="template-title">{{item.templateTitle || '视频模板'}}</text>
+            <text class="template-title" wx:if="{{item.templateTitle}}">{{item.templateTitle}}</text>
             <view class="template-stats">
               <text class="stat-item">{{item.sceneCount}}场景</text>
               <text class="stat-divider">·</text>
@@ -67,12 +67,16 @@
             </view>
           </view>
           
-          <text class="template-description">{{item.targetAudience || '通用模板'}} · {{item.tone || '轻松风格'}}</text>
+          <text class="template-description" wx:if="{{item.targetAudience || item.tone}}">
+            <text wx:if="{{item.targetAudience}}">{{item.targetAudience}}</text>
+            <text wx:if="{{item.targetAudience && item.tone}}"> · </text>
+            <text wx:if="{{item.tone}}">{{item.tone}}</text>
+          </text>
           
           <!-- 标签 -->
-          <view class="template-tags">
-            <text class="tag-item">{{item.videoFormat || '1080p'}}</text>
-            <text class="tag-item">{{item.tone || '轻松'}}</text>
+          <view class="template-tags" wx:if="{{item.videoFormat || item.tone || item.lightingRequirements}}">
+            <text wx:if="{{item.videoFormat}}" class="tag-item">{{item.videoFormat}}</text>
+            <text wx:if="{{item.tone}}" class="tag-item">{{item.tone}}</text>
             <text wx:if="{{item.lightingRequirements}}" class="tag-item">{{item.lightingRequirements}}</text>
           </view>
           

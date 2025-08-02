@@ -3,13 +3,17 @@
   <!-- 头部模板信息 -->
   <view wx:if="{{template}}" class="template-header">
     <view class="template-info">
-      <text class="template-title">{{template.templateTitle || '视频模板'}}</text>
-      <text class="template-desc">{{template.targetAudience || '通用'}} · {{template.tone || '轻松'}}</text>
+      <text class="template-title" wx:if="{{template.templateTitle}}">{{template.templateTitle}}</text>
+      <text class="template-desc" wx:if="{{template.targetAudience || template.tone}}">
+        <text wx:if="{{template.targetAudience}}">{{template.targetAudience}}</text>
+        <text wx:if="{{template.targetAudience && template.tone}}"> · </text>
+        <text wx:if="{{template.tone}}">{{template.tone}}</text>
+      </text>
     </view>
-    <view class="template-stats">
-      <text class="stat-item">{{template.totalVideoLength || 30}}秒</text>
-      <text class="stat-divider">·</text>
-      <text class="stat-item">{{(template.scenes && template.scenes.length) || 9}}场景</text>
+    <view class="template-stats" wx:if="{{template.totalVideoLength || (template.scenes && template.scenes.length)}}">
+      <text wx:if="{{template.totalVideoLength}}" class="stat-item">{{template.totalVideoLength}}秒</text>
+      <text wx:if="{{template.totalVideoLength && template.scenes && template.scenes.length}}" class="stat-divider">·</text>
+      <text wx:if="{{template.scenes && template.scenes.length}}" class="stat-item">{{template.scenes.length}}场景</text>
     </view>
   </view>
 
@@ -53,7 +57,7 @@
         <text class="suggestion-desc">{{item.description}}</text>
         
         <!-- 时长标识 -->
-        <view class="duration-badge">{{item.duration || 10}}s</view>
+        <view wx:if="{{item.duration}}" class="duration-badge">{{item.duration}}s</view>
       </view>
     </view>
   </view>
@@ -61,7 +65,7 @@
   <!-- 选择提示 -->
   <view wx:if="{{selectedSuggestions.length > 0}}" class="selection-info">
     <text class="selection-text">已选择 {{selectedSuggestions.length}} 个场景</text>
-    <text class="estimated-time">预计时长: {{selectedSuggestions.length * 10}}秒</text>
+    <text class="estimated-time" wx:if="{{totalDuration}}">预计时长: {{totalDuration}}秒</text>
   </view>
 
   <!-- 底部操作按钮 -->
