@@ -375,6 +375,31 @@ Page({
     this.setData({ showOverlay: !this.data.showOverlay })
   },
 
+  // 返回上一页
+  goBack() {
+    console.log('返回按钮被点击')
+    
+    // 如果正在录制，先停止录制
+    if (this.data.isRecording) {
+      this.stopRecording()
+    }
+    
+    // 返回上一页
+    wx.navigateBack({
+      delta: 1,
+      success: () => {
+        console.log('返回成功')
+      },
+      fail: (err) => {
+        console.error('返回失败:', err)
+        // 如果返回失败，跳转到模板页面
+        wx.switchTab({
+          url: '/pages/templates/templates'
+        })
+      }
+    })
+  },
+
   // 开始计时器
   startTimer() {
     this.timer = setInterval(() => {

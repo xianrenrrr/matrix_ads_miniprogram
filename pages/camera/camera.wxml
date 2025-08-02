@@ -46,14 +46,19 @@
 
     <!-- 顶部控制栏 -->
     <view class="top-controls">
-      <view class="control-btn" bindtap="toggleFlash">
-        <text class="control-icon">{{flashMode === 'off' ? '🔦' : flashMode === 'on' ? '💡' : '⚡'}}</text>
+      <view class="control-btn back-btn" bindtap="goBack">
+        <text class="control-icon">←</text>
       </view>
-      <view class="control-btn" bindtap="switchCamera">
-        <text class="control-icon">🔄</text>
-      </view>
-      <view class="control-btn" bindtap="toggleOverlay">
-        <text class="control-icon">{{showOverlay ? '📏' : '📐'}}</text>
+      <view class="controls-right">
+        <view class="control-btn" bindtap="toggleFlash">
+          <text class="control-icon">{{flashMode === 'off' ? '🔦' : flashMode === 'on' ? '💡' : '⚡'}}</text>
+        </view>
+        <view class="control-btn" bindtap="switchCamera">
+          <text class="control-icon">🔄</text>
+        </view>
+        <view class="control-btn" bindtap="toggleOverlay">
+          <text class="control-icon">{{showOverlay ? '📏' : '📐'}}</text>
+        </view>
       </view>
     </view>
   </camera>

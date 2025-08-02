@@ -2,6 +2,7 @@
 Page({
   data: {
     templates: [],
+    allTemplates: [], // 保存所有模板数据
     loading: true,
     searchText: ''
   },
@@ -55,6 +56,7 @@ Page({
           
           this.setData({
             templates: templates,
+            allTemplates: templates, // 保存所有模板
             loading: false
           })
           
@@ -64,6 +66,7 @@ Page({
           console.log('获取模板失败:', res.data)
           this.setData({
             templates: [],
+            allTemplates: [],
             loading: false
           })
           wx.showToast({
@@ -76,6 +79,7 @@ Page({
         console.error('获取模板请求失败:', err)
         this.setData({
           templates: [],
+          allTemplates: [],
           loading: false
         })
         wx.showToast({
@@ -98,21 +102,59 @@ Page({
 
   // 过滤模板
   filterTemplates() {
-    // 这里可以实现搜索过滤逻辑
-    console.log('过滤模板:', {
-      searchText: this.data.searchText
+    const { searchText, allTemplates } = this.data
+    console.log('过滤模板:', { searchText, allTemplatesCount: allTemplates.length })
+    
+    if (!searchText.trim()) {
+      // 如果搜索文本为空，显示所有模板
+      this.setData({
+        templates: allTemplates
+      })
+      return
+    }
+    
+    // 根据搜索文本过滤模板
+    const filteredTemplates = allTemplates.filter(template => {
+      const searchLower = searchText.toLowerCase()
+      return (
+        (template.templateTitle && template.templateTitle.toLowerCase().includes(searchLower)) ||
+        (template.targetAudience && template.targetAudience.toLowerCase().includes(searchLower)) ||
+        (template.tone && template.tone.toLowerCase().includes(searchLower))
+      )
+    })
+    
+    console.log('过滤结果:', filteredTemplates.length)
+    this.setData({
+      templates: filteredTemplates
     })
   },
 
 
   // 开始录制
   startRecording(e) {
-    e.stopPropagation() // 阻止事件冒泡
+    console.log('开始录制按钮被点击', e)
+    wx.showToast({
+      title: '按钮点击成功！',
+      icon: 'success'
+    })
     
     const templateId = e.currentTarget.dataset.id
+    console.log('模板ID:', templateId)
+    
+    if (!templateId) {
+      console.log('没有模板ID')
+      wx.showToast({
+        title: '没有模板ID',
+        icon: 'none'
+      })
+      return
+    }
+    
     const template = this.data.templates.find(t => t.id === templateId)
+    console.log('找到的模板:', template)
     
     if (!template) {
+      console.log('模板不存在')
       wx.showToast({
         title: '模板不存在',
         icon: 'none'
@@ -124,10 +166,25 @@ Page({
     
     // 保存选中的模板
     app.globalData.currentTemplate = template
+    console.log('准备跳转到录制页面')
     
     // 跳转到录制页面
     wx.navigateTo({
-      url: `/pages/camera/camera?templateId=${template.id}`
+      url: `/pages/camera/camera?templateId=${template.id}`,
+      success: () => {
+        console.log('跳转成功')
+        wx.showToast({
+          title: '跳转成功',
+          icon: 'success'
+        })
+      },
+      fail: (err) => {
+        console.error('跳转失败:', err)
+        wx.showToast({
+          title: `跳转失败: ${err.errMsg}`,
+          icon: 'none'
+        })
+      }
     })
   },
 

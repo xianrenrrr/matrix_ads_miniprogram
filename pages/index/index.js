@@ -148,9 +148,9 @@ Page({
       // 保存选中的模板
       app.globalData.currentTemplate = template
       
-      // 跳转到视频建议页面
+      // 跳转到录制页面
       wx.navigateTo({
-        url: `/pages/suggestions/suggestions?templateId=${template.id}`
+        url: `/pages/camera/camera?templateId=${template.id}`
       })
     } else {
       wx.showToast({

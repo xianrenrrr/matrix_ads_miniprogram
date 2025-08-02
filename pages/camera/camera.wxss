@@ -129,7 +129,14 @@
 .top-controls {
   position: absolute;
   top: 40rpx;
+  left: 32rpx;
   right: 32rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.controls-right {
   display: flex;
   gap: 16rpx;
 }
@@ -147,6 +154,17 @@
 
 .control-icon {
   font-size: 32rpx;
+  color: #fff;
+}
+
+/* 返回按钮特殊样式 */
+.back-btn {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.back-btn .control-icon {
+  font-size: 36rpx;
+  font-weight: bold;
 }
 
 /* 脚本提示器 */

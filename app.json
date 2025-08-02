@@ -3,7 +3,6 @@
     "pages/login/login",
     "pages/index/index",
     "pages/templates/templates",
-    "pages/suggestions/suggestions",
     "pages/camera/camera"
   ],
   "window": {
