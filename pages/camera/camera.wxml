@@ -40,7 +40,7 @@
         {{selectedTemplate.scenes[currentScene].sceneTitle}}
       </view>
       <view class="scene-time">
-        {{recordTime}}s / {{maxRecordTime}}s
+        {{recordTime}}s / {{selectedTemplate.scenes[currentScene].sceneDuration || maxRecordTime}}s
       </view>
     </view>
 
@@ -102,7 +102,7 @@
     <!-- 录制按钮 -->
     <view class="record-controls">
       <button 
-        wx:if="{{!isRecording}}"
+        wx:if="{{!isRecording && !recordedVideos[currentScene]}}"
         class="record-btn record-btn-start"
         bindtap="startRecording"
         disabled="{{!selectedTemplate}}"
@@ -111,12 +111,35 @@
       </button>
       
       <button 
-        wx:else
+        wx:elif="{{isRecording}}"
         class="record-btn record-btn-stop"
         bindtap="stopRecording"
       >
         <view class="stop-icon"></view>
       </button>
+    </view>
+
+    <!-- 场景录制完成后的控制 -->
+    <view wx:if="{{!isRecording && recordedVideos[currentScene]}}" class="scene-controls">
+      <view class="scene-actions">
+        <button class="action-btn delete-btn" bindtap="deleteCurrentScene">
+          🗑️ 删除重录
+        </button>
+        <button 
+          wx:if="{{currentScene < selectedTemplate.scenes.length - 1}}"
+          class="action-btn next-btn" 
+          bindtap="nextScene"
+        >
+          ➡️ 下一场景
+        </button>
+        <button 
+          wx:else
+          class="action-btn submit-btn" 
+          bindtap="submitAllVideos"
+        >
+          ✅ 提交视频
+        </button>
+      </view>
     </view>
 
     <!-- 完成按钮 -->

@@ -349,3 +349,41 @@
   font-size: 32rpx;
   font-weight: 500;
 }
+
+/* 场景控制区域 */
+.scene-controls {
+  padding: 32rpx;
+  background-color: rgba(0, 0, 0, 0.8);
+  border-radius: 24rpx 24rpx 0 0;
+}
+
+.scene-actions {
+  display: flex;
+  gap: 16rpx;
+  justify-content: center;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 24rpx 16rpx;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+  border: none;
+  max-width: 200rpx;
+}
+
+.delete-btn {
+  background-color: #ef4444;
+  color: white;
+}
+
+.next-btn {
+  background-color: #10b981;
+  color: white;
+}
+
+.submit-btn {
+  background-color: #3b82f6;
+  color: white;
+}

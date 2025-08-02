@@ -400,14 +400,156 @@ Page({
     })
   },
 
+  // 删除当前场景重录
+  deleteCurrentScene() {
+    const currentScene = this.data.currentScene
+    console.log(`删除场景 ${currentScene + 1} 的录制`)
+    
+    wx.showModal({
+      title: '确认删除',
+      content: `确定要删除场景 ${currentScene + 1} 的录制吗？`,
+      success: (res) => {
+        if (res.confirm) {
+          const recordedVideos = [...this.data.recordedVideos]
+          recordedVideos[currentScene] = null
+          
+          this.setData({
+            recordedVideos,
+            recordTime: 0
+          })
+          
+          wx.showToast({
+            title: '已删除，可重新录制',
+            icon: 'success'
+          })
+        }
+      }
+    })
+  },
+
+  // 提交所有视频
+  submitAllVideos() {
+    console.log('提交所有录制的视频')
+    
+    // 检查是否所有场景都已录制
+    const { recordedVideos, selectedTemplate } = this.data
+    const totalScenes = selectedTemplate.scenes.length
+    const recordedCount = recordedVideos.filter(video => video).length
+    
+    if (recordedCount < totalScenes) {
+      wx.showModal({
+        title: '未完成录制',
+        content: `还有 ${totalScenes - recordedCount} 个场景未录制，确定要提交吗？`,
+        success: (res) => {
+          if (res.confirm) {
+            this.uploadAndSubmitVideos()
+          }
+        }
+      })
+    } else {
+      this.uploadAndSubmitVideos()
+    }
+  },
+
+  // 上传并提交视频
+  uploadAndSubmitVideos() {
+    wx.showLoading({ title: '正在提交视频...' })
+    
+    const { recordedVideos, selectedTemplate } = this.data
+    const validVideos = recordedVideos.filter(video => video)
+    
+    if (validVideos.length === 0) {
+      wx.hideLoading()
+      wx.showToast({
+        title: '没有录制的视频',
+        icon: 'none'
+      })
+      return
+    }
+
+    // 获取用户信息
+    const app = getApp()
+    const userInfo = app.globalData.userInfo
+    
+    if (!userInfo) {
+      wx.hideLoading()
+      wx.showToast({
+        title: '用户信息不存在',
+        icon: 'none'
+      })
+      return
+    }
+
+    // 合并所有视频并上传
+    this.mergeAndUploadVideos(validVideos, selectedTemplate, userInfo)
+  },
+
+  // 合并并上传视频
+  mergeAndUploadVideos(videos, template, userInfo) {
+    // 这里应该调用视频合并API，暂时模拟上传第一个视频
+    const firstVideo = videos[0]
+    
+    wx.uploadFile({
+      url: 'https://matrix-ads-backend.onrender.com/content-creator/videos/upload',
+      filePath: firstVideo,
+      name: 'video',
+      header: {
+        'Authorization': `Bearer ${wx.getStorageSync('access_token')}`
+      },
+      formData: {
+        'templateId': template.id,
+        'userId': userInfo.id,
+        'title': `${template.templateTitle || '视频'} - ${new Date().toLocaleString()}`,
+        'description': `使用模板 ${template.templateTitle || '未命名模板'} 录制的视频`
+      },
+      success: (res) => {
+        console.log('视频上传成功:', res)
+        wx.hideLoading()
+        
+        if (res.statusCode === 200) {
+          wx.showToast({
+            title: '提交成功！',
+            icon: 'success',
+            duration: 2000
+          })
+          
+          // 2秒后返回模板页面
+          setTimeout(() => {
+            wx.switchTab({
+              url: '/pages/templates/templates'
+            })
+          }, 2000)
+        } else {
+          wx.showToast({
+            title: '提交失败',
+            icon: 'none'
+          })
+        }
+      },
+      fail: (err) => {
+        console.error('视频上传失败:', err)
+        wx.hideLoading()
+        wx.showToast({
+          title: '上传失败，请重试',
+          icon: 'none'
+        })
+      }
+    })
+  },
+
   // 开始计时器
   startTimer() {
     this.timer = setInterval(() => {
       const recordTime = this.data.recordTime + 1
       this.setData({ recordTime })
       
+      // 获取当前场景的时长限制
+      const currentScene = this.data.selectedTemplate?.scenes[this.data.currentScene]
+      const sceneMaxTime = currentScene?.sceneDuration || this.data.maxRecordTime
+      
       // 自动停止录制
-      if (recordTime >= this.data.maxRecordTime) {
+      if (recordTime >= sceneMaxTime) {
+        console.log(`场景 ${this.data.currentScene + 1} 录制时间到达 ${sceneMaxTime} 秒，自动停止`)
         this.stopRecording()
       }
     }, 1000)
