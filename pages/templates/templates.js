@@ -104,8 +104,11 @@ Page({
     })
   },
 
-  // 选择模板
-  selectTemplate(e) {
+
+  // 开始录制
+  startRecording(e) {
+    e.stopPropagation() // 阻止事件冒泡
+    
     const templateId = e.currentTarget.dataset.id
     const template = this.data.templates.find(t => t.id === templateId)
     
@@ -122,32 +125,12 @@ Page({
     // 保存选中的模板
     app.globalData.currentTemplate = template
     
-    // 跳转到视频建议页面
-    wx.navigateTo({
-      url: `/pages/suggestions/suggestions?templateId=${template.id}`
-    })
-  },
-
-  // 开始录制
-  startRecording(template) {
-    const app = getApp()
-    
-    // 保存选中的模板
-    app.globalData.currentTemplate = template
-    
     // 跳转到录制页面
     wx.navigateTo({
       url: `/pages/camera/camera?templateId=${template.id}`
     })
   },
 
-  // 查看模板详情
-  viewTemplateDetail(e) {
-    const templateId = e.currentTarget.dataset.id
-    wx.navigateTo({
-      url: `/pages/template-detail/template-detail?id=${templateId}`
-    })
-  },
 
   // 订阅模板
   subscribeTemplate(e) {

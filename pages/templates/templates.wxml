@@ -35,8 +35,6 @@
         wx:for="{{templates}}" 
         wx:key="id"
         class="template-card {{!item.isSubscribed ? 'unsubscribed' : ''}}"
-        data-id="{{item.id}}"
-        bindtap="selectTemplate"
       >
         <!-- 模板缩略图 -->
         <view class="template-thumbnail">
@@ -87,7 +85,7 @@
               <button 
                 class="action-btn primary-btn"
                 data-id="{{item.id}}"
-                bindtap="selectTemplate"
+                bindtap="startRecording"
                 size="mini"
               >
                 开始录制

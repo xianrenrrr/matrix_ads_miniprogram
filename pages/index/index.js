@@ -166,12 +166,6 @@ Page({
     app.redirectToLogin()
   },
 
-  // 查看所有模板
-  viewAllTemplates() {
-    wx.switchTab({
-      url: '/pages/templates/templates'
-    })
-  },
 
   // 开始录制
   startRecording() {

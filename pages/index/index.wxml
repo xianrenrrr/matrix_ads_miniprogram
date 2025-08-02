@@ -9,14 +9,9 @@
   <view wx:else class="container">
     <!-- 欢迎信息 -->
     <view class="card">
-      <view class="flex justify-between items-center">
-        <view>
-          <view class="card-title">你好，{{userInfo.username || '用户'}}</view>
-          <view class="card-subtitle">开始今天的创作吧</view>
-        </view>
-        <button class="btn btn-primary" bindtap="startRecording">
-          开始录制
-        </button>
+      <view>
+        <view class="card-title">你好，{{userInfo.username || '用户'}}</view>
+        <view class="card-subtitle">开始今天的创作吧</view>
       </view>
     </view>
 
@@ -71,10 +66,6 @@
     <view class="card">
       <view class="card-title mb-24">快速操作</view>
       <view class="quick-actions">
-        <button class="action-btn" bindtap="viewAllTemplates">
-          <text class="action-icon">📚</text>
-          <text class="action-text">浏览模板</text>
-        </button>
         <button class="action-btn" bindtap="startRecording">
           <text class="action-icon">📹</text>
           <text class="action-text">开始录制</text>
