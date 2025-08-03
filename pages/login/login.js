@@ -170,8 +170,8 @@ Page({
     })
   },
 
-  // 扫码登录
-  handleQRCodeLogin() {
+  // 扫码注册
+  handleQRCodeSignup() {
     // 检查相机权限
     wx.getSetting({
       success: (res) => {
@@ -179,7 +179,7 @@ Page({
           // 用户拒绝过相机权限
           wx.showModal({
             title: '需要相机权限',
-            content: '扫码登录需要使用相机，请在设置中开启相机权限',
+            content: '扫码注册需要使用相机，请在设置中开启相机权限',
             confirmText: '去设置',
             success: (modalRes) => {
               if (modalRes.confirm) {
@@ -227,105 +227,97 @@ Page({
     
     try {
       // 解析二维码数据
-      let loginData
+      let inviteData
       
-      // 检查是否是JSON格式的二维码
+      // 检查是否是JSON格式的二维码（新的邀请格式）
       if (qrData.startsWith('{')) {
-        loginData = JSON.parse(qrData)
-      } else {
-        // 检查是否是URL格式的二维码
-        const url = new URL(qrData)
-        const token = url.searchParams.get('token')
-        const userId = url.searchParams.get('userId')
+        inviteData = JSON.parse(qrData)
         
-        if (token && userId) {
-          loginData = { token, userId }
-        } else {
-          throw new Error('无效的二维码格式')
+        // 检查是否是邀请注册二维码
+        if (inviteData.type === 'signup_invite') {
+          this.handleInviteSignup(inviteData)
+          return
         }
       }
       
-      if (!loginData.token) {
-        throw new Error('二维码中缺少登录令牌')
+      // 检查是否是URL格式的二维码（旧的邀请链接格式）
+      if (qrData.includes('invite-signup')) {
+        const url = new URL(qrData)
+        const token = url.searchParams.get('token')
+        
+        if (token) {
+          this.handleInviteLinkSignup(token)
+          return
+        }
       }
       
-      // 使用二维码中的令牌进行登录验证
-      this.verifyQRCodeLogin(loginData)
+      throw new Error('无效的邀请二维码格式')
       
     } catch (error) {
       console.error('二维码解析失败:', error)
       wx.showModal({
         title: '二维码无效',
-        content: '请扫描从网页端生成的有效登录二维码',
+        content: '请扫描管理员生成的有效邀请二维码',
         showCancel: false
       })
     }
   },
 
-  // 验证二维码登录
-  verifyQRCodeLogin(loginData) {
-    wx.showLoading({ title: '验证登录中...' })
+  // 处理邀请注册（新格式：JSON二维码）
+  handleInviteSignup(inviteData) {
+    wx.showModal({
+      title: '确认注册',
+      content: `您即将加入管理员 ${inviteData.managerName} 的团队，是否继续？`,
+      confirmText: '确认注册',
+      cancelText: '取消',
+      success: (res) => {
+        if (res.confirm) {
+          // 显示注册表单
+          this.showSignupForm(inviteData)
+        }
+      }
+    })
+  },
+
+  // 处理邀请链接注册（旧格式：URL链接）
+  handleInviteLinkSignup(token) {
+    wx.showLoading({ title: '验证邀请中...' })
     
     const app = getApp()
     
+    // 先验证邀请是否有效
     wx.request({
-      url: `${app.globalData.apiBaseUrl}/auth/qr-login`,
-      method: 'POST',
-      header: {
-        'Content-Type': 'application/json'
-      },
-      data: {
-        token: loginData.token,
-        userId: loginData.userId,
-        platform: 'miniprogram'
-      },
+      url: `${app.globalData.apiBaseUrl}/auth/validate-invite/${token}`,
+      method: 'GET',
       success: (res) => {
-        console.log('二维码登录验证响应:', res)
-        
         if (res.statusCode === 200 && res.data.success) {
-          const { token, user } = res.data
-          
-          // 检查用户角色
-          if (user.role !== 'content_creator') {
-            wx.showModal({
-              title: '登录失败',
-              content: '此小程序仅供内容创作者使用',
-              showCancel: false
-            })
-            return
-          }
-          
-          // 保存登录信息
-          wx.setStorageSync('access_token', token)
-          wx.setStorageSync('user_info', user)
-          
-          // 更新全局状态
-          app.globalData.isLoggedIn = true
-          app.globalData.userInfo = user
-          
-          console.log('QR登录-全局登录状态已更新:', app.globalData.isLoggedIn)
-          console.log('QR登录-全局用户信息:', app.globalData.userInfo)
-          
-          wx.showToast({
-            title: '登录成功',
-            icon: 'success'
+          // 邀请有效，显示确认对话框
+          wx.showModal({
+            title: '确认注册',
+            content: `您即将加入管理员 ${res.data.managerName} 的团队，是否继续？`,
+            confirmText: '确认注册',
+            cancelText: '取消',
+            success: (modalRes) => {
+              if (modalRes.confirm) {
+                // 显示注册表单
+                this.showSignupForm({
+                  inviteToken: token,
+                  managerName: res.data.managerName,
+                  inviteeName: res.data.inviteeName
+                })
+              }
+            }
           })
-          
-          // 立即跳转，不要延迟
-          setTimeout(() => {
-            this.redirectToHome()
-          }, 1000)
-          
         } else {
           wx.showModal({
-            title: '登录失败',
-            content: res.data.message || '二维码已过期或无效',
+            title: '邀请无效',
+            content: res.data.message || '邀请已过期或无效',
             showCancel: false
           })
         }
       },
       fail: (err) => {
-        console.error('二维码登录验证失败:', err)
+        console.error('验证邀请失败:', err)
         wx.showModal({
           title: '网络错误',
           content: '请检查网络连接后重试',
@@ -335,6 +327,14 @@ Page({
       complete: () => {
         wx.hideLoading()
       }
+    })
+  },
+
+  // 显示注册表单
+  showSignupForm(inviteData) {
+    // 跳转到注册表单页面，传递邀请数据
+    wx.navigateTo({
+      url: `/pages/signup/signup?inviteData=${encodeURIComponent(JSON.stringify(inviteData))}`
     })
   },
 
@@ -367,8 +367,8 @@ Page({
   // 显示帮助信息
   showHelp() {
     wx.showModal({
-      title: '登录帮助',
-      content: '用户名密码登录：使用网页端注册的账号信息\n\n二维码登录：在网页端登录后生成二维码进行快速登录',
+      title: '注册帮助',
+      content: '用户名密码登录：使用已有的账号信息登录\n\n扫码注册：扫描管理员生成的邀请二维码进行快速注册加入团队',
       showCancel: false
     })
   }

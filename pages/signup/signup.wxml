@@ -1,0 +1,118 @@
+<!-- pages/signup/signup.wxml -->
+<view class="signup-container">
+  <!-- 头部信息 -->
+  <view class="header-section">
+    <view class="logo-container">
+      <text class="logo-icon">🎬</text>
+      <text class="logo-text">Matrix Ads</text>
+    </view>
+    <text class="subtitle">创建您的账户</text>
+  </view>
+
+  <!-- 邀请信息 -->
+  <view class="invite-info">
+    <view class="invite-card">
+      <text class="invite-title">📧 邀请信息</text>
+      <view class="invite-details">
+        <text class="detail-item">管理员: {{inviteInfo.managerName}}</text>
+        <text class="detail-item" wx:if="{{inviteInfo.inviteeName}}">邀请人: {{inviteInfo.inviteeName}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 注册表单 -->
+  <view class="form-container">
+    <view class="form-group">
+      <view class="input-group">
+        <text class="input-icon">👤</text>
+        <input 
+          type="text"
+          class="form-input"
+          placeholder="请输入用户名"
+          placeholder-class="input-placeholder"
+          value="{{formData.username}}"
+          bindinput="onUsernameInput"
+          maxlength="50"
+        />
+      </view>
+    </view>
+
+    <view class="form-group">
+      <view class="input-group">
+        <text class="input-icon">📱</text>
+        <input 
+          type="text"
+          class="form-input"
+          placeholder="请输入手机号码"
+          placeholder-class="input-placeholder"
+          value="{{formData.phone}}"
+          bindinput="onPhoneInput"
+          maxlength="11"
+        />
+      </view>
+    </view>
+
+    <view class="form-group">
+      <view class="input-group">
+        <text class="input-icon">🔒</text>
+        <input 
+          type="{{showPassword ? 'text' : 'password'}}"
+          class="form-input"
+          placeholder="请设置密码"
+          placeholder-class="input-placeholder"
+          value="{{formData.password}}"
+          bindinput="onPasswordInput"
+          maxlength="100"
+        />
+        <text 
+          class="password-toggle {{showPassword ? 'active' : ''}}"
+          bindtap="togglePasswordVisibility"
+        >
+          {{showPassword ? '👁️' : '👁️‍🗨️'}}
+        </text>
+      </view>
+    </view>
+
+    <view class="form-group">
+      <view class="input-group">
+        <text class="input-icon">🔒</text>
+        <input 
+          type="{{showConfirmPassword ? 'text' : 'password'}}"
+          class="form-input"
+          placeholder="请确认密码"
+          placeholder-class="input-placeholder"
+          value="{{formData.confirmPassword}}"
+          bindinput="onConfirmPasswordInput"
+          maxlength="100"
+        />
+        <text 
+          class="password-toggle {{showConfirmPassword ? 'active' : ''}}"
+          bindtap="toggleConfirmPasswordVisibility"
+        >
+          {{showConfirmPassword ? '👁️' : '👁️‍🗨️'}}
+        </text>
+      </view>
+    </view>
+
+    <!-- 注册按钮 -->
+    <button 
+      class="signup-btn primary-btn {{loading ? 'loading' : ''}}"
+      disabled="{{loading}}"
+      bindtap="handleSignup"
+    >
+      <text wx:if="{{loading}}" class="loading-text">注册中...</text>
+      <text wx:else>立即注册</text>
+    </button>
+
+    <!-- 注册说明 -->
+    <view class="signup-notes">
+      <text class="note-text">📝 注册完成后，您将成为 {{inviteInfo.managerName}} 团队的成员</text>
+      <text class="note-text">🎬 您可以开始录制视频并提交给管理员审核</text>
+    </view>
+  </view>
+
+  <!-- 返回按钮 -->
+  <view class="footer-actions">
+    <text class="back-btn" bindtap="goBack">← 返回登录页</text>
+  </view>
+</view>

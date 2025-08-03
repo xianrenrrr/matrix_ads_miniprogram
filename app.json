@@ -1,6 +1,7 @@
 {
   "pages": [
     "pages/login/login",
+    "pages/signup/signup",
     "pages/index/index",
     "pages/templates/templates",
     "pages/camera/camera"
@@ -30,7 +31,7 @@
   },
   "permission": {
     "scope.camera": {
-      "desc": "用于拍摄视频内容和扫描二维码登录"
+      "desc": "用于拍摄视频内容和扫描邀请二维码注册"
     },
     "scope.record": {
       "desc": "用于录制音频内容"
