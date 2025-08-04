@@ -122,7 +122,7 @@
 
 .scene-time {
   font-size: 24rpx;
-  color: #94a3b8;
+  color: #6b7280;
 }
 
 /* 顶部控制栏 */
@@ -223,7 +223,7 @@
 
 .script-detail {
   font-size: 24rpx;
-  color: #94a3b8;
+  color: #6b7280;
   padding: 12rpx;
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 8rpx;
@@ -398,7 +398,7 @@
 .script-hint {
   display: block;
   font-size: 20rpx;
-  color: #94a3b8;
+  color: #6b7280;
   text-align: center;
   margin-top: 8rpx;
 }

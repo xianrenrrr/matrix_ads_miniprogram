@@ -1,7 +1,7 @@
 /* app.wxss - 全局样式 */
 page {
-  background-color: #0f172a;
-  color: #f8fafc;
+  background-color: #ffffff;
+  color: #111827;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
@@ -13,16 +13,17 @@ page {
 
 .page-container {
   padding: 0 32rpx;
-  background-color: #0f172a;
+  background-color: #ffffff;
 }
 
 /* 卡片样式 */
 .card {
-  background-color: #1e293b;
+  background-color: #ffffff;
   border-radius: 16rpx;
   padding: 32rpx;
   margin-bottom: 24rpx;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+  border: 2rpx solid #e5e7eb;
 }
 
 .card-header {
@@ -32,13 +33,13 @@ page {
 .card-title {
   font-size: 36rpx;
   font-weight: 600;
-  color: #f8fafc;
+  color: #111827;
   margin-bottom: 8rpx;
 }
 
 .card-subtitle {
   font-size: 28rpx;
-  color: #94a3b8;
+  color: #6b7280;
 }
 
 /* 按钮样式 */
@@ -53,56 +54,56 @@ page {
 }
 
 .btn-primary {
-  background-color: #3b82f6;
+  background-color: #1f2937;
   color: #ffffff;
 }
 
 .btn-primary:hover {
-  background-color: #2563eb;
+  background-color: #111827;
 }
 
 .btn-secondary {
-  background-color: #475569;
-  color: #f8fafc;
+  background-color: #f3f4f6;
+  color: #374151;
 }
 
 .btn-secondary:hover {
-  background-color: #334155;
+  background-color: #e5e7eb;
 }
 
 .btn-outline {
   background-color: transparent;
-  border: 2rpx solid #475569;
-  color: #f8fafc;
+  border: 2rpx solid #d1d5db;
+  color: #374151;
 }
 
 .btn-outline:hover {
-  background-color: #475569;
+  background-color: #f9fafb;
 }
 
 /* 输入框样式 */
 .input {
-  background-color: #334155;
-  border: 2rpx solid #475569;
+  background-color: #ffffff;
+  border: 2rpx solid #d1d5db;
   border-radius: 12rpx;
   padding: 24rpx;
   font-size: 32rpx;
-  color: #f8fafc;
+  color: #111827;
   margin-bottom: 24rpx;
 }
 
 .input:focus {
-  border-color: #3b82f6;
+  border-color: #6b7280;
   outline: none;
 }
 
 /* 文本样式 */
 .text-primary {
-  color: #3b82f6;
+  color: #1f2937;
 }
 
 .text-secondary {
-  color: #94a3b8;
+  color: #6b7280;
 }
 
 .text-success {
@@ -183,23 +184,24 @@ page {
 }
 
 .template-card {
-  background-color: #1e293b;
+  background-color: #ffffff;
   border-radius: 16rpx;
   overflow: hidden;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
+  border: 2rpx solid #e5e7eb;
 }
 
 .template-card:hover {
   transform: translateY(-4rpx);
-  box-shadow: 0 8rpx 24rpx rgba(59, 130, 246, 0.15);
+  box-shadow: 0 8rpx 24rpx rgba(31, 41, 55, 0.1);
 }
 
 /* 视频预览样式 */
 .video-preview {
   width: 100%;
   height: 400rpx;
-  background-color: #334155;
+  background-color: #f3f4f6;
   border-radius: 12rpx;
   display: flex;
   align-items: center;
@@ -218,8 +220,8 @@ page {
 .loading-spinner {
   width: 48rpx;
   height: 48rpx;
-  border: 4rpx solid #334155;
-  border-top-color: #3b82f6;
+  border: 4rpx solid #e5e7eb;
+  border-top-color: #1f2937;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }

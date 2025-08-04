@@ -54,8 +54,8 @@ const config = {
   // 界面配置
   ui: {
     theme: {
-      primary: '#3b82f6',
-      secondary: '#1e293b',
+      primary: '#1f2937',
+      secondary: '#6b7280',
       success: '#10b981',
       warning: '#f59e0b',
       danger: '#ef4444'
