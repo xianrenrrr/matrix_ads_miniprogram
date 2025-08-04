@@ -133,6 +133,7 @@ Page({
     const signupData = {
       inviteToken: inviteInfo.inviteToken || inviteInfo.token,
       username: formData.username.trim(),
+      email: inviteInfo.inviteeEmail || formData.phone.trim() + '@miniprogram.local', // Use invite email or generate one
       phone: formData.phone.trim(),
       password: formData.password,
       role: 'content_creator'
