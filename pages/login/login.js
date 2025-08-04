@@ -2,7 +2,7 @@
 Page({
   data: {
     loginMethod: 'password', // 'password' | 'qrcode'
-    username: '',
+    phone: '',
     password: '',
     loading: false,
     qrCodeScanning: false,
@@ -25,15 +25,15 @@ Page({
     this.setData({ 
       loginMethod: method,
       // 重置表单数据
-      username: '',
+      phone: '',
       password: '',
       qrCodeScanning: false
     })
   },
 
-  // 输入用户名
-  onUsernameInput(e) {
-    this.setData({ username: e.detail.value })
+  // 输入手机号
+  onPhoneInput(e) {
+    this.setData({ phone: e.detail.value })
   },
 
   // 输入密码
@@ -46,13 +46,22 @@ Page({
     this.setData({ showPassword: !this.data.showPassword })
   },
 
-  // 用户名密码登录
+  // 手机号密码登录
   handlePasswordLogin() {
-    const { username, password } = this.data
+    const { phone, password } = this.data
     
-    if (!username.trim()) {
+    if (!phone.trim()) {
       wx.showToast({
-        title: '请输入用户名',
+        title: '请输入手机号',
+        icon: 'none'
+      })
+      return
+    }
+    
+    // 验证手机号格式
+    if (!/^1[3-9]\d{9}$/.test(phone.trim())) {
+      wx.showToast({
+        title: '请输入有效的手机号',
         icon: 'none'
       })
       return
@@ -78,7 +87,7 @@ Page({
         'Content-Type': 'application/json'
       },
       data: {
-        username: username.trim(),
+        phone: phone.trim(),
         password: password.trim(),
         platform: 'miniprogram'
       },

@@ -17,7 +17,7 @@
       bindtap="switchLoginMethod"
     >
       <text class="tab-icon">🔑</text>
-      <text class="tab-text">密码登录</text>
+      <text class="tab-text">手机登录</text>
     </view>
     <view 
       class="method-tab {{loginMethod === 'qrcode' ? 'active' : ''}}"
@@ -36,15 +36,15 @@
     <view wx:if="{{loginMethod === 'password'}}" class="password-login">
       <view class="form-group">
         <view class="input-group">
-          <text class="input-icon">👤</text>
+          <text class="input-icon">📱</text>
           <input 
-            type="text"
+            type="number"
             class="form-input"
-            placeholder="请输入用户名"
+            placeholder="请输入手机号"
             placeholder-class="input-placeholder"
-            value="{{username}}"
-            bindinput="onUsernameInput"
-            maxlength="50"
+            value="{{phone}}"
+            bindinput="onPhoneInput"
+            maxlength="11"
           />
         </view>
       </view>
