@@ -1,4 +1,6 @@
 // pages/signup/signup.js
+const locationData = require('../../utils/locationData.js')
+
 Page({
   data: {
     inviteInfo: {},
@@ -6,11 +8,17 @@ Page({
       username: '',
       phone: '',
       password: '',
-      confirmPassword: ''
+      confirmPassword: '',
+      province: '',
+      city: ''
     },
     loading: false,
     showPassword: false,
-    showConfirmPassword: false
+    showConfirmPassword: false,
+    
+    // 位置选择相关
+    provinces: locationData.provinces,
+    provinceIndex: -1
   },
 
   onLoad(options) {
@@ -66,6 +74,27 @@ Page({
     this.setData({ 'formData.confirmPassword': e.detail.value })
   },
 
+  onCityInput(e) {
+    this.setData({ 'formData.city': e.detail.value })
+  },
+
+  // 省份选择
+  onProvinceChange(e) {
+    const index = e.detail.value
+    const selectedProvince = this.data.provinces[index]
+    
+    this.setData({
+      provinceIndex: index,
+      'formData.province': selectedProvince.name
+    })
+  },
+
+  onProvinceSelectorCancel() {
+    // 省份选择取消
+    console.log('省份选择取消')
+  },
+
+
   // 切换密码可见性
   togglePasswordVisibility() {
     this.setData({ showPassword: !this.data.showPassword })
@@ -77,7 +106,7 @@ Page({
 
   // 验证表单
   validateForm() {
-    const { username, phone, password, confirmPassword } = this.data.formData
+    const { username, phone, password, confirmPassword, province, city } = this.data.formData
     
     if (!username.trim()) {
       wx.showToast({ title: '请输入用户名', icon: 'none' })
@@ -97,6 +126,16 @@ Page({
     // 简单的手机号验证
     if (!/^1[3-9]\d{9}$/.test(phone.trim())) {
       wx.showToast({ title: '请输入有效的手机号码', icon: 'none' })
+      return false
+    }
+    
+    if (!province.trim()) {
+      wx.showToast({ title: '请选择省份', icon: 'none' })
+      return false
+    }
+    
+    if (!city.trim()) {
+      wx.showToast({ title: '请选择城市', icon: 'none' })
       return false
     }
     
@@ -134,6 +173,8 @@ Page({
       inviteToken: inviteInfo.inviteToken || inviteInfo.token,
       username: formData.username.trim(),
       phone: formData.phone.trim(),
+      province: formData.province.trim(),
+      city: formData.city.trim(),
       password: formData.password,
       role: 'content_creator'
     }

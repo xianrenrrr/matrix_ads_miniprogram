@@ -190,6 +190,61 @@
   color: white;
 }
 
+/* 选择器样式 */
+.selector-group {
+  position: relative;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+  padding: 24rpx 20rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10rpx);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.selector-group:active {
+  transform: scale(0.98);
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.15);
+}
+
+.selector-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.selector-text {
+  font-size: 32rpx;
+  color: #333;
+}
+
+.selector-text.placeholder {
+  color: #999;
+  font-size: 30rpx;
+}
+
+.selector-arrow {
+  font-size: 24rpx;
+  color: #999;
+  margin-left: 20rpx;
+  transition: transform 0.3s ease;
+}
+
+.selector-group:active .selector-arrow {
+  transform: rotate(180deg);
+}
+
+.hidden-picker {
+  position: absolute;
+  left: -9999rpx;
+  top: -9999rpx;
+  opacity: 0;
+  pointer-events: none;
+}
+
 /* 响应式设计 */
 @media (max-width: 750rpx) {
   .header-section {

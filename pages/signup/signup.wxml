@@ -52,6 +52,43 @@
       </view>
     </view>
 
+    <!-- 省份选择器 -->
+    <picker 
+      mode="selector"
+      range="{{provinces}}"
+      range-key="name"
+      bindchange="onProvinceChange"
+      bindcancel="onProvinceSelectorCancel"
+    >
+      <view class="form-group">
+        <view class="selector-group">
+          <text class="input-icon">🌏</text>
+          <view class="selector-content">
+            <text class="selector-text {{formData.province ? '' : 'placeholder'}}">
+              {{formData.province || '请选择省份'}}
+            </text>
+            <text class="selector-arrow">▼</text>
+          </view>
+        </view>
+      </view>
+    </picker>
+
+    <!-- 城市输入 -->
+    <view class="form-group">
+      <view class="input-group">
+        <text class="input-icon">🏙</text>
+        <input 
+          type="text"
+          class="form-input"
+          placeholder="请输入城市名称"
+          placeholder-class="input-placeholder"
+          value="{{formData.city}}"
+          bindinput="onCityInput"
+          maxlength="20"
+        />
+      </view>
+    </view>
+
     <view class="form-group">
       <view class="input-group">
         <text class="input-icon">🔒</text>
