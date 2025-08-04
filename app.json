@@ -7,17 +7,17 @@
     "pages/camera/camera"
   ],
   "window": {
-    "backgroundTextStyle": "light",
-    "navigationBarBackgroundColor": "#1e293b",
+    "backgroundTextStyle": "dark",
+    "navigationBarBackgroundColor": "#ffffff",
     "navigationBarTitleText": "Matrix Ads",
-    "navigationBarTextStyle": "white",
-    "backgroundColor": "#0f172a"
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#ffffff"
   },
   "tabBar": {
-    "color": "#94a3b8",
-    "selectedColor": "#3b82f6",
-    "backgroundColor": "#1e293b",
-    "borderStyle": "white",
+    "color": "#6b7280",
+    "selectedColor": "#1f2937",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
     "list": [
       {
         "pagePath": "pages/index/index",

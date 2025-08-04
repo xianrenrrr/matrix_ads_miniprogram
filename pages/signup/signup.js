@@ -13,8 +13,6 @@ Page({
       city: ''
     },
     loading: false,
-    showPassword: false,
-    showConfirmPassword: false,
     
     // 位置选择相关
     provinces: locationData.provinces,
@@ -92,16 +90,6 @@ Page({
   onProvinceSelectorCancel() {
     // 省份选择取消
     console.log('省份选择取消')
-  },
-
-
-  // 切换密码可见性
-  togglePasswordVisibility() {
-    this.setData({ showPassword: !this.data.showPassword })
-  },
-
-  toggleConfirmPasswordVisibility() {
-    this.setData({ showConfirmPassword: !this.data.showConfirmPassword })
   },
 
   // 验证表单

@@ -24,7 +24,6 @@
   <view class="form-container">
     <view class="form-group">
       <view class="input-group">
-        <text class="input-icon">👤</text>
         <input 
           type="text"
           class="form-input"
@@ -39,7 +38,6 @@
 
     <view class="form-group">
       <view class="input-group">
-        <text class="input-icon">📱</text>
         <input 
           type="text"
           class="form-input"
@@ -53,30 +51,26 @@
     </view>
 
     <!-- 省份选择器 -->
-    <picker 
-      mode="selector"
-      range="{{provinces}}"
-      range-key="name"
-      bindchange="onProvinceChange"
-      bindcancel="onProvinceSelectorCancel"
-    >
-      <view class="form-group">
+    <view class="form-group">
+      <picker 
+        mode="selector"
+        range="{{provinces}}"
+        range-key="name"
+        bindchange="onProvinceChange"
+        bindcancel="onProvinceSelectorCancel"
+      >
         <view class="selector-group">
-          <text class="input-icon">🌏</text>
-          <view class="selector-content">
-            <text class="selector-text {{formData.province ? '' : 'placeholder'}}">
-              {{formData.province || '请选择省份'}}
-            </text>
-            <text class="selector-arrow">▼</text>
-          </view>
+          <text class="selector-text {{formData.province ? '' : 'placeholder'}}">
+            {{formData.province || '请选择省份'}}
+          </text>
+          <text class="selector-arrow">▼</text>
         </view>
-      </view>
-    </picker>
+      </picker>
+    </view>
 
     <!-- 城市输入 -->
     <view class="form-group">
       <view class="input-group">
-        <text class="input-icon">🏙</text>
         <input 
           type="text"
           class="form-input"
@@ -91,9 +85,8 @@
 
     <view class="form-group">
       <view class="input-group">
-        <text class="input-icon">🔒</text>
         <input 
-          type="{{showPassword ? 'text' : 'password'}}"
+          type="password"
           class="form-input"
           placeholder="请设置密码"
           placeholder-class="input-placeholder"
@@ -101,20 +94,13 @@
           bindinput="onPasswordInput"
           maxlength="100"
         />
-        <text 
-          class="password-toggle {{showPassword ? 'active' : ''}}"
-          bindtap="togglePasswordVisibility"
-        >
-          {{showPassword ? '👁️' : '👁️‍🗨️'}}
-        </text>
       </view>
     </view>
 
     <view class="form-group">
       <view class="input-group">
-        <text class="input-icon">🔒</text>
         <input 
-          type="{{showConfirmPassword ? 'text' : 'password'}}"
+          type="password"
           class="form-input"
           placeholder="请确认密码"
           placeholder-class="input-placeholder"
@@ -122,12 +108,6 @@
           bindinput="onConfirmPasswordInput"
           maxlength="100"
         />
-        <text 
-          class="password-toggle {{showConfirmPassword ? 'active' : ''}}"
-          bindtap="toggleConfirmPasswordVisibility"
-        >
-          {{showConfirmPassword ? '👁️' : '👁️‍🗨️'}}
-        </text>
       </view>
     </view>
 

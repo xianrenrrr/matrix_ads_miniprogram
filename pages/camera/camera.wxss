@@ -55,8 +55,8 @@
 
 .grid-block {
   position: absolute;
-  border: 4rpx solid #3b82f6;
-  background-color: rgba(59, 130, 246, 0.2);
+  border: 4rpx solid #1f2937;
+  background-color: rgba(31, 41, 55, 0.2);
   border-radius: 8rpx;
 }
 
@@ -274,7 +274,7 @@
 }
 
 .progress-dot.active {
-  background-color: #3b82f6;
+  background-color: #1f2937;
   transform: scale(1.5);
 }
 
@@ -357,30 +357,31 @@
 }
 
 .prompt-content {
-  background-color: #1e293b;
+  background-color: #ffffff;
   border-radius: 24rpx;
   padding: 48rpx;
   text-align: center;
   margin: 32rpx;
+  border: 2rpx solid #e5e7eb;
 }
 
 .prompt-title {
   display: block;
   font-size: 36rpx;
   font-weight: 600;
-  color: white;
+  color: #111827;
   margin-bottom: 16rpx;
 }
 
 .prompt-desc {
   display: block;
   font-size: 28rpx;
-  color: #94a3b8;
+  color: #6b7280;
   margin-bottom: 32rpx;
 }
 
 .prompt-btn {
-  background-color: #3b82f6;
+  background-color: #1f2937;
   color: white;
   border: none;
   border-radius: 12rpx;
@@ -417,11 +418,12 @@
 }
 
 .script-modal {
-  background-color: #1e293b;
+  background-color: #ffffff;
   border-radius: 24rpx;
   width: 90%;
   max-height: 70%;
   margin: 32rpx;
+  border: 2rpx solid #e5e7eb;
 }
 
 .script-header {
@@ -429,18 +431,18 @@
   justify-content: space-between;
   align-items: center;
   padding: 32rpx;
-  border-bottom: 2rpx solid #334155;
+  border-bottom: 2rpx solid #e5e7eb;
 }
 
 .script-title {
   font-size: 36rpx;
   font-weight: 600;
-  color: white;
+  color: #111827;
 }
 
 .script-close {
   font-size: 48rpx;
-  color: #94a3b8;
+  color: #6b7280;
   padding: 16rpx;
 }
 
@@ -453,7 +455,7 @@
   display: block;
   font-size: 32rpx;
   line-height: 1.6;
-  color: white;
+  color: #111827;
   margin-bottom: 32rpx;
 }
 
@@ -466,9 +468,9 @@
 .script-detail {
   display: block;
   font-size: 28rpx;
-  color: #94a3b8;
+  color: #6b7280;
   padding: 16rpx;
-  background-color: #334155;
+  background-color: #f9fafb;
   border-radius: 12rpx;
 }
 
@@ -495,23 +497,24 @@
 }
 
 .recording-complete-modal {
-  background-color: #1e293b;
+  background-color: #ffffff;
   border-radius: 24rpx;
   width: 80%;
   max-width: 600rpx;
   margin: 32rpx;
+  border: 2rpx solid #e5e7eb;
 }
 
 .recording-complete-header {
   padding: 32rpx 32rpx 16rpx;
   text-align: center;
-  border-bottom: 2rpx solid #334155;
+  border-bottom: 2rpx solid #e5e7eb;
 }
 
 .recording-complete-title {
   font-size: 36rpx;
   font-weight: 600;
-  color: white;
+  color: #111827;
 }
 
 .recording-complete-body {
@@ -521,7 +524,7 @@
 
 .recording-complete-text {
   font-size: 28rpx;
-  color: #94a3b8;
+  color: #6b7280;
 }
 
 .recording-complete-actions {
@@ -552,7 +555,7 @@
 }
 
 .recording-action-btn.finish-btn {
-  background-color: #3b82f6;
+  background-color: #1f2937;
   color: white;
 }
 
@@ -571,17 +574,18 @@
 }
 
 .upload-failure-modal {
-  background-color: #1e293b;
+  background-color: #ffffff;
   border-radius: 24rpx;
   width: 85%;
   max-width: 600rpx;
   margin: 32rpx;
+  border: 2rpx solid #e5e7eb;
 }
 
 .upload-failure-header {
   padding: 32rpx 32rpx 16rpx;
   text-align: center;
-  border-bottom: 2rpx solid #334155;
+  border-bottom: 2rpx solid #e5e7eb;
 }
 
 .upload-failure-title {
@@ -598,7 +602,7 @@
 .upload-failure-text {
   display: block;
   font-size: 28rpx;
-  color: #94a3b8;
+  color: #6b7280;
   margin-bottom: 16rpx;
   line-height: 1.4;
 }
@@ -606,8 +610,8 @@
 .upload-failure-detail {
   display: block;
   font-size: 24rpx;
-  color: #64748b;
-  background-color: #334155;
+  color: #9ca3af;
+  background-color: #f9fafb;
   padding: 12rpx;
   border-radius: 8rpx;
   margin-top: 16rpx;
@@ -637,6 +641,6 @@
 }
 
 .upload-action-btn.retry-btn {
-  background-color: #3b82f6;
+  background-color: #1f2937;
   color: white;
 }

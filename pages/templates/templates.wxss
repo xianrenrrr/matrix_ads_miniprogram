@@ -2,34 +2,34 @@
 
 .templates-container {
   padding: 0 0 120rpx;
-  background-color: #0f172a;
+  background-color: #ffffff;
   min-height: 100vh;
 }
 
 /* 搜索区域 */
 .search-section {
   padding: 24rpx 32rpx;
-  background-color: #1e293b;
-  border-bottom: 2rpx solid #334155;
+  background-color: #ffffff;
+  border-bottom: 2rpx solid #e5e7eb;
 }
 
 .search-box {
   display: flex;
   align-items: center;
-  background-color: #334155;
+  background-color: #ffffff;
   border-radius: 12rpx;
   padding: 0 24rpx;
-  border: 2rpx solid #475569;
+  border: 2rpx solid #d1d5db;
   transition: border-color 0.3s ease;
 }
 
 .search-box:focus-within {
-  border-color: #3b82f6;
+  border-color: #6b7280;
 }
 
 .search-icon {
   font-size: 32rpx;
-  color: #94a3b8;
+  color: #6b7280;
   margin-right: 16rpx;
 }
 
@@ -37,18 +37,18 @@
   flex: 1;
   padding: 24rpx 0;
   font-size: 32rpx;
-  color: #f8fafc;
+  color: #111827;
   background: transparent;
 }
 
 .search-placeholder {
-  color: #64748b;
+  color: #9ca3af;
 }
 
 /* 分类筛选 */
 .category-section {
-  background-color: #1e293b;
-  border-bottom: 2rpx solid #334155;
+  background-color: #ffffff;
+  border-bottom: 2rpx solid #e5e7eb;
 }
 
 .category-scroll {
@@ -64,8 +64,8 @@
 
 .category-item {
   padding: 16rpx 32rpx;
-  background-color: #334155;
-  color: #94a3b8;
+  background-color: #f3f4f6;
+  color: #6b7280;
   border-radius: 24rpx;
   font-size: 28rpx;
   white-space: nowrap;
@@ -74,9 +74,9 @@
 }
 
 .category-item.active {
-  background-color: #3b82f6;
+  background-color: #1f2937;
   color: white;
-  border-color: #3b82f6;
+  border-color: #1f2937;
 }
 
 /* 加载状态 */
@@ -91,8 +91,8 @@
 .loading-spinner {
   width: 48rpx;
   height: 48rpx;
-  border: 4rpx solid #334155;
-  border-top-color: #3b82f6;
+  border: 4rpx solid #e5e7eb;
+  border-top-color: #1f2937;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 24rpx;
@@ -100,7 +100,7 @@
 
 .loading-text {
   font-size: 28rpx;
-  color: #94a3b8;
+  color: #6b7280;
 }
 
 @keyframes spin {
@@ -127,13 +127,13 @@
 .empty-title {
   font-size: 36rpx;
   font-weight: 600;
-  color: #f8fafc;
+  color: #111827;
   margin-bottom: 16rpx;
 }
 
 .empty-desc {
   font-size: 28rpx;
-  color: #94a3b8;
+  color: #6b7280;
   line-height: 1.5;
 }
 
@@ -149,17 +149,17 @@
 }
 
 .template-card {
-  background-color: #1e293b;
+  background-color: #ffffff;
   border-radius: 16rpx;
   overflow: hidden;
-  border: 2rpx solid #334155;
+  border: 2rpx solid #e5e7eb;
   transition: all 0.3s ease;
 }
 
 .template-card:active {
   transform: scale(0.98);
-  border-color: #3b82f6;
-  box-shadow: 0 4rpx 12rpx rgba(59, 130, 246, 0.2);
+  border-color: #1f2937;
+  box-shadow: 0 4rpx 12rpx rgba(31, 41, 55, 0.1);
 }
 
 .template-card.unsubscribed {
@@ -169,7 +169,7 @@
 
 .template-card.unsubscribed:active {
   transform: none;
-  border-color: #475569;
+  border-color: #9ca3af;
   box-shadow: none;
 }
 
@@ -178,7 +178,7 @@
   position: relative;
   width: 100%;
   height: 200rpx;
-  background-color: #334155;
+  background-color: #f3f4f6;
 }
 
 .thumbnail-image {
@@ -230,7 +230,7 @@
 .template-title {
   font-size: 32rpx;
   font-weight: 600;
-  color: #f8fafc;
+  color: #111827;
   flex: 1;
   margin-right: 16rpx;
 }
@@ -243,18 +243,18 @@
 
 .stat-item {
   font-size: 24rpx;
-  color: #94a3b8;
+  color: #6b7280;
 }
 
 .stat-divider {
   font-size: 24rpx;
-  color: #64748b;
+  color: #9ca3af;
   margin: 0 8rpx;
 }
 
 .template-description {
   font-size: 28rpx;
-  color: #94a3b8;
+  color: #6b7280;
   line-height: 1.5;
   margin-bottom: 16rpx;
   display: -webkit-box;
@@ -273,11 +273,11 @@
 
 .tag-item {
   padding: 8rpx 16rpx;
-  background-color: rgba(59, 130, 246, 0.1);
-  color: #93c5fd;
+  background-color: #f3f4f6;
+  color: #6b7280;
   border-radius: 24rpx;
   font-size: 22rpx;
-  border: 2rpx solid rgba(59, 130, 246, 0.2);
+  border: 2rpx solid #e5e7eb;
 }
 
 /* 模板底部 */
@@ -289,7 +289,7 @@
 
 .creator-info {
   font-size: 24rpx;
-  color: #64748b;
+  color: #9ca3af;
 }
 
 .template-actions {
@@ -306,23 +306,23 @@
 }
 
 .primary-btn {
-  background-color: #3b82f6;
+  background-color: #1f2937;
   color: white;
 }
 
 .primary-btn:active {
-  background-color: #2563eb;
+  background-color: #111827;
   transform: scale(0.95);
 }
 
 .subscribe-btn {
-  background-color: #374151;
-  color: #9ca3af;
-  border: 2rpx solid #4b5563;
+  background-color: #f9fafb;
+  color: #6b7280;
+  border: 2rpx solid #d1d5db;
 }
 
 .subscribe-btn:active {
-  background-color: #4b5563;
+  background-color: #f3f4f6;
   transform: scale(0.95);
 }
 
@@ -334,5 +334,5 @@
 
 .tip-text {
   font-size: 26rpx;
-  color: #64748b;
+  color: #9ca3af;
 }
