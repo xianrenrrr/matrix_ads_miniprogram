@@ -1,0 +1,189 @@
+<!--pages/scene-submission/scene-submission.wxml-->
+<view class=\"scene-submission-container\">
+  <!-- Header -->
+  <view class=\"header\">
+    <view class=\"header-content\">
+      <view class=\"back-button\" bindtap=\"goBack\">
+        <text class=\"icon-back\">‹</text>
+      </view>
+      <view class=\"header-info\">
+        <text class=\"template-title\">{{template.templateTitle || 'Video Template'}}</text>
+        <text class=\"scene-indicator\">Scene {{currentSceneIndex + 1}} of {{scenes.length}}</text>
+      </view>
+      <view class=\"progress-button\" bindtap=\"viewProgress\">
+        <text class=\"icon-progress\">📊</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Scene Navigation -->
+  <view class=\"scene-nav\">
+    <scroll-view class=\"scene-nav-scroll\" scroll-x=\"true\">
+      <view class=\"scene-nav-content\">
+        <view wx:for=\"{{scenes}}\" wx:key=\"index\" 
+              class=\"scene-nav-item {{currentSceneIndex === index ? 'active' : ''}}\"
+              data-index=\"{{index}}\"
+              bindtap=\"selectScene\">
+          <view class=\"scene-number\" 
+                style=\"background-color: {{getSceneStatusColor(getSceneStatus(index + 1))}}\">
+            {{index + 1}}
+          </view>
+          <text class=\"scene-title\">{{item.sceneTitle}}</text>
+          <view class=\"scene-status\">
+            <text class=\"status-text\">{{getSceneStatus(index + 1)}}</text>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- Main Content -->
+  <view class=\"main-content\">
+    <!-- Scene Instructions -->
+    <view class=\"instructions-section\" wx:if=\"{{showInstructions}}\">
+      <view class=\"instructions-header\" bindtap=\"toggleInstructions\">
+        <text class=\"instructions-title\">📋 Scene Instructions</text>
+        <text class=\"toggle-icon\">{{showInstructions ? '▼' : '▶'}}</text>
+      </view>
+      
+      <view class=\"instructions-content\" wx:if=\"{{currentScene}}\">
+        <view class=\"instruction-item\">
+          <text class=\"instruction-label\">Script:</text>
+          <text class=\"instruction-text\">{{currentScene.scriptLine}}</text>
+        </view>
+        
+        <view class=\"instruction-row\">
+          <view class=\"instruction-item\">
+            <text class=\"instruction-label\">Duration:</text>
+            <text class=\"instruction-text\">{{currentScene.sceneDuration}}s</text>
+          </view>
+          <view class=\"instruction-item\">
+            <text class=\"instruction-label\">Position:</text>
+            <text class=\"instruction-text\">{{currentScene.personPosition}}</text>
+          </view>
+        </view>
+
+        <view class=\"instruction-item\" wx:if=\"{{currentScene.backgroundInstructions}}\">
+          <text class=\"instruction-label\">Background:</text>
+          <text class=\"instruction-text\">{{currentScene.backgroundInstructions}}</text>
+        </view>
+
+        <view class=\"instruction-item\" wx:if=\"{{currentScene.specificCameraInstructions}}\">
+          <text class=\"instruction-label\">Camera:</text>
+          <text class=\"instruction-text\">{{currentScene.specificCameraInstructions}}</text>
+        </view>
+
+        <view class=\"instruction-item\" wx:if=\"{{currentScene.movementInstructions}}\">
+          <text class=\"instruction-label\">Movement:</text>
+          <text class=\"instruction-text\">{{currentScene.movementInstructions}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- Camera Section -->
+    <view class=\"camera-section\">
+      <view class=\"camera-container\">
+        <!-- Grid Overlay -->
+        <view class=\"grid-overlay\" wx:if=\"{{enableGrid && gridOverlay.length > 0}}\">
+          <view wx:for=\"{{9}}\" wx:key=\"*this\" 
+                class=\"grid-cell {{gridOverlay.includes(index + 1) ? 'highlighted' : ''}}\">
+          </view>
+        </view>
+
+        <!-- Camera Preview -->
+        <camera class=\"camera-preview\" 
+                device-position=\"{{cameraPosition}}\"
+                flash=\"off\"
+                frame-size=\"large\">
+        </camera>
+
+        <!-- Recording Indicator -->
+        <view class=\"recording-indicator\" wx:if=\"{{isRecording}}\">
+          <view class=\"recording-dot\"></view>
+          <text class=\"recording-text\">REC {{formatDuration(recordingDuration)}}</text>
+        </view>
+
+        <!-- Camera Controls -->
+        <view class=\"camera-controls\">
+          <view class=\"control-button\" bindtap=\"switchCamera\">
+            <text class=\"control-icon\">🔄</text>
+          </view>
+          
+          <view class=\"record-button-container\">
+            <view class=\"record-button {{isRecording ? 'recording' : ''}}\" 
+                  bindtap=\"{{isRecording ? 'stopRecording' : 'startRecording'}}\">
+              <view class=\"record-button-inner\"></view>
+            </view>
+          </view>
+          
+          <view class=\"control-button\" bindtap=\"toggleGrid\">
+            <text class=\"control-icon\">{{enableGrid ? '⚏' : '⚏'}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- Upload Progress -->
+    <view class=\"upload-section\" wx:if=\"{{isUploading}}\">
+      <view class=\"upload-progress\">
+        <text class=\"upload-text\">Uploading scene... {{uploadProgress}}%</text>
+        <view class=\"progress-bar\">
+          <view class=\"progress-fill\" style=\"width: {{uploadProgress}}%\"></view>
+        </view>
+      </view>
+    </view>
+
+    <!-- Current Submission Status -->
+    <view class=\"submission-status\" wx:if=\"{{submissions[currentSceneIndex + 1]}}\">
+      <view class=\"status-card\">
+        <view class=\"status-header\">
+          <text class=\"status-title\">Scene {{currentSceneIndex + 1}} Status</text>
+          <view class=\"status-badge status-{{submissions[currentSceneIndex + 1].status}}\">
+            {{submissions[currentSceneIndex + 1].status}}
+          </view>
+        </view>
+        
+        <view wx:if=\"{{submissions[currentSceneIndex + 1].status === 'rejected'}}\" class=\"rejection-feedback\">
+          <text class=\"feedback-title\">Feedback:</text>
+          <view wx:for=\"{{submissions[currentSceneIndex + 1].feedback}}\" wx:key=\"*this\" class=\"feedback-item\">
+            • {{item}}
+          </view>
+        </view>
+
+        <view wx:if=\"{{submissions[currentSceneIndex + 1].status === 'approved'}}\" class=\"approval-info\">
+          <text class=\"approval-text\">✅ Scene approved! Great work!</text>
+        </view>
+
+        <view wx:if=\"{{submissions[currentSceneIndex + 1].status === 'pending'}}\" class=\"pending-info\">
+          <text class=\"pending-text\">⏳ Scene submitted and pending review</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- AI Feedback Modal -->
+  <view class=\"feedback-modal\" wx:if=\"{{showFeedback}}\" bindtap=\"closeFeedback\">
+    <view class=\"feedback-content\" catchtap=\"\">
+      <view class=\"feedback-header\">
+        <text class=\"feedback-title\">🤖 AI Analysis</text>
+        <text class=\"close-button\" bindtap=\"closeFeedback\">×</text>
+      </view>
+      
+      <view class=\"feedback-score\" wx:if=\"{{feedbackData.similarityScore}}\">
+        <text class=\"score-label\">Similarity Score:</text>
+        <text class=\"score-value\">{{Math.round(feedbackData.similarityScore * 100)}}%</text>
+      </view>
+
+      <view class=\"feedback-suggestions\" wx:if=\"{{feedbackData.suggestions}}\">
+        <text class=\"suggestions-title\">💡 AI Suggestions:</text>
+        <view wx:for=\"{{feedbackData.suggestions}}\" wx:key=\"*this\" class=\"suggestion-item\">
+          • {{item}}
+        </view>
+      </view>
+
+      <view class=\"feedback-actions\">
+        <button class=\"feedback-button\" bindtap=\"closeFeedback\">Got it!</button>
+      </view>
+    </view>
+  </view>
+</view>
