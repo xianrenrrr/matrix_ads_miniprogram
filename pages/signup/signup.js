@@ -30,7 +30,8 @@ Page({
         
         this.setData({ 
           inviteInfo: inviteInfo,
-          'formData.username': inviteInfo.inviteeName || ''
+          // For group invites, don't pre-fill username
+          'formData.username': ''
         })
       } catch (error) {
         console.error('解析邀请数据失败:', error)
@@ -188,9 +189,13 @@ Page({
           
           // 显示成功信息并引导用户登录
           setTimeout(() => {
+            // Use group info from response if available, otherwise fallback to invite info
+            const groupName = res.data.groupName || inviteInfo.groupName || '团队';
+            const managerName = res.data.managerName || inviteInfo.managerName || '管理员';
+            
             wx.showModal({
               title: '注册成功！',
-              content: `欢迎加入 ${inviteInfo.managerName} 的团队！\n\n请使用刚才设置的用户名和密码登录小程序。`,
+              content: `欢迎加入 ${groupName}！\n管理员：${managerName}\n\n请使用刚才设置的用户名和密码登录小程序。`,
               confirmText: '去登录',
               showCancel: false,
               success: () => {
