@@ -4,8 +4,8 @@
  * Allows content creators to submit individual scenes instead of full videos
  */
 
-const app = getApp();
-const config = require('../../utils/config');
+var app = getApp();
+var config = require('../../utils/config');
 
 Page({
   data: {
@@ -39,7 +39,8 @@ Page({
   },
 
   onLoad(options) {
-    const { templateId, userId } = options;
+    var templateId = options.templateId;
+    var userId = options.userId;
     
     if (!templateId || !userId) {
       wx.showToast({
@@ -50,8 +51,8 @@ Page({
     }
 
     this.setData({
-      templateId,
-      userId
+      templateId: templateId,
+      userId: userId
     });
 
     this.loadTemplate();
@@ -59,83 +60,94 @@ Page({
   },
 
   // Load template data
-  async loadTemplate() {
-    try {
-      wx.showLoading({ title: 'Loading template...' });
-      
-      const response = await wx.request({
-        url: `${config.API_BASE_URL}/content-manager/templates/${this.data.templateId}`,
-        method: 'GET'
-      });
-
-      if (response.data && response.data.scenes) {
-        this.setData({
-          template: response.data,
-          scenes: response.data.scenes,
-          currentScene: response.data.scenes[0]
+  loadTemplate: function() {
+    var self = this;
+    
+    wx.showLoading({ title: 'Loading template...' });
+    
+    wx.request({
+      url: config.API_BASE_URL + '/content-manager/templates/' + this.data.templateId,
+      method: 'GET',
+      success: function(response) {
+        if (response.data && response.data.scenes) {
+          self.setData({
+            template: response.data,
+            scenes: response.data.scenes,
+            currentScene: response.data.scenes[0]
+          });
+          
+          self.setupSceneData();
+        } else {
+          wx.showToast({
+            title: 'Template not found',
+            icon: 'error'
+          });
+        }
+      },
+      fail: function(error) {
+        console.error('Error loading template:', error);
+        wx.showToast({
+          title: 'Failed to load template',
+          icon: 'error'
         });
-        
-        this.setupSceneData();
-      } else {
-        throw new Error('Template not found');
+      },
+      complete: function() {
+        wx.hideLoading();
       }
-    } catch (error) {
-      console.error('Error loading template:', error);
-      wx.showToast({
-        title: 'Failed to load template',
-        icon: 'error'
-      });
-    } finally {
-      wx.hideLoading();
-    }
+    });
   },
 
   // Load user's progress for this template
-  async loadProgress() {
-    try {
-      const response = await wx.request({
-        url: `${config.API_BASE_URL}/content-creator/scenes/template/${this.data.templateId}/user/${this.data.userId}`,
-        method: 'GET'
-      });
+  loadProgress: function() {
+    var self = this;
+    
+    wx.request({
+      url: config.API_BASE_URL + '/content-creator/scenes/template/' + this.data.templateId + '/user/' + this.data.userId,
+      method: 'GET',
+      success: function(response) {
+        if (response.data && response.data.success) {
+          var sceneMap = response.data.sceneMap || {};
+          var progress = response.data.progress;
+          
+          self.setData({
+            submissions: sceneMap,
+            progress: progress
+          });
 
-      if (response.data && response.data.success) {
-        const { sceneMap, progress } = response.data;
-        
-        this.setData({
-          submissions: sceneMap || {},
-          progress: progress
-        });
-
-        // Find first incomplete scene
-        this.findNextIncompleteScene();
+          // Find first incomplete scene
+          self.findNextIncompleteScene();
+        }
+      },
+      fail: function(error) {
+        console.error('Error loading progress:', error);
       }
-    } catch (error) {
-      console.error('Error loading progress:', error);
-    }
+    });
   },
 
   // Setup current scene data and grid overlay
-  setupSceneData() {
-    const { currentScene, currentSceneIndex } = this.data;
+  setupSceneData: function() {
+    var currentScene = this.data.currentScene;
+    var currentSceneIndex = this.data.currentSceneIndex;
     
     if (!currentScene) return;
 
     // Set up grid overlay from scene data
-    const gridOverlay = currentScene.screenGridOverlay || [];
+    var gridOverlay = currentScene.screenGridOverlay || [];
     
     this.setData({
-      gridOverlay,
+      gridOverlay: gridOverlay,
       enableGrid: gridOverlay.length > 0
     });
   },
 
   // Find the next scene that needs submission
-  findNextIncompleteScene() {
-    const { scenes, submissions } = this.data;
+  findNextIncompleteScene: function() {
+    var scenes = this.data.scenes;
+    var submissions = this.data.submissions;
     
-    for (let i = 0; i < scenes.length; i++) {
-      const sceneNumber = i + 1;
-      const submission = submissions[sceneNumber];
+    for (var i = 0; i < scenes.length; i++) {
+      var sceneNumber = i + 1;
+      var submission = submissions[sceneNumber];
       
       if (!submission || submission.status === 'rejected') {
         this.setData({
@@ -155,8 +167,8 @@ Page({
   },
 
   // Navigate to specific scene
-  selectScene(event) {
-    const { index } = event.currentTarget.dataset;
+  selectScene: function(event) {
+    var index = event.currentTarget.dataset.index;
     
     this.setData({
       currentSceneIndex: index,
@@ -167,15 +179,15 @@ Page({
   },
 
   // Toggle scene instructions visibility
-  toggleInstructions() {
+  toggleInstructions: function() {
     this.setData({
       showInstructions: !this.data.showInstructions
     });
   },
 
   // Start video recording
-  startRecording() {
-    const recorderManager = wx.getRecorderManager();
+  startRecording: function() {
+    var recorderManager = wx.getRecorderManager();
     
     recorderManager.start({
       duration: (this.data.currentScene.sceneDuration || 30) * 1000,
@@ -191,28 +203,28 @@ Page({
     });
 
     // Start recording timer
-    this.recordingTimer = setInterval(() => {
-      this.setData({
-        recordingDuration: this.data.recordingDuration + 1
+    var self = this;
+    this.recordingTimer = setInterval(function() {
+      self.setData({
+        recordingDuration: self.data.recordingDuration + 1
       });
     }, 1000);
-
-    recorderManager.onStop((res) => {
-      clearInterval(this.recordingTimer);
+    recorderManager.onStop(function(res) {
+      clearInterval(self.recordingTimer);
       
-      this.setData({
+      self.setData({
         isRecording: false,
         recordingPath: res.tempFilePath
       });
       
       // Show recording preview
-      this.showRecordingPreview();
+      self.showRecordingPreview();
     });
 
-    recorderManager.onError((error) => {
-      clearInterval(this.recordingTimer);
+    recorderManager.onError(function(error) {
+      clearInterval(self.recordingTimer);
       
-      this.setData({
+      self.setData({
         isRecording: false
       });
       
@@ -224,19 +236,19 @@ Page({
   },
 
   // Stop video recording
-  stopRecording() {
-    const recorderManager = wx.getRecorderManager();
+  stopRecording: function() {
+    var recorderManager = wx.getRecorderManager();
     recorderManager.stop();
   },
 
   // Show recording preview and options
-  showRecordingPreview() {
+  showRecordingPreview: function() {
     wx.showModal({
       title: 'Recording Complete',
-      content: `Scene ${this.data.currentSceneIndex + 1} recorded (${this.data.recordingDuration}s). Submit this take or record again?`,
+      content: 'Scene ' + (this.data.currentSceneIndex + 1) + ' recorded (' + this.data.recordingDuration + 's). Submit this take or record again?',
       confirmText: 'Submit',
       cancelText: 'Re-record',
-      success: (res) => {
+      success: function(res) {
         if (res.confirm) {
           this.submitScene();
         } else {
@@ -246,12 +258,12 @@ Page({
             recordingDuration: 0
           });
         }
-      }
+      }.bind(this)
     });
   },
 
   // Submit current scene
-  async submitScene() {
+  submitScene: function() {
     if (!this.data.recordingPath) {
       wx.showToast({
         title: 'No recording to submit',
@@ -260,93 +272,101 @@ Page({
       return;
     }
 
-    try {
-      this.setData({
-        isUploading: true,
-        uploadProgress: 0
-      });
+    var self = this;
+    
+    this.setData({
+      isUploading: true,
+      uploadProgress: 0
+    });
 
-      wx.showLoading({ title: 'Uploading scene...' });
+    wx.showLoading({ title: 'Uploading scene...' });
 
-      const uploadTask = wx.uploadFile({
-        url: `${config.API_BASE_URL}/content-creator/scenes/upload`,
-        filePath: this.data.recordingPath,
-        name: 'file',
-        formData: {
-          templateId: this.data.templateId,
-          userId: this.data.userId,
-          sceneNumber: this.data.currentSceneIndex + 1,
-          sceneTitle: this.data.currentScene.sceneTitle || `Scene ${this.data.currentSceneIndex + 1}`
+    var uploadTask = wx.uploadFile({
+      url: config.API_BASE_URL + '/content-creator/scenes/upload',
+      filePath: this.data.recordingPath,
+      name: 'file',
+      formData: {
+        templateId: this.data.templateId,
+        userId: this.data.userId,
+        sceneNumber: this.data.currentSceneIndex + 1,
+        sceneTitle: this.data.currentScene.sceneTitle || ('Scene ' + (this.data.currentSceneIndex + 1))
+      },
+      success: function(response) {
+        try {
+          var result = JSON.parse(response.data);
+
+          if (result.success) {
+            wx.showToast({
+              title: 'Scene submitted!',
+              icon: 'success'
+            });
+
+            // Clear recording
+            self.setData({
+              recordingPath: '',
+              recordingDuration: 0
+            });
+
+            // Show AI feedback if available
+            if (result.aiSuggestions && result.aiSuggestions.length > 0) {
+              self.showAIFeedback(result);
+            }
+
+            // Reload progress and move to next scene
+            self.loadProgress();
+            self.findNextIncompleteScene();
+
+          } else {
+            wx.showToast({
+              title: result.message || 'Upload failed',
+              icon: 'error'
+            });
+          }
+        } catch (error) {
+          console.error('Error parsing response:', error);
+          wx.showToast({
+            title: 'Upload failed',
+            icon: 'error'
+          });
         }
-      });
-
-      uploadTask.onProgressUpdate((res) => {
-        this.setData({
-          uploadProgress: res.progress
-        });
-      });
-
-      const response = await new Promise((resolve, reject) => {
-        uploadTask.onSuccess(resolve);
-        uploadTask.onFail(reject);
-      });
-
-      const result = JSON.parse(response.data);
-
-      if (result.success) {
+      },
+      fail: function(error) {
+        console.error('Error submitting scene:', error);
         wx.showToast({
-          title: 'Scene submitted!',
-          icon: 'success'
+          title: 'Upload failed',
+          icon: 'error'
         });
-
-        // Clear recording
-        this.setData({
-          recordingPath: '',
-          recordingDuration: 0
+      },
+      complete: function() {
+        self.setData({
+          isUploading: false,
+          uploadProgress: 0
         });
-
-        // Show AI feedback if available
-        if (result.aiSuggestions && result.aiSuggestions.length > 0) {
-          this.showAIFeedback(result);
-        }
-
-        // Reload progress and move to next scene
-        await this.loadProgress();
-        this.findNextIncompleteScene();
-
-      } else {
-        throw new Error(result.message || 'Upload failed');
+        wx.hideLoading();
       }
+    });
 
-    } catch (error) {
-      console.error('Error submitting scene:', error);
-      wx.showToast({
-        title: 'Upload failed',
-        icon: 'error'
+    uploadTask.onProgressUpdate(function(res) {
+      self.setData({
+        uploadProgress: res.progress
       });
-    } finally {
-      this.setData({
-        isUploading: false,
-        uploadProgress: 0
-      });
-      wx.hideLoading();
-    }
+    });
   },
 
   // Show AI feedback modal
-  showAIFeedback(submissionData) {
+  showAIFeedback: function(submissionData) {
     this.setData({
       feedbackData: {
         similarityScore: submissionData.similarityScore,
         suggestions: submissionData.aiSuggestions,
-        qualityMetrics: submissionData.sceneSubmission?.qualityMetrics
+        qualityMetrics: submissionData.sceneSubmission && submissionData.sceneSubmission.qualityMetrics
       },
       showFeedback: true
     });
   },
 
   // Close AI feedback modal
-  closeFeedback() {
+  closeFeedback: function() {
     this.setData({
       showFeedback: false,
       feedbackData: null
@@ -354,28 +374,28 @@ Page({
   },
 
   // Toggle camera position
-  switchCamera() {
+  switchCamera: function() {
     this.setData({
       cameraPosition: this.data.cameraPosition === 'back' ? 'front' : 'back'
     });
   },
 
   // Toggle grid overlay
-  toggleGrid() {
+  toggleGrid: function() {
     this.setData({
       enableGrid: !this.data.enableGrid
     });
   },
 
   // Get scene status for display
-  getSceneStatus(sceneNumber) {
-    const submission = this.data.submissions[sceneNumber];
+  getSceneStatus: function(sceneNumber) {
+    var submission = this.data.submissions[sceneNumber];
     if (!submission) return 'not-submitted';
     return submission.status;
   },
 
   // Get scene status color
-  getSceneStatusColor(status) {
+  getSceneStatusColor: function(status) {
     switch (status) {
       case 'approved': return '#10B981'; // green
       case 'pending': return '#F59E0B';  // yellow
@@ -385,27 +405,43 @@ Page({
   },
 
   // Format duration for display
-  formatDuration(seconds) {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  formatDuration: function(seconds) {
+    var minutes = Math.floor(seconds / 60);
+    var remainingSeconds = seconds % 60;
+    return minutes + ':' + (remainingSeconds < 10 ? '0' : '') + remainingSeconds;
   },
 
   // Navigate back to template selection
-  goBack() {
+  goBack: function() {
     wx.navigateBack({
       delta: 1
     });
   },
 
   // View overall progress
-  viewProgress() {
-    wx.navigateTo({
-      url: `/pages/progress/progress?templateId=${this.data.templateId}&userId=${this.data.userId}`
+  viewProgress: function() {
+    var progress = this.data.progress;
+    if (!progress) {
+      wx.showToast({
+        title: 'No progress data',
+        icon: 'none'
+      });
+      return;
+    }
+
+    var message = 'Progress: ' + progress.approved + '/' + progress.totalScenes + ' scenes approved\n' +
+                   'Pending: ' + progress.pending + '\n' +
+                   'Completion: ' + Math.round(progress.completionPercentage) + '%';
+    
+    wx.showModal({
+      title: 'Template Progress',
+      content: message,
+      showCancel: false,
+      confirmText: 'OK'
     });
   },
 
-  onUnload() {
+  onUnload: function() {
     // Clean up timer if page is unloaded
     if (this.recordingTimer) {
       clearInterval(this.recordingTimer);

@@ -4,7 +4,8 @@
     "pages/signup/signup",
     "pages/index/index",
     "pages/templates/templates",
-    "pages/camera/camera"
+    "pages/camera/camera",
+    "pages/scene-submission/scene-submission"
   ],
   "window": {
     "backgroundTextStyle": "dark",

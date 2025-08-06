@@ -168,13 +168,13 @@ Page({
     app.globalData.currentTemplate = template
     console.log('准备跳转到录制页面')
     
-    // 跳转到录制页面
+    // 跳转到场景逐一录制页面
     wx.navigateTo({
-      url: `/pages/camera/camera?templateId=${template.id}`,
+      url: `/pages/scene-submission/scene-submission?templateId=${template.id}&userId=${app.globalData.userInfo.id}`,
       success: () => {
-        console.log('跳转成功')
+        console.log('跳转到场景录制页面成功')
         wx.showToast({
-          title: '跳转成功',
+          title: '进入场景录制',
           icon: 'success'
         })
       },
