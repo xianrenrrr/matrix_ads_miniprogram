@@ -85,4 +85,7 @@ if (env === 'development') {
   config.dev.mockApi = false
 }
 
+// Add backward compatibility
+config.API_BASE_URL = config.api.baseUrl
+
 module.exports = config

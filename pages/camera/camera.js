@@ -29,6 +29,15 @@ Page({
   onLoad(options) {
     console.log('录制页面加载', options)
     
+    // 保存传入的参数
+    this.setData({
+      templateId: options.templateId,
+      userId: options.userId,
+      sceneIndex: parseInt(options.sceneIndex || '0'),
+      sceneNumber: parseInt(options.sceneNumber || '1'),
+      returnPage: options.returnPage || 'scene-selection'
+    })
+    
     // 如果传入了模板ID，加载模板数据
     if (options.templateId) {
       this.loadTemplate(options.templateId)
@@ -133,14 +142,15 @@ Page({
     console.log('设置模板:', template)
     
     const scenes = template.scenes || []
-    const currentScene = scenes[0] || {}
+    const sceneIndex = this.data.sceneIndex || 0
+    const currentScene = scenes[sceneIndex] || {}
     
     this.setData({
       selectedTemplate: template,
-      currentScene: 0,
-      maxRecordTime: template.totalVideoLength || 30,
+      currentScene: sceneIndex,
+      maxRecordTime: currentScene.sceneDuration || 30,
       currentScript: currentScene.scriptLine || '',
-      sceneProgress: scenes.length > 0 ? 1 / scenes.length : 0,
+      sceneProgress: scenes.length > 0 ? (sceneIndex + 1) / scenes.length : 0,
       // 九宫格网格显示
       gridOverlay: currentScene.screenGridOverlay || [],
       gridLabels: currentScene.screenGridOverlayLabels || [],
@@ -235,120 +245,158 @@ Page({
 
   // 保存录制的视频
   saveRecordedVideo(tempPath) {
-    const currentScene = this.data.currentScene
+    const sceneIndex = this.data.sceneIndex || 0
+    const sceneNumber = this.data.sceneNumber || 1
     const template = this.data.selectedTemplate
     
     const videoData = {
-      sceneNumber: currentScene + 1,
-      sceneTitle: template.scenes[currentScene].sceneTitle,
+      sceneNumber: sceneNumber,
+      sceneTitle: template.scenes[sceneIndex].sceneTitle,
       tempPath: tempPath,
       duration: this.data.recordTime,
       timestamp: Date.now()
     }
     
-    const recordedVideos = [...this.data.recordedVideos]
-    recordedVideos[currentScene] = videoData
-    
     this.setData({ 
-      recordedVideos,
+      currentRecording: videoData,
       showRecordingCompleteModal: true
     })
   },
 
-  // 下一个场景
-  nextScene() {
-    const currentScene = this.data.currentScene + 1
-    const template = this.data.selectedTemplate
-    
-    if (currentScene < template.scenes.length) {
-      const scene = template.scenes[currentScene]
-      this.setData({
-        currentScene,
-        currentScript: scene.scriptLine || '',
-        maxRecordTime: scene.sceneDuration || 30,
-        cameraPosition: this.getCameraPosition(scene.personPosition),
-        // 更新九宫格
-        gridOverlay: scene.screenGridOverlay || [],
-        gridLabels: scene.screenGridOverlayLabels || [],
-        // 更新指导信息
-        backgroundInstructions: scene.backgroundInstructions || '',
-        cameraInstructions: scene.specificCameraInstructions || '',
-        movementInstructions: scene.movementInstructions || ''
-      })
-      
+  // 提交当前场景
+  submitCurrentScene() {
+    const recording = this.data.currentRecording
+    if (!recording) {
       wx.showToast({
-        title: `场景 ${currentScene + 1}: ${scene.sceneTitle || '录制'}`,
-        icon: 'none'
-      })
-    }
-  },
-
-  // 上一个场景
-  prevScene() {
-    const currentScene = Math.max(0, this.data.currentScene - 1)
-    const template = this.data.selectedTemplate
-    const scene = template.scenes[currentScene]
-    
-    this.setData({
-      currentScene,
-      currentScript: scene.scriptLine || '',
-      maxRecordTime: scene.sceneDuration || 30,
-      cameraPosition: this.getCameraPosition(scene.personPosition),
-      // 更新九宫格
-      gridOverlay: scene.screenGridOverlay || [],
-      gridLabels: scene.screenGridOverlayLabels || [],
-      // 更新指导信息
-      backgroundInstructions: scene.backgroundInstructions || '',
-      cameraInstructions: scene.specificCameraInstructions || '',
-      movementInstructions: scene.movementInstructions || ''
-    })
-    
-  },
-
-  // 完成录制
-  finishRecording() {
-    const recordedVideos = this.data.recordedVideos
-    
-    if (recordedVideos.length === 0) {
-      wx.showToast({
-        title: '请至少录制一个场景',
-        icon: 'none'
+        title: 'No recording to submit',
+        icon: 'error'
       })
       return
     }
+
+    wx.showLoading({ title: 'Uploading scene...' })
+    this.uploadSceneVideo(recording)
+  },
+
+  // 重录当前场景
+  retakeScene() {
+    this.setData({ 
+      showRecordingCompleteModal: false,
+      currentRecording: null,
+      recordTime: 0
+    })
+  },
+
+  // 上传场景视频
+  uploadSceneVideo(recording) {
+    const app = getApp()
+    var config = require('../../utils/config')
     
+    console.log('Starting scene upload:', {
+      url: config.api.baseUrl + '/content-creator/scenes/upload',
+      templateId: this.data.templateId,
+      userId: this.data.userId,
+      sceneNumber: recording.sceneNumber,
+      filePath: recording.tempPath
+    })
+    
+    wx.uploadFile({
+      url: config.api.baseUrl + '/content-creator/scenes/upload',
+      filePath: recording.tempPath,
+      name: 'file',
+      header: {
+        'Authorization': 'Bearer ' + wx.getStorageSync('access_token')
+      },
+      formData: {
+        templateId: this.data.templateId,
+        userId: this.data.userId,
+        sceneNumber: recording.sceneNumber,
+        sceneTitle: recording.sceneTitle || ('Scene ' + recording.sceneNumber)
+      },
+      success: (response) => {
+        console.log('Upload response:', {
+          statusCode: response.statusCode,
+          data: response.data,
+          header: response.header
+        })
+        
+        try {
+          var result = JSON.parse(response.data)
+          wx.hideLoading()
+
+          if (result.success) {
+            console.log('Upload successful, showing AI feedback')
+            // Show AI feedback if available
+            this.showAIFeedback(result)
+          } else {
+            console.error('Upload failed with message:', result.message)
+            wx.showToast({
+              title: result.message || 'Upload failed',
+              icon: 'error'
+            })
+          }
+        } catch (error) {
+          console.error('Error parsing response:', error, 'Raw response:', response.data)
+          wx.hideLoading()
+          wx.showToast({
+            title: 'Upload failed - Invalid response',
+            icon: 'error'
+          })
+        }
+      },
+      fail: (error) => {
+        console.error('Upload request failed:', error)
+        wx.hideLoading()
+        wx.showToast({
+          title: 'Network error: ' + (error.errMsg || 'Upload failed'),
+          icon: 'error'
+        })
+      }
+    })
+  },
+
+  // 显示AI反馈
+  showAIFeedback(submissionData) {
+    const similarity = Math.round((submissionData.similarityScore || 0) * 100)
+    const suggestions = submissionData.aiSuggestions || []
+    
+    let message = 'Scene uploaded successfully!\n\n'
+    message += 'Similarity Score: ' + similarity + '%\n'
+    
+    if (suggestions.length > 0) {
+      message += '\nAI Suggestions:\n'
+      for (var i = 0; i < suggestions.length; i++) {
+        message += '• ' + suggestions[i] + '\n'
+      }
+    }
+
     wx.showModal({
-      title: '录制完成',
-      content: '是否上传视频？',
+      title: 'AI Analysis Results',
+      content: message,
+      showCancel: true,
+      confirmText: 'Continue',
+      cancelText: 'Re-record',
       success: (res) => {
+        this.setData({ showRecordingCompleteModal: false })
+        
         if (res.confirm) {
-          this.uploadVideos()
+          this.returnToSceneSelection()
         } else {
-          wx.navigateBack()
+          // Allow re-recording
+          this.retakeScene()
         }
       }
     })
   },
 
-  // 上传视频
-  uploadVideos() {
-    wx.showLoading({ title: '上传中...' })
-    
-    const app = getApp()
-    const recordedVideos = this.data.recordedVideos
-    
-    // 模拟上传过程
-    setTimeout(() => {
-      wx.hideLoading()
-      wx.showToast({
-        title: '上传成功',
-        icon: 'success'
-      })
-      
-      setTimeout(() => {
-        wx.navigateBack()
-      }, 1500)
-    }, 2000)
+  // 返回场景选择页面
+  returnToSceneSelection() {
+    const returnPage = this.data.returnPage
+    if (returnPage === 'scene-selection') {
+      wx.navigateBack({ delta: 1 })
+    } else {
+      wx.switchTab({ url: '/pages/templates/templates' })
+    }
   },
 
   // 切换相机
@@ -375,121 +423,18 @@ Page({
     this.setData({ showScriptSidebar: !this.data.showScriptSidebar })
   },
 
-  // 重录当前场景
+  // 重录当前场景（从模态框调用）
   retakeCurrentScene() {
     this.setData({ showRecordingCompleteModal: false })
-    this.deleteCurrentScene()
+    this.retakeScene()
   },
 
-  // 继续下一场景
-  continueToNextScene() {
+  // 提交场景（从模态框调用）
+  submitScene() {
     this.setData({ showRecordingCompleteModal: false })
-    this.nextScene()
+    this.submitCurrentScene()
   },
 
-  // 完成所有录制
-  finishAllRecording() {
-    this.setData({ showRecordingCompleteModal: false })
-    this.submitAllVideos()
-  },
-
-  // 重试上传
-  retryUpload() {
-    const uploadData = this.data.pendingUploadData
-    if (!uploadData) {
-      wx.showToast({
-        title: '没有待上传的数据',
-        icon: 'none'
-      })
-      return
-    }
-
-    this.setData({ showUploadFailureModal: false })
-    wx.showLoading({ title: '正在重试上传...' })
-    this.performUpload(uploadData)
-  },
-
-  // 下载视频到本地
-  downloadVideoToLocal() {
-    const uploadData = this.data.pendingUploadData
-    if (!uploadData || !uploadData.filePath) {
-      wx.showToast({
-        title: '没有可下载的视频',
-        icon: 'none'
-      })
-      return
-    }
-
-    wx.showLoading({ title: '准备下载...' })
-
-    // 获取当前录制的所有视频
-    const { recordedVideos } = this.data
-    const validVideos = recordedVideos.filter(video => video && video.tempPath)
-
-    if (validVideos.length === 0) {
-      wx.hideLoading()
-      wx.showToast({
-        title: '没有录制的视频',
-        icon: 'none'
-      })
-      return
-    }
-
-    // 逐个保存视频到相册
-    this.saveVideosToAlbum(validVideos, 0)
-  },
-
-  // 递归保存视频到相册
-  saveVideosToAlbum(videos, index) {
-    if (index >= videos.length) {
-      wx.hideLoading()
-      this.setData({ showUploadFailureModal: false })
-      wx.showToast({
-        title: `已保存 ${videos.length} 个视频到相册`,
-        icon: 'success',
-        duration: 3000
-      })
-      return
-    }
-
-    const video = videos[index]
-    wx.saveVideoToPhotosAlbum({
-      filePath: video.tempPath,
-      success: () => {
-        console.log(`视频 ${index + 1} 保存成功:`, video.sceneTitle)
-        // 继续保存下一个视频
-        this.saveVideosToAlbum(videos, index + 1)
-      },
-      fail: (err) => {
-        console.error(`视频 ${index + 1} 保存失败:`, err)
-        
-        if (err.errMsg.includes('auth deny')) {
-          wx.hideLoading()
-          wx.showModal({
-            title: '需要相册权限',
-            content: '请在设置中允许访问相册，以便保存录制的视频',
-            confirmText: '去设置',
-            success: (res) => {
-              if (res.confirm) {
-                wx.openSetting({
-                  success: (settingRes) => {
-                    if (settingRes.authSetting['scope.writePhotosAlbum']) {
-                      // 重新尝试保存
-                      wx.showLoading({ title: '继续保存...' })
-                      this.saveVideosToAlbum(videos, index)
-                    }
-                  }
-                })
-              }
-            }
-          })
-        } else {
-          // 跳过失败的视频，继续保存下一个
-          this.saveVideosToAlbum(videos, index + 1)
-        }
-      }
-    })
-  },
 
   // 返回上一页
   goBack() {
@@ -500,218 +445,9 @@ Page({
       this.stopRecording()
     }
     
-    // 返回上一页
-    wx.navigateBack({
-      delta: 1,
-      success: () => {
-        console.log('返回成功')
-      },
-      fail: (err) => {
-        console.error('返回失败:', err)
-        // 如果返回失败，跳转到模板页面
-        wx.switchTab({
-          url: '/pages/templates/templates'
-        })
-      }
-    })
+    this.returnToSceneSelection()
   },
 
-  // 删除当前场景重录
-  deleteCurrentScene() {
-    const currentScene = this.data.currentScene
-    console.log(`删除场景 ${currentScene + 1} 的录制`)
-    
-    wx.showModal({
-      title: '确认删除',
-      content: `确定要删除场景 ${currentScene + 1} 的录制吗？`,
-      success: (res) => {
-        if (res.confirm) {
-          const recordedVideos = [...this.data.recordedVideos]
-          recordedVideos[currentScene] = null
-          
-          this.setData({
-            recordedVideos,
-            recordTime: 0
-          })
-          
-          wx.showToast({
-            title: '已删除，可重新录制',
-            icon: 'success'
-          })
-        }
-      }
-    })
-  },
-
-  // 提交所有视频
-  submitAllVideos() {
-    console.log('提交所有录制的视频')
-    
-    // 检查是否所有场景都已录制
-    const { recordedVideos, selectedTemplate } = this.data
-    const totalScenes = selectedTemplate.scenes.length
-    const recordedCount = recordedVideos.filter(video => video).length
-    
-    if (recordedCount < totalScenes) {
-      wx.showModal({
-        title: '未完成录制',
-        content: `还有 ${totalScenes - recordedCount} 个场景未录制，确定要提交吗？`,
-        success: (res) => {
-          if (res.confirm) {
-            this.uploadAndSubmitVideos()
-          }
-        }
-      })
-    } else {
-      this.uploadAndSubmitVideos()
-    }
-  },
-
-  // 上传并提交视频
-  uploadAndSubmitVideos() {
-    wx.showLoading({ title: '正在提交视频...' })
-    
-    const { recordedVideos, selectedTemplate } = this.data
-    const validVideos = recordedVideos.filter(video => video)
-    
-    if (validVideos.length === 0) {
-      wx.hideLoading()
-      wx.showToast({
-        title: '没有录制的视频',
-        icon: 'none'
-      })
-      return
-    }
-
-    // 获取用户信息
-    const app = getApp()
-    const userInfo = app.globalData.userInfo
-    
-    if (!userInfo) {
-      wx.hideLoading()
-      wx.showToast({
-        title: '用户信息不存在',
-        icon: 'none'
-      })
-      return
-    }
-
-    // 合并所有视频并上传
-    this.mergeAndUploadVideos(validVideos, selectedTemplate, userInfo)
-  },
-
-  // 合并并上传视频
-  mergeAndUploadVideos(videos, template, userInfo) {
-    // 这里应该调用视频合并API，暂时模拟上传第一个视频
-    const firstVideo = videos[0]
-    console.log('准备上传的视频信息:', {
-      videosCount: videos.length,
-      firstVideo: firstVideo,
-      template: template.templateTitle,
-      user: userInfo.id
-    })
-    
-    // 检查视频路径是否有效
-    if (!firstVideo || !firstVideo.tempPath) {
-      wx.showToast({
-        title: '没有可上传的视频文件',
-        icon: 'none'
-      })
-      return
-    }
-    
-    // 保存上传数据以便重试
-    const uploadData = {
-      videos: videos,
-      template: template,
-      userInfo: userInfo,
-      filePath: firstVideo.tempPath  // 使用 tempPath 而不是整个对象
-    }
-    
-    this.setData({ pendingUploadData: uploadData })
-    
-    this.performUpload(uploadData)
-  },
-
-  // 执行实际的上传操作
-  performUpload(uploadData) {
-    const { template, userInfo, filePath } = uploadData
-    
-    console.log('开始上传视频:', {
-      filePath: filePath,
-      templateId: template.id,
-      userId: userInfo.id,
-      url: 'https://matrix-ads-backend.onrender.com/content-creator/videos/upload'
-    })
-    
-    wx.uploadFile({
-      url: 'https://matrix-ads-backend.onrender.com/content-creator/videos/upload',
-      filePath: filePath,
-      name: 'file',  // 修正：使用与web端相同的字段名
-      header: {
-        'Authorization': `Bearer ${wx.getStorageSync('access_token')}`
-      },
-      formData: {
-        templateId: template.id,
-        userId: userInfo.id,
-        requestApproval: 'true'  // 修正：添加与web端相同的字段
-      },
-      success: (res) => {
-        console.log('视频上传响应完整信息:', {
-          statusCode: res.statusCode,
-          data: res.data,
-          header: res.header
-        })
-        wx.hideLoading()
-        
-        if (res.statusCode === 200) {
-          // 上传成功，清除待上传数据
-          this.setData({ pendingUploadData: null })
-          
-          wx.showToast({
-            title: '提交成功！',
-            icon: 'success',
-            duration: 2000
-          })
-          
-          // 2秒后返回模板页面
-          setTimeout(() => {
-            wx.switchTab({
-              url: '/pages/templates/templates'
-            })
-          }, 2000)
-        } else {
-          // 上传失败，显示失败弹窗
-          console.error('上传失败详细信息:', {
-            statusCode: res.statusCode,
-            responseData: res.data,
-            responseHeaders: res.header
-          })
-          this.showUploadFailure(`服务器响应错误 (${res.statusCode})`, res.data || '未知错误')
-        }
-      },
-      fail: (err) => {
-        console.error('视频上传网络失败完整信息:', {
-          errMsg: err.errMsg,
-          errno: err.errno,
-          errCode: err.errCode,
-          error: err
-        })
-        wx.hideLoading()
-        
-        // 显示上传失败弹窗
-        this.showUploadFailure('网络错误', err.errMsg || '请检查网络连接')
-      }
-    })
-  },
-
-  // 显示上传失败弹窗
-  showUploadFailure(errorType, errorDetail) {
-    this.setData({
-      showUploadFailureModal: true,
-      uploadErrorMessage: `${errorType}: ${errorDetail}`
-    })
-  },
 
   // 开始计时器
   startTimer() {

@@ -1,0 +1,244 @@
+// pages/scene-selection/scene-selection.js
+/**
+ * Scene Selection Page
+ * Shows all scenes for a template and allows user to select which scene to record
+ */
+
+var app = getApp();
+var config = require('../../utils/config');
+
+Page({
+  data: {
+    templateId: '',
+    userId: '',
+    template: null,
+    scenes: [],
+    submissions: {},
+    progress: null,
+    loading: true
+  },
+
+  onLoad: function(options) {
+    var templateId = options.templateId;
+    var userId = options.userId;
+    
+    if (!templateId || !userId) {
+      wx.showToast({
+        title: 'Missing parameters',
+        icon: 'error'
+      });
+      return;
+    }
+
+    this.setData({
+      templateId: templateId,
+      userId: userId
+    });
+
+    this.loadTemplate();
+    this.loadProgress();
+  },
+
+  // Load template data
+  loadTemplate: function() {
+    var self = this;
+    
+    wx.showLoading({ title: 'Loading template...' });
+    
+    // First try to use template from globalData (similar to camera page)
+    var app = getApp();
+    if (app.globalData.currentTemplate && app.globalData.currentTemplate.id === this.data.templateId) {
+      console.log('Using template from globalData:', app.globalData.currentTemplate);
+      self.setData({
+        template: app.globalData.currentTemplate,
+        scenes: app.globalData.currentTemplate.scenes || [],
+        loading: false
+      });
+      wx.hideLoading();
+      return;
+    }
+    
+    // If not in globalData, fetch from API
+    wx.request({
+      url: config.API_BASE_URL + '/content-manager/templates/' + this.data.templateId,
+      method: 'GET',
+      header: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + wx.getStorageSync('access_token')
+      },
+      success: function(response) {
+        console.log('Template API response:', response);
+        if (response.data && response.data.scenes) {
+          console.log('Found scenes:', response.data.scenes.length);
+          self.setData({
+            template: response.data,
+            scenes: response.data.scenes,
+            loading: false
+          });
+        } else {
+          console.log('No scenes found in response:', response.data);
+          wx.showToast({
+            title: 'Template not found or no scenes',
+            icon: 'error'
+          });
+          self.setData({ loading: false });
+        }
+      },
+      fail: function(error) {
+        console.error('Error loading template:', error);
+        wx.showToast({
+          title: 'Failed to load template',
+          icon: 'error'
+        });
+        self.setData({ loading: false });
+      },
+      complete: function() {
+        wx.hideLoading();
+      }
+    });
+  },
+
+  // Load user's progress for this template
+  loadProgress: function() {
+    var self = this;
+    
+    wx.request({
+      url: config.API_BASE_URL + '/content-creator/scenes/template/' + this.data.templateId + '/user/' + this.data.userId,
+      method: 'GET',
+      header: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + wx.getStorageSync('access_token')
+      },
+      success: function(response) {
+        console.log('Load progress response:', response);
+        if (response.data && response.data.success) {
+          var sceneMap = response.data.sceneMap || {};
+          var progress = response.data.progress;
+          
+          self.setData({
+            submissions: sceneMap,
+            progress: progress
+          });
+        }
+      },
+      fail: function(error) {
+        console.error('Error loading progress:', error);
+      }
+    });
+  },
+
+  // Navigate to camera for specific scene
+  recordScene: function(event) {
+    var sceneIndex = event.currentTarget.dataset.index;
+    var scene = this.data.scenes[sceneIndex];
+    
+    if (!scene) {
+      wx.showToast({
+        title: 'Scene not found',
+        icon: 'error'
+      });
+      return;
+    }
+
+    wx.navigateTo({
+      url: '/pages/camera/camera?templateId=' + this.data.templateId + 
+           '&userId=' + this.data.userId + 
+           '&sceneIndex=' + sceneIndex +
+           '&sceneNumber=' + (sceneIndex + 1) +
+           '&returnPage=scene-selection'
+    });
+  },
+
+  // View scene feedback/results
+  viewSceneFeedback: function(event) {
+    var sceneNumber = event.currentTarget.dataset.sceneNumber;
+    var submission = this.data.submissions[sceneNumber];
+    
+    if (!submission) {
+      wx.showToast({
+        title: 'No submission found',
+        icon: 'none'
+      });
+      return;
+    }
+
+    var message = 'Scene ' + sceneNumber + ' Status: ' + submission.status;
+    
+    if (submission.similarityScore) {
+      message += '\nSimilarity: ' + Math.round(submission.similarityScore * 100) + '%';
+    }
+    
+    if (submission.feedback && submission.feedback.length > 0) {
+      message += '\n\nFeedback:\n';
+      for (var i = 0; i < submission.feedback.length; i++) {
+        message += '• ' + submission.feedback[i] + '\n';
+      }
+    }
+
+    wx.showModal({
+      title: 'Scene Feedback',
+      content: message,
+      showCancel: true,
+      confirmText: 'Re-record',
+      cancelText: 'OK',
+      success: function(res) {
+        if (res.confirm) {
+          // Navigate to re-record
+          this.recordScene({ currentTarget: { dataset: { index: sceneNumber - 1 } } });
+        }
+      }.bind(this)
+    });
+  },
+
+  // Get scene status for display
+  getSceneStatus: function(sceneNumber) {
+    var submission = this.data.submissions[sceneNumber];
+    if (!submission) return 'not-submitted';
+    return submission.status;
+  },
+
+  // Get scene status color
+  getSceneStatusColor: function(status) {
+    switch (status) {
+      case 'approved': return '#10B981'; // green
+      case 'pending': return '#F59E0B';  // yellow
+      case 'rejected': return '#EF4444'; // red
+      default: return '#9CA3AF';         // gray
+    }
+  },
+
+  // View overall progress
+  viewProgress: function() {
+    var progress = this.data.progress;
+    if (!progress) {
+      wx.showToast({
+        title: 'No progress data',
+        icon: 'none'
+      });
+      return;
+    }
+
+    var message = 'Progress: ' + progress.approved + '/' + progress.totalScenes + ' scenes approved\n' +
+                   'Pending: ' + progress.pending + '\n' +
+                   'Completion: ' + Math.round(progress.completionPercentage) + '%';
+    
+    wx.showModal({
+      title: 'Template Progress',
+      content: message,
+      showCancel: false,
+      confirmText: 'OK'
+    });
+  },
+
+  // Navigate back to templates
+  goBack: function() {
+    wx.navigateBack({
+      delta: 1
+    });
+  },
+
+  onShow: function() {
+    // Reload progress when returning from camera
+    this.loadProgress();
+  }
+});

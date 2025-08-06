@@ -148,9 +148,9 @@ Page({
       // 保存选中的模板
       app.globalData.currentTemplate = template
       
-      // 跳转到录制页面
+      // 跳转到场景选择页面
       wx.navigateTo({
-        url: `/pages/camera/camera?templateId=${template.id}`
+        url: `/pages/scene-selection/scene-selection?templateId=${template.id}&userId=${app.globalData.userInfo.id}`
       })
     } else {
       wx.showToast({

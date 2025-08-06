@@ -168,9 +168,9 @@ Page({
     app.globalData.currentTemplate = template
     console.log('准备跳转到录制页面')
     
-    // 跳转到场景逐一录制页面
+    // 跳转到场景选择页面
     wx.navigateTo({
-      url: `/pages/scene-submission/scene-submission?templateId=${template.id}&userId=${app.globalData.userInfo.id}`,
+      url: `/pages/scene-selection/scene-selection?templateId=${template.id}&userId=${app.globalData.userInfo.id}`,
       success: () => {
         console.log('跳转到场景录制页面成功')
         wx.showToast({

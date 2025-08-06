@@ -1,0 +1,144 @@
+<!--pages/scene-selection/scene-selection.wxml-->
+<view class="scene-selection-container">
+  <!-- Header -->
+  <view class="header">
+    <view class="header-content">
+      <view class="back-button" bindtap="goBack">
+        <text class="icon-back">‹</text>
+      </view>
+      <view class="header-info">
+        <text class="template-title">{{template.templateTitle || 'Video Template'}}</text>
+        <text class="scene-count">{{scenes.length}} scenes to record</text>
+      </view>
+      <view class="progress-button" bindtap="viewProgress">
+        <text class="icon-progress">📊</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Loading State -->
+  <view class="loading-container" wx:if="{{loading}}">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">Loading scenes...</text>
+  </view>
+
+  <!-- Template Info -->
+  <view class="template-info" wx:if="{{!loading && template}}">
+    <view class="info-card">
+      <text class="info-title">Template Instructions</text>
+      <text class="info-description">{{template.templateDescription || 'Record each scene following the specific instructions'}}</text>
+    </view>
+  </view>
+
+  <!-- Scenes List -->
+  <view class="scenes-container" wx:if="{{!loading}}">
+    <view class="scenes-header">
+      <text class="scenes-title">Scenes</text>
+      <text class="scenes-subtitle">Tap "Record" to start filming each scene</text>
+    </view>
+
+    <view class="scenes-list">
+      <view wx:for="{{scenes}}" wx:key="index" class="scene-item">
+        <!-- Scene Header -->
+        <view class="scene-header">
+          <view class="scene-number-container">
+            <view class="scene-number" 
+                  style="background-color: {{getSceneStatusColor(getSceneStatus(index + 1))}}">
+              {{index + 1}}
+            </view>
+            <text class="scene-status">{{getSceneStatus(index + 1)}}</text>
+          </view>
+          
+          <view class="scene-title-container">
+            <text class="scene-title">{{item.sceneTitle || 'Scene ' + (index + 1)}}</text>
+            <text class="scene-duration">{{item.sceneDuration}}s</text>
+          </view>
+        </view>
+
+        <!-- Scene Content -->
+        <view class="scene-content">
+          <!-- Script -->
+          <view class="scene-section">
+            <text class="section-label">Script:</text>
+            <text class="section-text">{{item.scriptLine}}</text>
+          </view>
+
+          <!-- Instructions Row -->
+          <view class="instructions-row">
+            <view class="instruction-item">
+              <text class="instruction-label">Position:</text>
+              <text class="instruction-text">{{item.personPosition}}</text>
+            </view>
+            <view class="instruction-item" wx:if="{{item.backgroundInstructions}}">
+              <text class="instruction-label">Background:</text>
+              <text class="instruction-text">{{item.backgroundInstructions}}</text>
+            </view>
+          </view>
+
+          <!-- Camera Instructions -->
+          <view class="scene-section" wx:if="{{item.specificCameraInstructions}}">
+            <text class="section-label">Camera:</text>
+            <text class="section-text">{{item.specificCameraInstructions}}</text>
+          </view>
+
+          <!-- Movement Instructions -->
+          <view class="scene-section" wx:if="{{item.movementInstructions}}">
+            <text class="section-label">Movement:</text>
+            <text class="section-text">{{item.movementInstructions}}</text>
+          </view>
+        </view>
+
+        <!-- Scene Actions -->
+        <view class="scene-actions">
+          <!-- Submission Status -->
+          <view class="submission-status" wx:if="{{submissions[index + 1]}}">
+            <view class="status-info">
+              <text class="status-label">Status: {{submissions[index + 1].status}}</text>
+              <text class="similarity-score" wx:if="{{submissions[index + 1].similarityScore}}">
+                Similarity: {{Math.round(submissions[index + 1].similarityScore * 100)}}%
+              </text>
+            </view>
+            <button class="feedback-button" 
+                    data-scene-number="{{index + 1}}"
+                    bindtap="viewSceneFeedback">
+              View Feedback
+            </button>
+          </view>
+
+          <!-- Record Button -->
+          <button class="record-button {{getSceneStatus(index + 1) === 'approved' ? 'completed' : ''}}"
+                  data-index="{{index}}"
+                  bindtap="recordScene">
+            <text class="record-icon">🎥</text>
+            <text class="record-text">
+              {{getSceneStatus(index + 1) === 'approved' ? 'Re-record' : 
+                getSceneStatus(index + 1) === 'pending' ? 'Re-record' :
+                getSceneStatus(index + 1) === 'rejected' ? 'Fix & Record' : 'Record'}}
+            </text>
+          </button>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Overall Progress -->
+  <view class="progress-summary" wx:if="{{!loading && progress}}">
+    <view class="progress-card">
+      <text class="progress-title">Overall Progress</text>
+      <view class="progress-stats">
+        <view class="stat-item">
+          <text class="stat-number">{{progress.approved}}</text>
+          <text class="stat-label">Approved</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-number">{{progress.pending}}</text>
+          <text class="stat-label">Pending</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-number">{{Math.round(progress.completionPercentage)}}%</text>
+          <text class="stat-label">Complete</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

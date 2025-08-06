@@ -4,6 +4,7 @@
     "pages/signup/signup",
     "pages/index/index",
     "pages/templates/templates",
+    "pages/scene-selection/scene-selection",
     "pages/camera/camera",
     "pages/scene-submission/scene-submission"
   ],
