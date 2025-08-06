@@ -92,15 +92,6 @@
               >
                 开始录制
               </button>
-              <button 
-                class="action-btn info-btn"
-                data-id="{{item.id}}"
-                bindtap="viewSubmission"
-                size="mini"
-                style="margin-left: 10rpx;"
-              >
-                查看提交
-              </button>
             </view>
             
             <view class="template-actions" wx:else>

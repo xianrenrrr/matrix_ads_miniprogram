@@ -45,7 +45,7 @@
           <view class="similarity-section" wx:if="{{submissions[index + 1].similarityScore}}">
             <text class="similarity-label">AI相似度:</text>
             <text class="similarity-value {{submissions[index + 1].similarityScore >= 0.85 ? 'high-score' : ''}}">
-              {{Math.round(submissions[index + 1].similarityScore * 100)}}%
+              {{getSimilarityScore(index + 1)}}%
             </text>
             <!-- Green checkmark for high scores -->
             <text class="score-indicator" wx:if="{{submissions[index + 1].similarityScore >= 0.85}}">✓</text>
@@ -92,7 +92,7 @@
           <text class="stat-label">待审核</text>
         </view>
         <view class="stat-item">
-          <text class="stat-number">{{Math.round(progress.completionPercentage)}}%</text>
+          <text class="stat-number">{{Math.round(progress.completionPercentage || 0)}}%</text>
           <text class="stat-label">完成度</text>
         </view>
       </view>

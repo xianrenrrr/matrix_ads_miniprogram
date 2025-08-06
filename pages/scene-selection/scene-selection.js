@@ -98,31 +98,64 @@ Page({
     });
   },
 
-  // Load user's progress for this template
+  // Load user's progress for this template using submittedVideos collection
   loadProgress: function() {
     var self = this;
     
+    console.log('Loading progress for templateId:', this.data.templateId, 'userId:', this.data.userId);
+    
+    // Create composite video ID: userId_templateId
+    var compositeVideoId = this.data.userId + '_' + this.data.templateId;
+    console.log('Using composite video ID:', compositeVideoId);
+    
     wx.request({
-      url: config.API_BASE_URL + '/content-creator/scenes/template/' + this.data.templateId + '/user/' + this.data.userId,
+      url: config.API_BASE_URL + '/content-creator/scenes/submitted-videos/' + compositeVideoId,
       method: 'GET',
       header: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + wx.getStorageSync('access_token')
       },
       success: function(response) {
-        console.log('Load progress response:', response);
-        if (response.data && response.data.success) {
-          var sceneMap = response.data.sceneMap || {};
-          var progress = response.data.progress;
+        console.log('Load submitted video response:', response);
+        if (response.statusCode === 200 && response.data) {
+          var videoData = response.data;
+          var scenes = videoData.scenes || {};
+          var progress = videoData.progress || null;
+          
+          console.log('Scenes data:', scenes);
+          console.log('Progress data:', progress);
+          
+          // Convert scenes object to sceneMap format (keyed by scene number)
+          var sceneMap = {};
+          Object.keys(scenes).forEach(function(sceneKey) {
+            var scene = scenes[sceneKey];
+            if (scene && scene.sceneNumber) {
+              sceneMap[scene.sceneNumber] = scene;
+            }
+          });
+          
+          console.log('Converted scene map:', sceneMap);
           
           self.setData({
             submissions: sceneMap,
             progress: progress
           });
+        } else {
+          console.log('No submission data found or API error');
+          // Set empty data for new template (no submissions yet)
+          self.setData({
+            submissions: {},
+            progress: null
+          });
         }
       },
       fail: function(error) {
-        console.error('Error loading progress:', error);
+        console.error('Error loading submitted video:', error);
+        // Set empty data - this is normal for first-time users
+        self.setData({
+          submissions: {},
+          progress: null
+        });
       }
     });
   },
@@ -195,6 +228,13 @@ Page({
     var submission = this.data.submissions[sceneNumber];
     if (!submission) return 'not-submitted';
     return submission.status;
+  },
+
+  // Get similarity score as percentage
+  getSimilarityScore: function(sceneNumber) {
+    var submission = this.data.submissions[sceneNumber];
+    if (!submission || !submission.similarityScore) return 0;
+    return Math.round(submission.similarityScore * 100);
   },
 
   // Get scene status color
