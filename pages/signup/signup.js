@@ -1,6 +1,4 @@
 // pages/signup/signup.js
-const locationData = require('../../utils/locationData.js')
-
 Page({
   data: {
     inviteInfo: {},
@@ -9,14 +7,9 @@ Page({
       phone: '',
       password: '',
       confirmPassword: '',
-      province: '',
       city: ''
     },
-    loading: false,
-    
-    // 位置选择相关
-    provinces: locationData.provinces,
-    provinceIndex: -1
+    loading: false
   },
 
   onLoad(options) {
@@ -77,25 +70,9 @@ Page({
     this.setData({ 'formData.city': e.detail.value })
   },
 
-  // 省份选择
-  onProvinceChange(e) {
-    const index = e.detail.value
-    const selectedProvince = this.data.provinces[index]
-    
-    this.setData({
-      provinceIndex: index,
-      'formData.province': selectedProvince.name
-    })
-  },
-
-  onProvinceSelectorCancel() {
-    // 省份选择取消
-    console.log('省份选择取消')
-  },
-
   // 验证表单
   validateForm() {
-    const { username, phone, password, confirmPassword, province, city } = this.data.formData
+    const { username, phone, password, confirmPassword, city } = this.data.formData
     
     if (!username.trim()) {
       wx.showToast({ title: '请输入用户名', icon: 'none' })
@@ -118,13 +95,8 @@ Page({
       return false
     }
     
-    if (!province.trim()) {
-      wx.showToast({ title: '请选择省份', icon: 'none' })
-      return false
-    }
-    
     if (!city.trim()) {
-      wx.showToast({ title: '请选择城市', icon: 'none' })
+      wx.showToast({ title: '请输入城市', icon: 'none' })
       return false
     }
     
@@ -162,7 +134,6 @@ Page({
       inviteToken: inviteInfo.inviteToken || inviteInfo.token,
       username: formData.username.trim(),
       phone: formData.phone.trim(),
-      province: formData.province.trim(),
       city: formData.city.trim(),
       password: formData.password,
       role: 'content_creator'

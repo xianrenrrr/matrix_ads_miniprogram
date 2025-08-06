@@ -3,7 +3,6 @@
   <!-- 搜索栏 -->
   <view class="search-section">
     <view class="search-box">
-      <text class="search-icon">🔍</text>
       <input 
         type="text"
         class="search-input"
@@ -25,7 +24,6 @@
   <!-- 模板列表 -->
   <view wx:else class="templates-list">
     <view wx:if="{{templates.length === 0}}" class="empty-state">
-      <text class="empty-icon">📝</text>
       <text class="empty-title">暂无模板</text>
       <text class="empty-desc">请联系管理员分配模板或在网页端订阅</text>
     </view>
@@ -114,6 +112,6 @@
 
   <!-- 底部提示 -->
   <view class="bottom-tips">
-    <text class="tip-text">💡 在网页端可以订阅更多模板</text>
+    <text class="tip-text">在网页端可以订阅更多模板</text>
   </view>
 </view>

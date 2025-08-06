@@ -1,12 +1,11 @@
 {
   "pages": [
     "pages/login/login",
-    "pages/signup/signup",
+    "pages/signup/signup", 
     "pages/index/index",
     "pages/templates/templates",
     "pages/scene-selection/scene-selection",
-    "pages/camera/camera",
-    "pages/scene-submission/scene-submission"
+    "pages/camera/camera"
   ],
   "window": {
     "backgroundTextStyle": "dark",
@@ -47,5 +46,5 @@
     "request": 60000,
     "uploadFile": 60000
   },
-  "debug": true
+  "debug": false
 }

@@ -361,24 +361,5 @@ Page({
       content: '请联系管理员重置密码，或在网页端进行密码重置',
       showCancel: false
     })
-  },
-
-  // 注册账号
-  handleRegister() {
-    wx.showModal({
-      title: '账号注册',
-      content: '请在网页端进行账号注册，注册成功后即可使用小程序',
-      confirmText: '知道了',
-      showCancel: false
-    })
-  },
-
-  // 显示帮助信息
-  showHelp() {
-    wx.showModal({
-      title: '注册帮助',
-      content: '用户名密码登录：使用已有的账号信息登录\n\n扫码注册：扫描管理员生成的邀请二维码进行快速注册加入团队',
-      showCancel: false
-    })
   }
 })

@@ -3,7 +3,6 @@
   <!-- 头部信息 -->
   <view class="header-section">
     <view class="logo-container">
-      <text class="logo-icon">🎬</text>
       <text class="logo-text">Matrix Ads</text>
     </view>
     <text class="subtitle">创建您的账户</text>
@@ -50,31 +49,13 @@
       </view>
     </view>
 
-    <!-- 省份选择器 -->
-    <view class="form-group">
-      <picker 
-        mode="selector"
-        range="{{provinces}}"
-        range-key="name"
-        bindchange="onProvinceChange"
-        bindcancel="onProvinceSelectorCancel"
-      >
-        <view class="selector-group">
-          <text class="selector-text {{formData.province ? '' : 'placeholder'}}">
-            {{formData.province || '请选择省份'}}
-          </text>
-          <text class="selector-arrow">▼</text>
-        </view>
-      </picker>
-    </view>
-
     <!-- 城市输入 -->
     <view class="form-group">
       <view class="input-group">
         <input 
           type="text"
           class="form-input"
-          placeholder="请输入城市名称"
+          placeholder="请输入所在城市"
           placeholder-class="input-placeholder"
           value="{{formData.city}}"
           bindinput="onCityInput"

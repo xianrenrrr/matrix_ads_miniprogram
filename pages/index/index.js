@@ -167,6 +167,21 @@ Page({
   },
 
 
+  // 查看全部模板
+  viewAllTemplates() {
+    if (!this.data.isLoggedIn) {
+      wx.showToast({
+        title: '请先登录',
+        icon: 'none'
+      })
+      return
+    }
+    
+    wx.switchTab({
+      url: '/pages/templates/templates'
+    })
+  },
+
   // 开始录制
   startRecording() {
     if (!this.data.isLoggedIn) {

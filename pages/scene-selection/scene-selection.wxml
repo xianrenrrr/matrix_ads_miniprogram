@@ -7,11 +7,11 @@
         <text class="icon-back">‹</text>
       </view>
       <view class="header-info">
-        <text class="template-title">{{template.templateTitle || 'Video Template'}}</text>
-        <text class="scene-count">{{scenes.length}} scenes to record</text>
+        <text class="template-title">{{template.templateTitle || '视频模板'}}</text>
+        <text class="scene-count">{{scenes.length}} 个场景待录制</text>
       </view>
       <view class="progress-button" bindtap="viewProgress">
-        <text class="icon-progress">📊</text>
+        <text class="progress-text">进度</text>
       </view>
     </view>
   </view>
@@ -19,22 +19,22 @@
   <!-- Loading State -->
   <view class="loading-container" wx:if="{{loading}}">
     <view class="loading-spinner"></view>
-    <text class="loading-text">Loading scenes...</text>
+    <text class="loading-text">加载场景中...</text>
   </view>
 
   <!-- Template Info -->
   <view class="template-info" wx:if="{{!loading && template}}">
     <view class="info-card">
-      <text class="info-title">Template Instructions</text>
-      <text class="info-description">{{template.templateDescription || 'Record each scene following the specific instructions'}}</text>
+      <text class="info-title">模板说明</text>
+      <text class="info-description">{{template.templateDescription || '请按照具体说明录制每个场景'}}</text>
     </view>
   </view>
 
   <!-- Scenes List -->
   <view class="scenes-container" wx:if="{{!loading}}">
     <view class="scenes-header">
-      <text class="scenes-title">Scenes</text>
-      <text class="scenes-subtitle">Tap "Record" to start filming each scene</text>
+      <text class="scenes-title">场景</text>
+      <text class="scenes-subtitle">点击"录制"开始拍摄每个场景</text>
     </view>
 
     <view class="scenes-list">
@@ -50,8 +50,8 @@
           </view>
           
           <view class="scene-title-container">
-            <text class="scene-title">{{item.sceneTitle || 'Scene ' + (index + 1)}}</text>
-            <text class="scene-duration">{{item.sceneDuration}}s</text>
+            <text class="scene-title">{{item.sceneTitle || '场景 ' + (index + 1)}}</text>
+            <text class="scene-duration">{{item.sceneDuration}}秒</text>
           </view>
         </view>
 
@@ -59,31 +59,31 @@
         <view class="scene-content">
           <!-- Script -->
           <view class="scene-section">
-            <text class="section-label">Script:</text>
+            <text class="section-label">台词:</text>
             <text class="section-text">{{item.scriptLine}}</text>
           </view>
 
           <!-- Instructions Row -->
           <view class="instructions-row">
             <view class="instruction-item">
-              <text class="instruction-label">Position:</text>
+              <text class="instruction-label">位置:</text>
               <text class="instruction-text">{{item.personPosition}}</text>
             </view>
             <view class="instruction-item" wx:if="{{item.backgroundInstructions}}">
-              <text class="instruction-label">Background:</text>
+              <text class="instruction-label">背景:</text>
               <text class="instruction-text">{{item.backgroundInstructions}}</text>
             </view>
           </view>
 
           <!-- Camera Instructions -->
           <view class="scene-section" wx:if="{{item.specificCameraInstructions}}">
-            <text class="section-label">Camera:</text>
+            <text class="section-label">拍摄:</text>
             <text class="section-text">{{item.specificCameraInstructions}}</text>
           </view>
 
           <!-- Movement Instructions -->
           <view class="scene-section" wx:if="{{item.movementInstructions}}">
-            <text class="section-label">Movement:</text>
+            <text class="section-label">动作:</text>
             <text class="section-text">{{item.movementInstructions}}</text>
           </view>
         </view>
@@ -93,28 +93,26 @@
           <!-- Submission Status -->
           <view class="submission-status" wx:if="{{submissions[index + 1]}}">
             <view class="status-info">
-              <text class="status-label">Status: {{submissions[index + 1].status}}</text>
+              <text class="status-label">状态: {{submissions[index + 1].status}}</text>
               <text class="similarity-score" wx:if="{{submissions[index + 1].similarityScore}}">
-                Similarity: {{Math.round(submissions[index + 1].similarityScore * 100)}}%
+                相似度: {{Math.round(submissions[index + 1].similarityScore * 100)}}%
               </text>
             </view>
             <button class="feedback-button" 
                     data-scene-number="{{index + 1}}"
                     bindtap="viewSceneFeedback">
-              View Feedback
+              查看反馈
             </button>
           </view>
 
           <!-- Record Button -->
           <button class="record-button {{getSceneStatus(index + 1) === 'approved' ? 'completed' : ''}}"
                   data-index="{{index}}"
-                  bindtap="recordScene">
-            <text class="record-icon">🎥</text>
-            <text class="record-text">
-              {{getSceneStatus(index + 1) === 'approved' ? 'Re-record' : 
-                getSceneStatus(index + 1) === 'pending' ? 'Re-record' :
-                getSceneStatus(index + 1) === 'rejected' ? 'Fix & Record' : 'Record'}}
-            </text>
+                  bindtap="recordScene"
+                  size="mini">
+            {{getSceneStatus(index + 1) === 'approved' ? '重新录制' : 
+              getSceneStatus(index + 1) === 'pending' ? '重新录制' :
+              getSceneStatus(index + 1) === 'rejected' ? '修改重录' : '录制'}}
           </button>
         </view>
       </view>
@@ -124,19 +122,19 @@
   <!-- Overall Progress -->
   <view class="progress-summary" wx:if="{{!loading && progress}}">
     <view class="progress-card">
-      <text class="progress-title">Overall Progress</text>
+      <text class="progress-title">总体进度</text>
       <view class="progress-stats">
         <view class="stat-item">
           <text class="stat-number">{{progress.approved}}</text>
-          <text class="stat-label">Approved</text>
+          <text class="stat-label">已通过</text>
         </view>
         <view class="stat-item">
           <text class="stat-number">{{progress.pending}}</text>
-          <text class="stat-label">Pending</text>
+          <text class="stat-label">待审核</text>
         </view>
         <view class="stat-item">
           <text class="stat-number">{{Math.round(progress.completionPercentage)}}%</text>
-          <text class="stat-label">Complete</text>
+          <text class="stat-label">完成度</text>
         </view>
       </view>
     </view>
