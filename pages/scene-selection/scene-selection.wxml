@@ -1,20 +1,5 @@
 <!--pages/scene-selection/scene-selection.wxml-->
 <view class="scene-selection-container">
-  <!-- Header -->
-  <view class="header">
-    <view class="header-content">
-      <view class="back-button" bindtap="goBack">
-        <text class="icon-back">‹</text>
-      </view>
-      <view class="header-info">
-        <text class="template-title">{{template.templateTitle || '视频模板'}}</text>
-        <text class="scene-count">{{scenes.length}} 个场景待录制</text>
-      </view>
-      <view class="progress-button" bindtap="viewProgress">
-        <text class="progress-text">进度</text>
-      </view>
-    </view>
-  </view>
 
   <!-- Loading State -->
   <view class="loading-container" wx:if="{{loading}}">
@@ -51,60 +36,34 @@
           
           <view class="scene-title-container">
             <text class="scene-title">{{item.sceneTitle || '场景 ' + (index + 1)}}</text>
-            <text class="scene-duration">{{item.sceneDuration}}秒</text>
           </view>
         </view>
 
         <!-- Scene Content -->
-        <view class="scene-content">
-          <!-- Script -->
-          <view class="scene-section">
-            <text class="section-label">台词:</text>
-            <text class="section-text">{{item.scriptLine}}</text>
+        <view class="scene-content" wx:if="{{submissions[index + 1]}}">
+          <!-- AI Similarity Score -->
+          <view class="similarity-section" wx:if="{{submissions[index + 1].similarityScore}}">
+            <text class="similarity-label">AI相似度:</text>
+            <text class="similarity-value {{submissions[index + 1].similarityScore >= 0.85 ? 'high-score' : ''}}">
+              {{Math.round(submissions[index + 1].similarityScore * 100)}}%
+            </text>
+            <!-- Green checkmark for high scores -->
+            <text class="score-indicator" wx:if="{{submissions[index + 1].similarityScore >= 0.85}}">✓</text>
           </view>
 
-          <!-- Instructions Row -->
-          <view class="instructions-row">
-            <view class="instruction-item">
-              <text class="instruction-label">位置:</text>
-              <text class="instruction-text">{{item.personPosition}}</text>
+          <!-- AI Suggestions -->
+          <view class="suggestions-section" wx:if="{{submissions[index + 1].aiSuggestions && submissions[index + 1].aiSuggestions.length > 0}}">
+            <text class="suggestions-label">AI建议:</text>
+            <view class="suggestions-list">
+              <text wx:for="{{submissions[index + 1].aiSuggestions}}" wx:key="index" class="suggestion-item">
+                • {{item}}
+              </text>
             </view>
-            <view class="instruction-item" wx:if="{{item.backgroundInstructions}}">
-              <text class="instruction-label">背景:</text>
-              <text class="instruction-text">{{item.backgroundInstructions}}</text>
-            </view>
-          </view>
-
-          <!-- Camera Instructions -->
-          <view class="scene-section" wx:if="{{item.specificCameraInstructions}}">
-            <text class="section-label">拍摄:</text>
-            <text class="section-text">{{item.specificCameraInstructions}}</text>
-          </view>
-
-          <!-- Movement Instructions -->
-          <view class="scene-section" wx:if="{{item.movementInstructions}}">
-            <text class="section-label">动作:</text>
-            <text class="section-text">{{item.movementInstructions}}</text>
           </view>
         </view>
 
         <!-- Scene Actions -->
         <view class="scene-actions">
-          <!-- Submission Status -->
-          <view class="submission-status" wx:if="{{submissions[index + 1]}}">
-            <view class="status-info">
-              <text class="status-label">状态: {{submissions[index + 1].status}}</text>
-              <text class="similarity-score" wx:if="{{submissions[index + 1].similarityScore}}">
-                相似度: {{Math.round(submissions[index + 1].similarityScore * 100)}}%
-              </text>
-            </view>
-            <button class="feedback-button" 
-                    data-scene-number="{{index + 1}}"
-                    bindtap="viewSceneFeedback">
-              查看反馈
-            </button>
-          </view>
-
           <!-- Record Button -->
           <button class="record-button {{getSceneStatus(index + 1) === 'approved' ? 'completed' : ''}}"
                   data-index="{{index}}"
