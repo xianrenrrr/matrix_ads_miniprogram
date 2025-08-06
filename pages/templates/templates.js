@@ -188,6 +188,64 @@ Page({
     })
   },
 
+  // 查看提交的场景
+  viewSubmission(e) {
+    const templateId = e.currentTarget.dataset.id
+    const app = getApp()
+    const userId = app.globalData.userInfo.id
+    const compositeVideoId = `${userId}_${templateId}`
+    
+    wx.showLoading({ title: '加载提交信息...' })
+    
+    // 获取提交的场景信息
+    wx.request({
+      url: `${app.globalData.apiBaseUrl}/content-creator/submitted-videos/${compositeVideoId}`,
+      method: 'GET',
+      header: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${wx.getStorageSync('access_token')}`
+      },
+      success: (res) => {
+        wx.hideLoading()
+        
+        if (res.statusCode === 200 && res.data && res.data.scenes) {
+          // 准备场景数据用于显示
+          const scenes = Object.values(res.data.scenes).map(scene => ({
+            sceneNumber: scene.sceneNumber,
+            sceneTitle: scene.sceneTitle,
+            status: scene.status,
+            similarityScore: scene.similarityScore ? Math.round(scene.similarityScore * 100) : 0,
+            aiSuggestions: scene.aiSuggestions || [],
+            submittedAt: scene.submittedAt
+          }))
+          
+          // 显示场景列表
+          wx.showModal({
+            title: '已提交场景',
+            content: scenes.map(s => 
+              `场景${s.sceneNumber}: ${s.sceneTitle}\n状态: ${s.status}\n相似度: ${s.similarityScore}%\nAI建议: ${s.aiSuggestions.join(', ') || '无'}`
+            ).join('\n\n'),
+            showCancel: false,
+            confirmText: '确定'
+          })
+        } else {
+          wx.showToast({
+            title: '暂无提交记录',
+            icon: 'none'
+          })
+        }
+      },
+      fail: (err) => {
+        wx.hideLoading()
+        console.error('获取提交信息失败:', err)
+        wx.showToast({
+          title: '获取失败',
+          icon: 'none'
+        })
+      }
+    })
+  },
+
 
   // 订阅模板
   subscribeTemplate(e) {

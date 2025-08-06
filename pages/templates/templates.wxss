@@ -326,6 +326,16 @@
   transform: scale(0.95);
 }
 
+.info-btn {
+  background-color: #2196F3;
+  color: white;
+}
+
+.info-btn:active {
+  background-color: #1976D2;
+  transform: scale(0.95);
+}
+
 /* 底部提示 */
 .bottom-tips {
   text-align: center;
