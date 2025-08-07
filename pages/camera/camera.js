@@ -316,7 +316,8 @@ Page({
       filePath: recording.tempPath,
       name: 'file',
       header: {
-        'Authorization': 'Bearer ' + wx.getStorageSync('access_token')
+        'Authorization': 'Bearer ' + wx.getStorageSync('access_token'),
+        'Accept-Language': 'zh-CN,zh;q=0.9'
       },
       formData: {
         templateId: this.data.templateId,
