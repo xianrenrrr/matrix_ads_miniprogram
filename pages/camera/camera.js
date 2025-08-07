@@ -1,6 +1,9 @@
 // pages/camera/camera.js
+const { t } = require('../../utils/translations')
+
 Page({
   data: {
+    t: t, // Translation function
     selectedTemplate: null,
     currentScene: 0,
     isRecording: false,
@@ -73,9 +76,10 @@ Page({
             },
             fail: () => {
               wx.showModal({
-                title: '需要相机权限',
-                content: '请在设置中开启相机权限以使用录制功能',
-                showCancel: false
+                title: t('cameraPermissionNeeded'),
+                content: t('cameraPermissionMessage'),
+                showCancel: false,
+                confirmText: t('cameraPermissionOk')
               })
             }
           })
@@ -104,7 +108,7 @@ Page({
     }
     
     // 如果没有找到，从API加载
-    wx.showLoading({ title: '加载模板中...' })
+    wx.showLoading({ title: t('loadingTemplate') })
     
     wx.request({
       url: `${app.globalData.apiBaseUrl}/content-creator/templates/${templateId}`,
@@ -119,7 +123,7 @@ Page({
           this.setupTemplate(res.data)
         } else {
           wx.showToast({
-            title: '模板加载失败',
+            title: t('templateNotFound'),
             icon: 'none'
           })
         }
@@ -127,7 +131,7 @@ Page({
       fail: (err) => {
         console.error('加载模板失败:', err)
         wx.showToast({
-          title: '网络错误',
+          title: t('networkError'),
           icon: 'none'
         })
       },
@@ -193,7 +197,7 @@ Page({
   startRecording() {
     if (!this.data.selectedTemplate) {
       wx.showToast({
-        title: '请先选择模板',
+        title: t('selectTemplate'),
         icon: 'none'
       })
       return
@@ -213,7 +217,7 @@ Page({
       fail: (err) => {
         console.error('录制失败', err)
         wx.showToast({
-          title: '录制失败',
+          title: t('recordingFailed'),
           icon: 'none'
         })
       }
@@ -268,13 +272,13 @@ Page({
     const recording = this.data.currentRecording
     if (!recording) {
       wx.showToast({
-        title: 'No recording to submit',
+        title: t('noRecordingToSubmit'),
         icon: 'error'
       })
       return
     }
 
-    wx.showLoading({ title: 'Uploading scene...' })
+    wx.showLoading({ title: t('uploadingScene') })
     this.uploadSceneVideo(recording)
   },
 
@@ -331,7 +335,7 @@ Page({
           } else {
             console.error('Upload failed with message:', result.message)
             wx.showToast({
-              title: result.message || 'Upload failed',
+              title: result.message || t('uploadFailed'),
               icon: 'error'
             })
           }
@@ -339,7 +343,7 @@ Page({
           console.error('Error parsing response:', error, 'Raw response:', response.data)
           wx.hideLoading()
           wx.showToast({
-            title: 'Upload failed - Invalid response',
+            title: t('uploadFailedInvalidResponse'),
             icon: 'error'
           })
         }
@@ -348,7 +352,7 @@ Page({
         console.error('Upload request failed:', error)
         wx.hideLoading()
         wx.showToast({
-          title: 'Network error: ' + (error.errMsg || 'Upload failed'),
+          title: t('networkErrorPrefix') + (error.errMsg || t('uploadFailed')),
           icon: 'error'
         })
       }
@@ -360,22 +364,22 @@ Page({
     const similarity = Math.round((submissionData.similarityScore || 0) * 100)
     const suggestions = submissionData.aiSuggestions || []
     
-    let message = 'Scene uploaded successfully!\n\n'
-    message += 'Similarity Score: ' + similarity + '%\n'
+    let message = t('sceneUploadSuccess') + '\n\n'
+    message += t('similarityScore') + ': ' + similarity + '%\n'
     
     if (suggestions.length > 0) {
-      message += '\nAI Suggestions:\n'
+      message += '\n' + t('aiSuggestions') + ':\n'
       for (var i = 0; i < suggestions.length; i++) {
         message += '• ' + suggestions[i] + '\n'
       }
     }
 
     wx.showModal({
-      title: 'AI Analysis Results',
+      title: t('aiAnalysisResults'),
       content: message,
       showCancel: true,
-      confirmText: 'Continue',
-      cancelText: 'Re-record',
+      confirmText: t('continueButton'),
+      cancelText: t('reRecordButton'),
       success: (res) => {
         this.setData({ showRecordingCompleteModal: false })
         
@@ -479,7 +483,7 @@ Page({
   onCameraError(e) {
     console.error('相机错误', e)
     wx.showToast({
-      title: '相机出现错误',
+      title: t('cameraError'),
       icon: 'none'
     })
   },

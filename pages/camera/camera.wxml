@@ -30,16 +30,16 @@
     <!-- 录制状态指示器 -->
     <view wx:if="{{isRecording}}" class="recording-indicator">
       <view class="recording-dot"></view>
-      <text class="recording-text">录制中</text>
+      <text class="recording-text">{{t('recording')}}</text>
     </view>
 
     <!-- 场景信息 -->
     <view wx:if="{{selectedTemplate}}" class="scene-info">
       <view class="scene-title">
-        Scene {{sceneNumber}}: {{selectedTemplate.scenes[sceneIndex].sceneTitle}}
+        {{t('scene')}} {{sceneNumber}}: {{selectedTemplate.scenes[sceneIndex].sceneTitle}}
       </view>
       <view class="scene-time">
-        {{recordTime}}s / {{selectedTemplate.scenes[sceneIndex].sceneDuration || maxRecordTime}}s
+        {{recordTime}}{{t('secondsShort')}} / {{selectedTemplate.scenes[sceneIndex].sceneDuration || maxRecordTime}}{{t('secondsShort')}}
       </view>
     </view>
 
@@ -70,9 +70,9 @@
     <view class="script-content">
       <text class="script-text">{{selectedTemplate.scenes[sceneIndex].scriptLine}}</text>
       <view class="script-details">
-        <text class="script-detail">📍 人物位置: {{selectedTemplate.scenes[sceneIndex].personPosition || '未指定'}}</text>
-        <text class="script-detail">🎬 动作指导: {{selectedTemplate.scenes[sceneIndex].movementInstructions || '无特殊要求'}}</text>
-        <text class="script-detail">📷 摄像要求: {{selectedTemplate.scenes[sceneIndex].specificCameraInstructions || '按模板拍摄'}}</text>
+        <text class="script-detail">📍 {{t('personPosition')}}: {{selectedTemplate.scenes[sceneIndex].personPosition || t('unspecified')}}</text>
+        <text class="script-detail">🎬 {{t('movementInstructions')}}: {{selectedTemplate.scenes[sceneIndex].movementInstructions || t('noSpecialRequirements')}}</text>
+        <text class="script-detail">📷 {{t('cameraInstructions')}}: {{selectedTemplate.scenes[sceneIndex].specificCameraInstructions || t('followTemplate')}}</text>
       </view>
     </view>
   </view>
@@ -106,18 +106,18 @@
   <view wx:if="{{showRecordingCompleteModal}}" class="recording-complete-overlay">
     <view class="recording-complete-modal">
       <view class="recording-complete-header">
-        <text class="recording-complete-title">Recording Complete</text>
+        <text class="recording-complete-title">{{t('recordingComplete')}}</text>
       </view>
       <view class="recording-complete-body">
-        <text class="recording-complete-text">Scene {{sceneNumber}} recorded successfully!</text>
-        <text class="recording-complete-duration">Duration: {{recordTime}}s</text>
+        <text class="recording-complete-text">{{t('recordingCompleteMessage')}}</text>
+        <text class="recording-complete-duration">{{t('duration')}}: {{recordTime}}{{t('secondsShort')}}</text>
       </view>
       <view class="recording-complete-actions">
         <button class="recording-action-btn retry-btn" bindtap="retakeCurrentScene">
-          Re-record
+          {{t('reRecord')}}
         </button>
         <button class="recording-action-btn submit-btn" bindtap="submitScene">
-          Submit Scene
+          {{t('submitScene')}}
         </button>
       </view>
     </view>
@@ -127,10 +127,10 @@
   <!-- 模板选择提示 -->
   <view wx:if="{{!selectedTemplate}}" class="template-prompt">
     <view class="prompt-content">
-      <text class="prompt-title">请选择录制模板</text>
-      <text class="prompt-desc">选择合适的模板开始录制</text>
+      <text class="prompt-title">{{t('selectTemplate')}}</text>
+      <text class="prompt-desc">{{t('selectTemplateDesc')}}</text>
       <button class="prompt-btn" bindtap="showTemplateSelector">
-        选择模板
+        {{t('chooseTemplate')}}
       </button>
     </view>
   </view>

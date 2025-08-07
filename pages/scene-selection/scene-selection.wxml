@@ -4,13 +4,13 @@
   <!-- Loading State -->
   <view class="loading-container" wx:if="{{loading}}">
     <view class="loading-spinner"></view>
-    <text class="loading-text">加载场景中...</text>
+    <text class="loading-text">{{t('loadingScenes')}}</text>
   </view>
 
   <!-- Template Info -->
   <view class="template-info" wx:if="{{!loading && template}}">
     <view class="info-card">
-      <text class="info-title">模板说明</text>
+      <text class="info-title">{{t('templateInfo')}}</text>
       <text class="info-description">{{template.templateDescription || '请按照具体说明录制每个场景'}}</text>
     </view>
   </view>

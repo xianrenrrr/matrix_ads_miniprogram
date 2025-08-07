@@ -6,9 +6,11 @@
 
 var app = getApp();
 var config = require('../../utils/config');
+const { t } = require('../../utils/translations');
 
 Page({
   data: {
+    t: t, // Translation function
     templateId: '',
     userId: '',
     template: null,
@@ -24,7 +26,7 @@ Page({
     
     if (!templateId || !userId) {
       wx.showToast({
-        title: 'Missing parameters',
+        title: t('missingParameters'),
         icon: 'error'
       });
       return;
@@ -43,7 +45,7 @@ Page({
   loadTemplate: function() {
     var self = this;
     
-    wx.showLoading({ title: 'Loading template...' });
+    wx.showLoading({ title: t('loadingTemplate') });
     
     // First try to use template from globalData (similar to camera page)
     var app = getApp();
@@ -78,7 +80,7 @@ Page({
         } else {
           console.log('No scenes found in response:', response.data);
           wx.showToast({
-            title: 'Template not found or no scenes',
+            title: t('templateNotFoundOrNoScenes'),
             icon: 'error'
           });
           self.setData({ loading: false });
@@ -87,7 +89,7 @@ Page({
       fail: function(error) {
         console.error('Error loading template:', error);
         wx.showToast({
-          title: 'Failed to load template',
+          title: t('failedToLoadTemplate'),
           icon: 'error'
         });
         self.setData({ loading: false });
@@ -167,7 +169,7 @@ Page({
     
     if (!scene) {
       wx.showToast({
-        title: 'Scene not found',
+        title: t('sceneNotFound'),
         icon: 'error'
       });
       return;
@@ -189,31 +191,31 @@ Page({
     
     if (!submission) {
       wx.showToast({
-        title: 'No submission found',
+        title: t('noSubmissionFound'),
         icon: 'none'
       });
       return;
     }
 
-    var message = 'Scene ' + sceneNumber + ' Status: ' + submission.status;
+    var message = t('scene') + ' ' + sceneNumber + ' ' + t('status') + ': ' + submission.status;
     
     if (submission.similarityScore) {
-      message += '\nSimilarity: ' + Math.round(submission.similarityScore * 100) + '%';
+      message += '\n' + t('aiSimilarity') + ': ' + Math.round(submission.similarityScore * 100) + '%';
     }
     
     if (submission.feedback && submission.feedback.length > 0) {
-      message += '\n\nFeedback:\n';
+      message += '\n\n' + t('feedback') + ':\n';
       for (var i = 0; i < submission.feedback.length; i++) {
         message += '• ' + submission.feedback[i] + '\n';
       }
     }
 
     wx.showModal({
-      title: 'Scene Feedback',
+      title: t('sceneFeedback'),
       content: message,
       showCancel: true,
-      confirmText: 'Re-record',
-      cancelText: 'OK',
+      confirmText: t('reRecord'),
+      cancelText: t('cameraPermissionOk'),
       success: function(res) {
         if (res.confirm) {
           // Navigate to re-record
