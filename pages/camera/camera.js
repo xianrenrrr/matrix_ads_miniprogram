@@ -26,7 +26,14 @@ Page({
     // 指导信息
     backgroundInstructions: '',
     cameraInstructions: '',
-    movementInstructions: ''
+    movementInstructions: '',
+    // Translated strings for modal buttons
+    reRecordText: t('reRecord'),
+    submitSceneText: t('submitScene'),
+    recordingCompleteText: t('recordingComplete'),
+    recordingCompleteMessageText: t('recordingCompleteMessage'),
+    durationText: t('duration'),
+    secondsShortText: t('secondsShort')
   },
 
   onLoad(options) {

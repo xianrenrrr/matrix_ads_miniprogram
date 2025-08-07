@@ -106,18 +106,18 @@
   <view wx:if="{{showRecordingCompleteModal}}" class="recording-complete-overlay">
     <view class="recording-complete-modal">
       <view class="recording-complete-header">
-        <text class="recording-complete-title">{{t('recordingComplete')}}</text>
+        <text class="recording-complete-title">{{recordingCompleteText}}</text>
       </view>
       <view class="recording-complete-body">
-        <text class="recording-complete-text">{{t('recordingCompleteMessage')}}</text>
-        <text class="recording-complete-duration">{{t('duration')}}: {{recordTime}}{{t('secondsShort')}}</text>
+        <text class="recording-complete-text">{{recordingCompleteMessageText}}</text>
+        <text class="recording-complete-duration">{{durationText}}: {{recordTime}}{{secondsShortText}}</text>
       </view>
       <view class="recording-complete-actions">
         <button class="recording-action-btn retry-btn" bindtap="retakeCurrentScene">
-          {{t('reRecord')}}
+          {{reRecordText}}
         </button>
         <button class="recording-action-btn submit-btn" bindtap="submitScene">
-          {{t('submitScene')}}
+          {{submitSceneText}}
         </button>
       </view>
     </view>
