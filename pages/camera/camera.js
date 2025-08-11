@@ -159,7 +159,7 @@ Page({
     this.setData({
       selectedTemplate: template,
       currentScene: sceneIndex,
-      maxRecordTime: currentScene.sceneDuration || 30,
+      maxRecordTime: currentScene.sceneDurationInSeconds || 30,
       currentScript: currentScene.scriptLine || '',
       sceneProgress: scenes.length > 0 ? (sceneIndex + 1) / scenes.length : 0,
       // 九宫格网格显示
@@ -469,7 +469,7 @@ Page({
       
       // 获取当前场景的时长限制
       const currentScene = this.data.selectedTemplate && this.data.selectedTemplate.scenes && this.data.selectedTemplate.scenes[this.data.currentScene]
-      const sceneMaxTime = (currentScene && currentScene.sceneDuration) || this.data.maxRecordTime
+      const sceneMaxTime = (currentScene && currentScene.sceneDurationInSeconds) || this.data.maxRecordTime
       
       // 自动停止录制
       if (recordTime >= sceneMaxTime) {
