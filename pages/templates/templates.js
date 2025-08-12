@@ -45,7 +45,9 @@ Page({
       success: (res) => {
         console.log('模板页面订阅模板响应:', res)
         if (res.statusCode === 200 && res.data) {
-          const templates = res.data.map(template => ({
+          // Handle new ApiResponse format: {success, message, data, error}
+          const responseData = res.data?.data || res.data;
+          const templates = responseData.map(template => ({
             ...template,
             isSubscribed: true, // 这些都是已订阅的模板
             duration: template.totalVideoLength,

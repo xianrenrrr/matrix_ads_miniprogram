@@ -97,9 +97,13 @@ Page({
         console.log('响应数据:', res.data)
         
         if (res.statusCode === 200) {
-          if (res.data && res.data.success) {
+          // Handle new ApiResponse format: {success, message, data: {token, user}, error}
+          const responseData = res.data?.data || res.data;
+          const success = res.data?.success !== undefined ? res.data.success : true;
+          
+          if (responseData && success) {
             // 登录成功
-            const { token, user } = res.data
+            const { token, user } = responseData;
             console.log('登录成功，用户信息:', user)
             
             // 检查用户角色
@@ -139,7 +143,7 @@ Page({
             console.log('后端返回失败:', res.data)
             wx.showModal({
               title: '登录失败',
-              content: (res.data && res.data.message) || '登录验证失败',
+              content: res.data?.message || res.data?.error || '登录验证失败',
               showCancel: false
             })
           }
@@ -299,11 +303,15 @@ Page({
       url: `${app.globalData.apiBaseUrl}/auth/validate-invite/${token}`,
       method: 'GET',
       success: (res) => {
-        if (res.statusCode === 200 && res.data.success) {
+        // Handle new ApiResponse format: {success, message, data, error}
+        const responseData = res.data?.data || res.data;
+        const success = res.data?.success !== undefined ? res.data.success : true;
+        
+        if (res.statusCode === 200 && success) {
           // 邀请有效，显示确认对话框
           wx.showModal({
             title: '确认注册',
-            content: `您即将加入管理员 ${res.data.managerName} 的团队，是否继续？`,
+            content: `您即将加入管理员 ${responseData.managerName || res.data.managerName} 的团队，是否继续？`,
             confirmText: '确认注册',
             cancelText: '取消',
             success: (modalRes) => {
@@ -311,8 +319,8 @@ Page({
                 // 显示注册表单
                 this.showSignupForm({
                   inviteToken: token,
-                  managerName: res.data.managerName,
-                  inviteeName: res.data.inviteeName
+                  managerName: responseData.managerName || res.data.managerName,
+                  inviteeName: responseData.inviteeName || res.data.inviteeName
                 })
               }
             }

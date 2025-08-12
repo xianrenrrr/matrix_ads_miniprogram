@@ -151,7 +151,11 @@ Page({
       success: (res) => {
         console.log('注册响应:', res)
         
-        if (res.statusCode === 200 && res.data.success) {
+        // Handle new ApiResponse format: {success, message, data, error}
+        const responseData = res.data?.data || res.data;
+        const success = res.data?.success !== undefined ? res.data.success : true;
+        
+        if (res.statusCode === 200 && success) {
           // 注册成功
           wx.showToast({
             title: '注册成功',
@@ -161,8 +165,8 @@ Page({
           // 显示成功信息并引导用户登录
           setTimeout(() => {
             // Use group info from response if available, otherwise fallback to invite info
-            const groupName = res.data.groupName || inviteInfo.groupName || '团队';
-            const managerName = res.data.managerName || inviteInfo.managerName || '管理员';
+            const groupName = responseData.groupName || res.data.groupName || inviteInfo.groupName || '团队';
+            const managerName = responseData.managerName || res.data.managerName || inviteInfo.managerName || '管理员';
             
             wx.showModal({
               title: '注册成功！',
@@ -180,7 +184,7 @@ Page({
           // 注册失败
           wx.showModal({
             title: '注册失败',
-            content: res.data.message || '注册过程中出现错误，请稍后重试',
+            content: res.data?.message || res.data?.error || '注册过程中出现错误，请稍后重试',
             showCancel: false
           })
         }

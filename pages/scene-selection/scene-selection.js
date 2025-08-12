@@ -70,11 +70,14 @@ Page({
       },
       success: function(response) {
         console.log('Template API response:', response);
-        if (response.data && response.data.scenes) {
-          console.log('Found scenes:', response.data.scenes.length);
+        // Handle new ApiResponse format: {success, message, data, error}
+        const responseData = response.data?.data || response.data;
+        
+        if (responseData && responseData.scenes) {
+          console.log('Found scenes:', responseData.scenes.length);
           self.setData({
-            template: response.data,
-            scenes: response.data.scenes,
+            template: responseData,
+            scenes: responseData.scenes,
             loading: false
           });
         } else {
@@ -120,7 +123,9 @@ Page({
       success: function(response) {
         console.log('Load submitted video response:', response);
         if (response.statusCode === 200 && response.data) {
-          var videoData = response.data;
+          // Handle new ApiResponse format: {success, message, data, error}
+          var responseData = response.data?.data || response.data;
+          var videoData = responseData;
           var scenes = videoData.scenes || {};
           var progress = videoData.progress || null;
           
