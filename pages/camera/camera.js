@@ -130,7 +130,9 @@ Page({
       success: (res) => {
         console.log('加载模板响应:', res)
         if (res.statusCode === 200 && res.data) {
-          this.setupTemplate(res.data)
+          // Handle new ApiResponse format: {success, message, data, error}
+          const responseData = res.data?.data || res.data;
+          this.setupTemplate(responseData)
         } else {
           wx.showToast({
             title: t('templateNotFound'),
@@ -359,17 +361,21 @@ Page({
         })
         
         try {
-          var result = JSON.parse(response.data)
+          var parsedResponse = JSON.parse(response.data)
           wx.hideLoading()
 
-          if (result.success) {
+          // Handle new ApiResponse format: {success, message, data, error}
+          var responseData = parsedResponse?.data || parsedResponse;
+          var success = parsedResponse?.success !== undefined ? parsedResponse.success : true;
+
+          if (success) {
             console.log('Upload successful, showing AI feedback')
-            // Show AI feedback if available
-            this.showAIFeedback(result)
+            // Show AI feedback if available - pass the data part or full response
+            this.showAIFeedback(responseData.data ? responseData : parsedResponse)
           } else {
-            console.error('Upload failed with message:', result.message)
+            console.error('Upload failed with message:', parsedResponse?.message || parsedResponse?.error)
             wx.showToast({
-              title: result.message || t('uploadFailed'),
+              title: parsedResponse?.message || parsedResponse?.error || t('uploadFailed'),
               icon: 'error'
             })
           }

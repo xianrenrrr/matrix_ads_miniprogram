@@ -69,7 +69,9 @@ Page({
       success: (res) => {
         console.log('订阅模板响应:', res)
         if (res.statusCode === 200 && res.data) {
-          const templates = res.data
+          // Handle new ApiResponse format: {success, message, data, error}
+          const responseData = res.data?.data || res.data;
+          const templates = responseData
           console.log('获取到的模板数量:', templates.length)
           
           // 更新统计数据
@@ -117,12 +119,16 @@ Page({
       },
       success: (res) => {
         console.log('仪表板统计响应:', res)
-        if (res.statusCode === 200 && res.data && res.data.success) {
+        // Handle new ApiResponse format: {success, message, data, error}
+        const responseData = res.data?.data || res.data;
+        const success = res.data?.success !== undefined ? res.data.success : true;
+        
+        if (res.statusCode === 200 && responseData && success) {
           this.setData({
             stats: {
-              availableTemplates: res.data.availableTemplates || 0,
-              recordedVideos: res.data.recordedVideos || 0,
-              publishedVideos: res.data.publishedVideos || 0
+              availableTemplates: responseData.availableTemplates || 0,
+              recordedVideos: responseData.recordedVideos || 0,
+              publishedVideos: responseData.publishedVideos || 0
             }
           })
         } else {
