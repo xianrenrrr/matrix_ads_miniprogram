@@ -8,7 +8,7 @@
     binderror="onCameraError"
   >
     <!-- 网格覆盖 -->
-    <view wx:if="{{showOverlay && selectedTemplate}}" class="grid-overlay">
+    <view wx:if="{{showOverlay && selectedTemplate && overlayType === 'grid'}}" class="grid-overlay">
       <view class="grid-line grid-line-v1"></view>
       <view class="grid-line grid-line-v2"></view>
       <view class="grid-line grid-line-h1"></view>
@@ -27,6 +27,23 @@
       </view>
     </view>
 
+    <!-- 对象覆盖 -->
+    <view wx:if="{{showOverlay && selectedTemplate && overlayType === 'objects'}}" class="object-overlay">
+      <cover-view 
+        wx:for="{{objectOverlay}}" 
+        wx:key="index"
+        class="object-box"
+        style="left: {{item.x * 100}}%; top: {{item.y * 100}}%; width: {{item.w * 100}}%; height: {{item.h * 100}}%;"
+      >
+        <cover-view class="object-box-border"></cover-view>
+        <cover-view class="object-label">
+          <cover-view class="object-label-bg"></cover-view>
+          <text class="object-label-text">{{item.label}}</text>
+          <text class="object-confidence">{{item.confidence * 100}}%</text>
+        </cover-view>
+      </cover-view>
+    </view>
+
     <!-- 录制状态指示器 -->
     <view wx:if="{{isRecording}}" class="recording-indicator">
       <view class="recording-dot"></view>
@@ -39,7 +56,7 @@
         {{t('scene')}} {{sceneNumber}}: {{selectedTemplate.scenes[sceneIndex].sceneTitle}}
       </view>
       <view class="scene-time">
-        {{recordTime}}{{t('secondsShort')}} / {{selectedTemplate.scenes[sceneIndex].sceneDuration || maxRecordTime}}{{t('secondsShort')}}
+        {{recordTime}}{{t('secondsShort')}} / {{selectedTemplate.scenes[sceneIndex].sceneDurationInSeconds || maxRecordTime}}{{t('secondsShort')}}
       </view>
     </view>
 

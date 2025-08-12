@@ -200,7 +200,9 @@ Page({
     var message = t('scene') + ' ' + sceneNumber + ' ' + t('status') + ': ' + submission.status;
     
     if (submission.similarityScore) {
-      message += '\n' + t('aiSimilarity') + ': ' + Math.round(submission.similarityScore * 100) + '%';
+      const raw = submission.similarityScore || 0;
+      const similarity = raw <= 1 ? Math.round(raw * 100) : Math.round(raw);
+      message += '\n' + t('aiSimilarity') + ': ' + similarity + '%';
     }
     
     if (submission.feedback && submission.feedback.length > 0) {
@@ -236,7 +238,9 @@ Page({
   getSimilarityScore: function(sceneNumber) {
     var submission = this.data.submissions[sceneNumber];
     if (!submission || !submission.similarityScore) return 0;
-    return Math.round(submission.similarityScore * 100);
+    const raw = submission.similarityScore || 0;
+    const similarity = raw <= 1 ? Math.round(raw * 100) : Math.round(raw);
+    return similarity;
   },
 
   // Get scene status color

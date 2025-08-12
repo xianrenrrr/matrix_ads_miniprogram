@@ -70,6 +70,71 @@
 .grid-block-8 { top: 66.67%; left: 33.33%; width: 33.33%; height: 33.33%; }
 .grid-block-9 { top: 66.67%; left: 66.67%; width: 33.33%; height: 33.33%; }
 
+/* 对象覆盖 */
+.object-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.object-box {
+  position: absolute;
+  box-sizing: border-box;
+}
+
+.object-box-border {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 4rpx dashed #10b981;
+  border-radius: 8rpx;
+  background-color: rgba(16, 185, 129, 0.1);
+  box-sizing: border-box;
+}
+
+.object-label {
+  position: absolute;
+  top: -8rpx;
+  left: 0;
+  display: flex;
+  align-items: center;
+  font-size: 24rpx;
+  font-weight: 500;
+  white-space: nowrap;
+  z-index: 10;
+}
+
+.object-label-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(16, 185, 129, 0.9);
+  border-radius: 8rpx;
+}
+
+.object-label-text {
+  position: relative;
+  color: white;
+  padding: 8rpx 12rpx;
+  z-index: 1;
+}
+
+.object-confidence {
+  position: relative;
+  color: white;
+  padding: 8rpx 12rpx 8rpx 0;
+  opacity: 0.8;
+  font-size: 20rpx;
+  z-index: 1;
+}
+
 /* 录制状态指示器 */
 .recording-indicator {
   position: absolute;

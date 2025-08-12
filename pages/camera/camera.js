@@ -23,6 +23,9 @@ Page({
     // 九宫格网格
     gridOverlay: [], // 选中的网格块编号 [1,2,3,4,5,6,7,8,9]
     gridLabels: [], // 每个网格块的标签
+    // 对象覆盖层
+    overlayType: 'grid', // 'grid' | 'objects'
+    objectOverlay: [], // 对象覆盖数据 {label, confidence, x, y, w, h}
     // 指导信息
     backgroundInstructions: '',
     cameraInstructions: '',
@@ -156,24 +159,47 @@ Page({
     const sceneIndex = this.data.sceneIndex || 0
     const currentScene = scenes[sceneIndex] || {}
     
-    this.setData({
+    // 检查当前场景的覆盖类型
+    const overlayType = currentScene.overlayType || 'grid'
+    const isObjectOverlay = overlayType === 'objects'
+    
+    console.log(`场景 ${sceneIndex + 1} 覆盖类型:`, overlayType)
+    
+    // 设置基础数据
+    let updateData = {
       selectedTemplate: template,
       currentScene: sceneIndex,
       maxRecordTime: currentScene.sceneDurationInSeconds || 30,
       currentScript: currentScene.scriptLine || '',
       sceneProgress: scenes.length > 0 ? (sceneIndex + 1) / scenes.length : 0,
-      // 九宫格网格显示
-      gridOverlay: currentScene.screenGridOverlay || [],
-      gridLabels: currentScene.screenGridOverlayLabels || [],
+      overlayType: overlayType,
       // 相机设置
       cameraPosition: this.getCameraPosition(currentScene.personPosition),
       // 指导信息
       backgroundInstructions: currentScene.backgroundInstructions || '',
       cameraInstructions: currentScene.specificCameraInstructions || '',
       movementInstructions: currentScene.movementInstructions || ''
-    })
+    }
+    
+    if (isObjectOverlay && currentScene.overlayObjects && currentScene.overlayObjects.length > 0) {
+      // 使用对象覆盖模式
+      console.log('使用对象覆盖模式，对象数量:', currentScene.overlayObjects.length)
+      updateData.objectOverlay = currentScene.overlayObjects
+      updateData.gridOverlay = []
+      updateData.gridLabels = []
+    } else {
+      // 使用网格覆盖模式（默认或回退）
+      console.log('使用网格覆盖模式')
+      updateData.overlayType = 'grid'
+      updateData.gridOverlay = currentScene.screenGridOverlay || []
+      updateData.gridLabels = currentScene.screenGridOverlayLabels || []
+      updateData.objectOverlay = []
+    }
+    
+    this.setData(updateData)
     
     console.log('模板设置完成，当前场景:', currentScene)
+    console.log('覆盖模式:', updateData.overlayType, '对象数量:', updateData.objectOverlay.length)
   },
   
   // 根据人物位置确定相机方向
