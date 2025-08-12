@@ -186,7 +186,7 @@ Page({
     if (isObjectOverlay && currentScene.overlayObjects && currentScene.overlayObjects.length > 0) {
       // 使用对象覆盖模式
       console.log('使用对象覆盖模式，对象数量:', currentScene.overlayObjects.length)
-      updateData.objectOverlay = currentScene.overlayObjects
+      updateData.objectOverlay = this.processOverlayObjects(currentScene.overlayObjects)
       updateData.gridOverlay = []
       updateData.gridLabels = []
     } else {
@@ -212,6 +212,120 @@ Page({
       return 'front'
     }
     return 'back'  // 默认后置摄像头
+  },
+
+  /**
+   * 处理覆盖对象数组，规范化字段名称并验证数据
+   * @param {Array} overlayObjects - 原始覆盖对象数组
+   * @returns {Array} 处理后的覆盖对象数组
+   */
+  processOverlayObjects(overlayObjects) {
+    if (!Array.isArray(overlayObjects)) {
+      console.warn('overlayObjects is not an array:', overlayObjects)
+      return []
+    }
+    
+    return overlayObjects.map((obj, index) => {
+      // 规范化字段名称（向后兼容）
+      const processed = {
+        label: obj.label || '',
+        confidence: Math.max(0, Math.min(1, obj.confidence || 0)),
+        x: Math.max(0, Math.min(1, obj.x || 0)),
+        y: Math.max(0, Math.min(1, obj.y || 0)),
+        // 优先使用新字段名，后备到旧字段名
+        width: Math.max(0, Math.min(1, obj.width || obj.w || 0)),
+        height: Math.max(0, Math.min(1, obj.height || obj.h || 0))
+      }
+      
+      // 验证边界框完整性
+      if (processed.x + processed.width > 1) {
+        console.warn(`Object ${index}: x + width exceeds bounds, clamping`)
+        processed.width = 1 - processed.x
+      }
+      
+      if (processed.y + processed.height > 1) {
+        console.warn(`Object ${index}: y + height exceeds bounds, clamping`)
+        processed.height = 1 - processed.y
+      }
+      
+      // 保留旧字段名用于向后兼容
+      processed.w = processed.width
+      processed.h = processed.height
+      
+      return processed
+    }).filter(obj => {
+      // 过滤掉无效对象
+      return obj.width > 0 && obj.height > 0 && obj.label.length > 0
+    })
+  },
+
+  /**
+   * 将归一化边界框转换为像素矩形
+   * @param {Object} normalizedBox - 归一化边界框 {x, y, width, height} 范围 [0,1]
+   * @param {number} containerWidth - 预览容器宽度 (px)
+   * @param {number} containerHeight - 预览容器高度 (px) 
+   * @param {string} objectFit - 对象适应模式 ('cover' | 'contain' | 'fill')
+   * @returns {Object} 像素矩形 {left, top, width, height}
+   */
+  convertNormalizedToPixelRect(normalizedBox, containerWidth, containerHeight, objectFit = 'cover') {
+    const { x, y, width, height } = normalizedBox
+    
+    // 验证输入参数
+    if (typeof x !== 'number' || typeof y !== 'number' || 
+        typeof width !== 'number' || typeof height !== 'number' ||
+        x < 0 || y < 0 || width <= 0 || height <= 0 ||
+        x + width > 1 || y + height > 1) {
+      console.warn('Invalid normalized box coordinates:', normalizedBox)
+      return { left: 0, top: 0, width: 0, height: 0 }
+    }
+    
+    if (containerWidth <= 0 || containerHeight <= 0) {
+      console.warn('Invalid container dimensions:', { containerWidth, containerHeight })
+      return { left: 0, top: 0, width: 0, height: 0 }
+    }
+    
+    let scaleX, scaleY, offsetX = 0, offsetY = 0
+    
+    switch (objectFit) {
+      case 'contain':
+        // 保持宽高比，全部内容可见，可能有黑边
+        const containScale = Math.min(containerWidth, containerHeight)
+        scaleX = scaleY = containScale
+        offsetX = (containerWidth - containScale) / 2
+        offsetY = (containerHeight - containScale) / 2
+        break
+        
+      case 'fill':
+        // 拉伸填满容器，可能变形
+        scaleX = containerWidth
+        scaleY = containerHeight
+        break
+        
+      case 'cover':
+      default:
+        // 保持宽高比，填满容器，可能裁剪
+        const coverScale = Math.max(containerWidth, containerHeight)
+        scaleX = scaleY = coverScale
+        offsetX = (containerWidth - coverScale) / 2
+        offsetY = (containerHeight - coverScale) / 2
+        break
+    }
+    
+    // 转换坐标
+    const pixelRect = {
+      left: Math.round(x * scaleX + offsetX),
+      top: Math.round(y * scaleY + offsetY),
+      width: Math.round(width * scaleX),
+      height: Math.round(height * scaleY)
+    }
+    
+    // 确保像素坐标在容器范围内
+    pixelRect.left = Math.max(0, Math.min(containerWidth - pixelRect.width, pixelRect.left))
+    pixelRect.top = Math.max(0, Math.min(containerHeight - pixelRect.height, pixelRect.top))
+    pixelRect.width = Math.min(containerWidth - pixelRect.left, pixelRect.width)
+    pixelRect.height = Math.min(containerHeight - pixelRect.top, pixelRect.height)
+    
+    return pixelRect
   },
 
   // 显示模板选择器

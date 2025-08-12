@@ -33,13 +33,13 @@
         wx:for="{{objectOverlay}}" 
         wx:key="index"
         class="object-box"
-        style="left: {{item.x * 100}}%; top: {{item.y * 100}}%; width: {{item.w * 100}}%; height: {{item.h * 100}}%;"
+        style="left: {{(item.x || 0) * 100}}%; top: {{(item.y || 0) * 100}}%; width: {{(item.width || item.w || 0) * 100}}%; height: {{(item.height || item.h || 0) * 100}}%;"
       >
         <cover-view class="object-box-border"></cover-view>
         <cover-view class="object-label">
           <cover-view class="object-label-bg"></cover-view>
           <text class="object-label-text">{{item.label}}</text>
-          <text class="object-confidence">{{item.confidence * 100}}%</text>
+          <text class="object-confidence">{{(item.confidence * 100).toFixed(0)}}%</text>
         </cover-view>
       </cover-view>
     </view>
