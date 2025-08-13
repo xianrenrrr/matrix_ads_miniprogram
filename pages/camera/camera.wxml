@@ -38,18 +38,9 @@
       ></canvas>
     </view>
 
-    <!-- 对象覆盖 (改为非阻塞) -->
-    <view wx:if="{{showOverlay && selectedTemplate && overlayType === 'objects'}}" class="object-overlay">
-      <view 
-        wx:for="{{objectOverlayPixels}}" 
-        wx:key="index"
-        class="object-box"
-        style="left: {{item.left}}px; top: {{item.top}}px; width: {{item.width}}px; height: {{item.height}}px; border-color: {{item.color}};"
-      >
-        <view class="object-label" style="background-color: {{item.color}};">
-          <text class="object-label-text">{{item.labelLocalized || item.label}}</text>
-        </view>
-      </view>
+    <!-- 对象覆盖层 (MVP: Canvas based) -->
+    <view wx:if="{{showOverlay && selectedTemplate && overlayType === 'objects'}}" id="overlayLayer" class="overlay-layer">
+      <canvas canvas-id="overlayCanvas" id="overlayCanvas"></canvas>
     </view>
 
     <!-- 录制状态指示器 -->
@@ -88,13 +79,14 @@
   </camera>
   </view> <!-- end of previewContainer -->
   
-  <!-- 图例侧边栏 -->
-  <view wx:if="{{legend && legend.length > 0 && showOverlay}}" class="legend-sidebar">
-    <view wx:for="{{legend}}" wx:key="index" class="legend-item">
-      <view class="legend-dot" style="background-color: {{item.colorHex}};"></view>
-      <text class="legend-label">{{item.labelLocalized || item.label}}</text>
-      <text class="legend-confidence">{{(item.confidence * 100).toFixed(0)}}%</text>
-    </view>
+  <!-- 图例 (MVP: Right side legend) -->
+  <view wx:if="{{legend && legend.length && showOverlay && overlayType === 'objects'}}" class="legend">
+    <block wx:for="{{legend}}" wx:key="index">
+      <view class="legend-item">
+        <view class="dot" style="background-color: {{item.colorHex}}"></view>
+        <text class="legend-text">{{item.labelLocalized || item.label}}（{{Math.round((item.confidence||0)*100)}}%）</text>
+      </view>
+    </block>
   </view>
 
   <!-- 脚本侧边栏 -->

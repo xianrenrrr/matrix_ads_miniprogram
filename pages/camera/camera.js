@@ -30,7 +30,8 @@ Page({
     objectOverlayPixels: [], // 对象覆盖像素坐标
     polygonOverlay: [], // 多边形覆盖数据
     polygonOverlayPixels: [], // 多边形覆盖像素坐标
-    legend: [], // 图例数据
+    overlayRectsPixels: [], // MVP: [{left, top, width, height, colorHex, label, labelLocalized, confidence}]
+    legend: [], // 图例数据 from backend scene.legend, or derived from overlayObjects order
     sourceAspect: '9:16', // 源视频比例
     // 指导信息
     backgroundInstructions: '',
@@ -208,9 +209,10 @@ Page({
       updateData.gridOverlay = []
       updateData.gridLabels = []
     } else if (isObjectOverlay && currentScene.overlayObjects && currentScene.overlayObjects.length > 0) {
-      // 使用对象覆盖模式
-      console.log('使用对象覆盖模式，对象数量:', currentScene.overlayObjects.length)
+      // MVP: 使用对象覆盖模式
+      console.log('MVP: 使用对象覆盖模式，对象数量:', currentScene.overlayObjects.length)
       updateData.objectOverlay = this.processOverlayObjects(currentScene.overlayObjects)
+      updateData.legend = currentScene.legend || [] // Set legend from backend
       updateData.polygonOverlay = []
       updateData.gridOverlay = []
       updateData.gridLabels = []
@@ -222,6 +224,8 @@ Page({
       updateData.gridLabels = currentScene.screenGridOverlayLabels || []
       updateData.objectOverlay = []
       updateData.polygonOverlay = []
+      updateData.legend = [] // Clear legend for grid mode
+      updateData.overlayRectsPixels = [] // Clear rect pixels for grid mode
     }
     
     this.setData(updateData)
@@ -277,29 +281,88 @@ Page({
           that.drawPolygons(offsetX, offsetY, drawnW, drawnH, colors)
         }
         
-        // 处理对象覆盖
+        // MVP: 处理对象覆盖 (Canvas based)
         if (that.data.overlayType === 'objects' && that.data.objectOverlay.length > 0) {
-          const pixelOverlays = that.data.objectOverlay.map((obj, index) => {
-            const x = obj.x || 0
-            const y = obj.y || 0
-            const width = obj.width || obj.w || 0
-            const height = obj.height || obj.h || 0
-            
-            return {
-              left: offsetX + x * drawnW,
-              top: offsetY + y * drawnH,
-              width: width * drawnW,
-              height: height * drawnH,
-              label: obj.label,
-              labelLocalized: obj.labelLocalized || toZh(obj.label),
-              color: colors[index % colors.length]
-            }
-          })
-          
-          that.setData({ objectOverlayPixels: pixelOverlays })
+          const scene = {
+            overlayObjects: that.data.objectOverlay,
+            sourceAspect: sourceAspect,
+            legend: that.data.legend
+          }
+          that.updateOverlayPixelsForScene(scene, containerW, containerH, offsetX, offsetY, drawnW, drawnH, colors)
         }
       })
       .exec()
+  },
+  
+  // MVP: Update overlay pixels for scene
+  updateOverlayPixelsForScene(scene, containerW, containerH, offsetX, offsetY, drawnW, drawnH, colors) {
+    const objs = scene.overlayObjects || []
+    
+    // Compute pixel rectangles  
+    const overlayRectsPixels = []
+    for (let i = 0; i < objs.length; i++) {
+      const o = objs[i]
+      const left = offsetX + (o.x || 0) * drawnW
+      const top = offsetY + (o.y || 0) * drawnH
+      const width = (o.width || o.w || 0) * drawnW
+      const height = (o.height || o.h || 0) * drawnH
+      const color = (scene.legend && scene.legend[i]) ? scene.legend[i].colorHex : colors[i % colors.length]
+      const labelZh = o.labelLocalized || toZh(o.label) || o.label
+      
+      overlayRectsPixels.push({
+        left, top, width, height, 
+        colorHex: color, 
+        label: o.label, 
+        labelLocalized: labelZh, 
+        confidence: o.confidence
+      })
+    }
+    
+    this.setData({ overlayRectsPixels })
+    
+    // Draw on canvas
+    this.drawOverlayCanvas(containerW, containerH, overlayRectsPixels)
+  },
+  
+  // MVP: Draw overlay canvas with rectangles
+  drawOverlayCanvas(containerW, containerH, rects) {
+    const ctx = wx.createCanvasContext('overlayCanvas', this)
+    ctx.clearRect(0, 0, containerW, containerH)
+    
+    // Set canvas size to container size
+    ctx.setCanvasSize ? ctx.setCanvasSize(containerW, containerH) : null
+    
+    rects.forEach((rect, index) => {
+      const { left, top, width, height, colorHex, labelLocalized, label } = rect
+      
+      // Draw rounded dashed rectangle (stroke only)
+      ctx.setStrokeStyle(colorHex)
+      ctx.setLineWidth(2)
+      ctx.setLineDash([5, 5])
+      ctx.beginPath()
+      ctx.roundRect(left, top, width, height, 8)
+      ctx.stroke()
+      
+      // Draw label chip at (left+4, top+4)
+      const labelText = labelLocalized || label || ''
+      if (labelText) {
+        const chipX = left + 4
+        const chipY = top + 4
+        const chipWidth = 80
+        const chipHeight = 20
+        
+        // Background chip
+        ctx.setFillStyle(colorHex)
+        ctx.fillRect(chipX, chipY, chipWidth, chipHeight)
+        
+        // Label text
+        ctx.setFillStyle('#FFFFFF')
+        ctx.setFontSize(12)
+        ctx.fillText(labelText, chipX + 4, chipY + 14)
+      }
+    })
+    
+    ctx.draw()
   },
   
   // 绘制多边形
