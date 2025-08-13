@@ -238,43 +238,20 @@ Page({
   handleQRCodeResult(qrData) {
     console.log('二维码数据:', qrData)
     
-    try {
-      // 解析二维码数据
-      let inviteData
-      
-      // 检查是否是JSON格式的二维码（新的邀请格式）
-      if (qrData.startsWith('{')) {
-        inviteData = JSON.parse(qrData)
-        
-        // 检查是否是邀请注册二维码
-        if (inviteData.type === 'signup_invite') {
-          this.handleInviteSignup(inviteData)
-          return
-        }
-      }
-      
-      // 检查是否是URL格式的二维码（旧的邀请链接格式）
-      if (qrData.includes('invite-signup')) {
-        // Parse token from URL manually (WeChat doesn't support URL constructor)
-        const tokenMatch = qrData.match(/[?&]token=([^&]+)/)
-        const token = tokenMatch ? tokenMatch[1] : null
-        
-        if (token) {
-          this.handleInviteLinkSignup(token)
-          return
-        }
-      }
-      
-      throw new Error('无效的邀请二维码格式')
-      
-    } catch (error) {
-      console.error('二维码解析失败:', error)
-      wx.showModal({
-        title: '二维码无效',
-        content: '请扫描管理员生成的有效邀请二维码',
-        showCancel: false
-      })
+    // 检查是否是群组邀请令牌
+    if (qrData.startsWith('group_')) {
+      console.log('检测到群组邀请token:', qrData)
+      this.handleInviteLinkSignup(qrData)
+      return
     }
+    
+    // 无效的二维码格式
+    console.error('二维码格式不支持:', qrData)
+    wx.showModal({
+      title: '二维码无效',
+      content: '请扫描管理员生成的有效邀请二维码',
+      showCancel: false
+    })
   },
 
   // 处理邀请注册（新格式：JSON二维码）
