@@ -15,8 +15,21 @@ Page({
   onLoad(options) {
     console.log('注册页面加载, 参数:', options)
     
-    // 解析邀请数据
-    if (options.inviteData) {
+    // Handle both token (from QR code) and inviteData (from other sources)
+    if (options.token) {
+      // QR code scan with token parameter (group invite)
+      console.log('通过二维码扫描进入，token:', options.token)
+      
+      this.setData({ 
+        inviteInfo: {
+          token: options.token,
+          inviteToken: options.token,
+          isGroupInvite: true
+        },
+        'formData.username': ''
+      })
+    } else if (options.inviteData) {
+      // Legacy invite data format
       try {
         const inviteInfo = JSON.parse(decodeURIComponent(options.inviteData))
         console.log('解析邀请信息:', inviteInfo)
