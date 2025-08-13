@@ -71,7 +71,7 @@ Page({
       success: function(response) {
         console.log('Template API response:', response);
         // Handle new ApiResponse format: {success, message, data, error}
-        const responseData = response.data?.data || response.data;
+        const responseData = (response.data && response.data.data) || response.data;
         
         if (responseData && responseData.scenes) {
           console.log('Found scenes:', responseData.scenes.length);
@@ -124,7 +124,7 @@ Page({
         console.log('Load submitted video response:', response);
         if (response.statusCode === 200 && response.data) {
           // Handle new ApiResponse format: {success, message, data, error}
-          var responseData = response.data?.data || response.data;
+          var responseData = (response.data && response.data.data) || response.data;
           var videoData = responseData;
           var scenes = videoData.scenes || {};
           var progress = videoData.progress || null;

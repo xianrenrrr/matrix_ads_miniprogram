@@ -39,7 +39,7 @@
         <cover-view class="object-label">
           <cover-view class="object-label-bg"></cover-view>
           <text class="object-label-text">{{item.label}}</text>
-          <text class="object-confidence">{{(item.confidence * 100).toFixed(0)}}%</text>
+          <text class="object-confidence">{{item.confidencePercent}}%</text>
         </cover-view>
       </cover-view>
     </view>

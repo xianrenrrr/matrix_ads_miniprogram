@@ -79,7 +79,7 @@ App({
       success: (res) => {
         if (res.statusCode === 200) {
           // Handle new ApiResponse format: {success, message, data, error}
-          const responseData = res.data?.data || res.data;
+          const responseData = (res.data && res.data.data) || res.data;
           this.globalData.userInfo = responseData;
           this.globalData.isLoggedIn = true;
         } else {

@@ -98,8 +98,8 @@ Page({
         
         if (res.statusCode === 200) {
           // Handle new ApiResponse format: {success, message, data: {token, user}, error}
-          const responseData = res.data?.data || res.data;
-          const success = res.data?.success !== undefined ? res.data.success : true;
+          const responseData = (res.data && res.data.data) || res.data;
+          const success = (res.data && res.data.success !== undefined) ? res.data.success : true;
           
           if (responseData && success) {
             // 登录成功
@@ -143,7 +143,7 @@ Page({
             console.log('后端返回失败:', res.data)
             wx.showModal({
               title: '登录失败',
-              content: res.data?.message || res.data?.error || '登录验证失败',
+              content: (res.data && res.data.message) || (res.data && res.data.error) || '登录验证失败',
               showCancel: false
             })
           }
@@ -255,8 +255,9 @@ Page({
       
       // 检查是否是URL格式的二维码（旧的邀请链接格式）
       if (qrData.includes('invite-signup')) {
-        const url = new URL(qrData)
-        const token = url.searchParams.get('token')
+        // Parse token from URL manually (WeChat doesn't support URL constructor)
+        const tokenMatch = qrData.match(/[?&]token=([^&]+)/)
+        const token = tokenMatch ? tokenMatch[1] : null
         
         if (token) {
           this.handleInviteLinkSignup(token)
@@ -304,8 +305,8 @@ Page({
       method: 'GET',
       success: (res) => {
         // Handle new ApiResponse format: {success, message, data, error}
-        const responseData = res.data?.data || res.data;
-        const success = res.data?.success !== undefined ? res.data.success : true;
+        const responseData = (res.data && res.data.data) || res.data;
+        const success = (res.data && res.data.success !== undefined) ? res.data.success : true;
         
         if (res.statusCode === 200 && success) {
           // 邀请有效，显示确认对话框

@@ -70,7 +70,7 @@ Page({
         console.log('订阅模板响应:', res)
         if (res.statusCode === 200 && res.data) {
           // Handle new ApiResponse format: {success, message, data, error}
-          const responseData = res.data?.data || res.data;
+          const responseData = (res.data && res.data.data) || res.data;
           const templates = responseData
           console.log('获取到的模板数量:', templates.length)
           
@@ -120,8 +120,8 @@ Page({
       success: (res) => {
         console.log('仪表板统计响应:', res)
         // Handle new ApiResponse format: {success, message, data, error}
-        const responseData = res.data?.data || res.data;
-        const success = res.data?.success !== undefined ? res.data.success : true;
+        const responseData = (res.data && res.data.data) || res.data;
+        const success = (res.data && res.data.success !== undefined) ? res.data.success : true;
         
         if (res.statusCode === 200 && responseData && success) {
           this.setData({

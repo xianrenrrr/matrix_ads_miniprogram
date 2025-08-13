@@ -131,7 +131,7 @@ Page({
         console.log('加载模板响应:', res)
         if (res.statusCode === 200 && res.data) {
           // Handle new ApiResponse format: {success, message, data, error}
-          const responseData = res.data?.data || res.data;
+          const responseData = (res.data && res.data.data) || res.data;
           this.setupTemplate(responseData)
         } else {
           wx.showToast({
@@ -227,9 +227,11 @@ Page({
     
     return overlayObjects.map((obj, index) => {
       // 规范化字段名称（向后兼容）
+      const confidence = Math.max(0, Math.min(1, obj.confidence || 0))
       const processed = {
         label: obj.label || '',
-        confidence: Math.max(0, Math.min(1, obj.confidence || 0)),
+        confidence: confidence,
+        confidencePercent: Math.round(confidence * 100),
         x: Math.max(0, Math.min(1, obj.x || 0)),
         y: Math.max(0, Math.min(1, obj.y || 0)),
         // 优先使用新字段名，后备到旧字段名
@@ -479,17 +481,17 @@ Page({
           wx.hideLoading()
 
           // Handle new ApiResponse format: {success, message, data, error}
-          var responseData = parsedResponse?.data || parsedResponse;
-          var success = parsedResponse?.success !== undefined ? parsedResponse.success : true;
+          var responseData = (parsedResponse && parsedResponse.data) || parsedResponse;
+          var success = (parsedResponse && parsedResponse.success !== undefined) ? parsedResponse.success : true;
 
           if (success) {
             console.log('Upload successful, showing AI feedback')
             // Show AI feedback if available - pass the data part or full response
             this.showAIFeedback(responseData.data ? responseData : parsedResponse)
           } else {
-            console.error('Upload failed with message:', parsedResponse?.message || parsedResponse?.error)
+            console.error('Upload failed with message:', (parsedResponse && parsedResponse.message) || (parsedResponse && parsedResponse.error))
             wx.showToast({
-              title: parsedResponse?.message || parsedResponse?.error || t('uploadFailed'),
+              title: (parsedResponse && parsedResponse.message) || (parsedResponse && parsedResponse.error) || t('uploadFailed'),
               icon: 'error'
             })
           }

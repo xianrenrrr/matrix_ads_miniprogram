@@ -165,8 +165,8 @@ Page({
         console.log('注册响应:', res)
         
         // Handle new ApiResponse format: {success, message, data, error}
-        const responseData = res.data?.data || res.data;
-        const success = res.data?.success !== undefined ? res.data.success : true;
+        const responseData = (res.data && res.data.data) || res.data;
+        const success = (res.data && res.data.success !== undefined) ? res.data.success : true;
         
         if (res.statusCode === 200 && success) {
           // 注册成功
@@ -197,7 +197,7 @@ Page({
           // 注册失败
           wx.showModal({
             title: '注册失败',
-            content: res.data?.message || res.data?.error || '注册过程中出现错误，请稍后重试',
+            content: (res.data && res.data.message) || (res.data && res.data.error) || '注册过程中出现错误，请稍后重试',
             showCancel: false
           })
         }
