@@ -238,15 +238,46 @@ Page({
   handleQRCodeResult(qrData) {
     console.log('二维码数据:', qrData)
     
-    // 检查是否是群组邀请令牌
-    if (qrData.startsWith('group_')) {
-      console.log('检测到群组邀请token:', qrData)
-      this.handleInviteLinkSignup(qrData)
+    // Ensure qrData is a string and decode if needed
+    if (typeof qrData !== 'string') {
+      wx.showModal({
+        title: '二维码无效',
+        content: '未识别到二维码数据',
+        showCancel: false
+      })
       return
     }
     
-    // 无效的二维码格式
-    console.error('二维码格式不支持:', qrData)
+    // Decode URI components
+    const decodedData = decodeURIComponent(qrData)
+    
+    // Check for mini-program page path format: pages/signup/signup?token=xxx
+    if (decodedData.includes('pages/signup/signup') && decodedData.includes('token=')) {
+      const tokenMatch = decodedData.match(/token=([^&]+)/)
+      const token = tokenMatch ? tokenMatch[1] : null
+      if (token) {
+        console.log('检测到小程序路径格式QR码，token:', token)
+        this.handleInviteLinkSignup(token)
+        return
+      }
+    }
+    
+    // Check for direct group token format
+    if (decodedData.startsWith('group_')) {
+      console.log('检测到群组邀请token:', decodedData)
+      this.handleInviteLinkSignup(decodedData)
+      return
+    }
+    
+    // Check for other invite tokens (UUID format)
+    if (decodedData.length > 10 && (decodedData.includes('-') || decodedData.length === 32)) {
+      console.log('检测到邀请token:', decodedData)
+      this.handleInviteLinkSignup(decodedData)
+      return
+    }
+    
+    // Invalid QR code format
+    console.error('二维码格式不支持:', decodedData)
     wx.showModal({
       title: '二维码无效',
       content: '请扫描管理员生成的有效邀请二维码',
