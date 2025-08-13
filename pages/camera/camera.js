@@ -1,5 +1,6 @@
 // pages/camera/camera.js
 const { t } = require('../../utils/translations')
+const { toZh } = require('../../utils/objectLabels')
 
 Page({
   data: {
@@ -290,7 +291,7 @@ Page({
               width: width * drawnW,
               height: height * drawnH,
               label: obj.label,
-              labelLocalized: obj.labelLocalized,
+              labelLocalized: obj.labelLocalized || toZh(obj.label),
               color: colors[index % colors.length]
             }
           })
@@ -336,7 +337,8 @@ Page({
         
         ctx.setFillStyle('#FFFFFF')
         ctx.setFontSize(12)
-        ctx.fillText(polygon.labelLocalized || polygon.label || '', labelX, labelY)
+        const labelText = polygon.labelLocalized || toZh(polygon.label) || polygon.label || ''
+        ctx.fillText(labelText, labelX, labelY)
       }
     })
     
