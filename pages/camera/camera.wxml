@@ -1,12 +1,14 @@
 <!-- pages/camera/camera.wxml -->
 <view class="camera-container">
-  <!-- 相机预览 -->
-  <camera 
-    class="camera-preview"
-    device-position="{{cameraPosition}}"
-    flash="{{flashMode}}"
-    binderror="onCameraError"
-  >
+  <!-- 相机预览容器 -->
+  <view id="previewContainer" class="preview-container">
+    <!-- 相机预览 -->
+    <camera 
+      class="camera-preview"
+      device-position="{{cameraPosition}}"
+      flash="{{flashMode}}"
+      binderror="onCameraError"
+    >
     <!-- 网格覆盖 -->
     <view wx:if="{{showOverlay && selectedTemplate && overlayType === 'grid'}}" class="grid-overlay">
       <view class="grid-line grid-line-v1"></view>
@@ -27,21 +29,27 @@
       </view>
     </view>
 
-    <!-- 对象覆盖 -->
+    <!-- 多边形覆盖 -->
+    <view wx:if="{{showOverlay && selectedTemplate && overlayType === 'polygons'}}" class="polygon-overlay">
+      <canvas 
+        canvas-id="polygonCanvas"
+        class="overlay-canvas"
+        disable-scroll="true"
+      ></canvas>
+    </view>
+
+    <!-- 对象覆盖 (改为非阻塞) -->
     <view wx:if="{{showOverlay && selectedTemplate && overlayType === 'objects'}}" class="object-overlay">
-      <cover-view 
-        wx:for="{{objectOverlay}}" 
+      <view 
+        wx:for="{{objectOverlayPixels}}" 
         wx:key="index"
         class="object-box"
-        style="left: {{(item.x || 0) * 100}}%; top: {{(item.y || 0) * 100}}%; width: {{(item.width || item.w || 0) * 100}}%; height: {{(item.height || item.h || 0) * 100}}%;"
+        style="left: {{item.left}}px; top: {{item.top}}px; width: {{item.width}}px; height: {{item.height}}px; border-color: {{item.color}};"
       >
-        <cover-view class="object-box-border"></cover-view>
-        <cover-view class="object-label">
-          <cover-view class="object-label-bg"></cover-view>
-          <text class="object-label-text">{{item.label}}</text>
-          <text class="object-confidence">{{item.confidencePercent}}%</text>
-        </cover-view>
-      </cover-view>
+        <view class="object-label" style="background-color: {{item.color}};">
+          <text class="object-label-text">{{item.labelLocalized || item.label}}</text>
+        </view>
+      </view>
     </view>
 
     <!-- 录制状态指示器 -->
@@ -78,6 +86,16 @@
       </view>
     </view>
   </camera>
+  </view> <!-- end of previewContainer -->
+  
+  <!-- 图例侧边栏 -->
+  <view wx:if="{{legend && legend.length > 0 && showOverlay}}" class="legend-sidebar">
+    <view wx:for="{{legend}}" wx:key="index" class="legend-item">
+      <view class="legend-dot" style="background-color: {{item.colorHex}};"></view>
+      <text class="legend-label">{{item.labelLocalized || item.label}}</text>
+      <text class="legend-confidence">{{(item.confidence * 100).toFixed(0)}}%</text>
+    </view>
+  </view>
 
   <!-- 脚本侧边栏 -->
   <view wx:if="{{selectedTemplate && currentScript}}" class="script-sidebar {{showScriptSidebar ? 'show' : ''}}">

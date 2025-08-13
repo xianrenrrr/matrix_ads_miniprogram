@@ -24,8 +24,13 @@ Page({
     gridOverlay: [], // 选中的网格块编号 [1,2,3,4,5,6,7,8,9]
     gridLabels: [], // 每个网格块的标签
     // 对象覆盖层
-    overlayType: 'grid', // 'grid' | 'objects'
+    overlayType: 'grid', // 'grid' | 'objects' | 'polygons'
     objectOverlay: [], // 对象覆盖数据 {label, confidence, x, y, w, h}
+    objectOverlayPixels: [], // 对象覆盖像素坐标
+    polygonOverlay: [], // 多边形覆盖数据
+    polygonOverlayPixels: [], // 多边形覆盖像素坐标
+    legend: [], // 图例数据
+    sourceAspect: '9:16', // 源视频比例
     // 指导信息
     backgroundInstructions: '',
     cameraInstructions: '',
@@ -63,6 +68,10 @@ Page({
   onShow() {
     console.log('录制页面显示')
     this.initCamera()
+    // 更新覆盖层像素坐标（处理屏幕旋转等）
+    if (this.data.selectedTemplate) {
+      this.updateOverlayPixels()
+    }
   },
 
   onHide() {
@@ -167,6 +176,7 @@ Page({
     
     // 检查当前场景的覆盖类型
     const overlayType = currentScene.overlayType || 'grid'
+    const isPolygonOverlay = overlayType === 'polygons'
     const isObjectOverlay = overlayType === 'objects'
     
     console.log(`场景 ${sceneIndex + 1} 覆盖类型:`, overlayType)
@@ -179,6 +189,8 @@ Page({
       currentScript: currentScene.scriptLine || '',
       sceneProgress: scenes.length > 0 ? (sceneIndex + 1) / scenes.length : 0,
       overlayType: overlayType,
+      sourceAspect: currentScene.sourceAspect || '9:16',
+      legend: currentScene.legend || [],
       // 相机设置
       cameraPosition: this.getCameraPosition(currentScene.personPosition),
       // 指导信息
@@ -187,10 +199,18 @@ Page({
       movementInstructions: currentScene.movementInstructions || ''
     }
     
-    if (isObjectOverlay && currentScene.overlayObjects && currentScene.overlayObjects.length > 0) {
+    if (isPolygonOverlay && currentScene.overlayPolygons && currentScene.overlayPolygons.length > 0) {
+      // 使用多边形覆盖模式
+      console.log('使用多边形覆盖模式，多边形数量:', currentScene.overlayPolygons.length)
+      updateData.polygonOverlay = currentScene.overlayPolygons
+      updateData.objectOverlay = []
+      updateData.gridOverlay = []
+      updateData.gridLabels = []
+    } else if (isObjectOverlay && currentScene.overlayObjects && currentScene.overlayObjects.length > 0) {
       // 使用对象覆盖模式
       console.log('使用对象覆盖模式，对象数量:', currentScene.overlayObjects.length)
       updateData.objectOverlay = this.processOverlayObjects(currentScene.overlayObjects)
+      updateData.polygonOverlay = []
       updateData.gridOverlay = []
       updateData.gridLabels = []
     } else {
@@ -200,12 +220,127 @@ Page({
       updateData.gridOverlay = currentScene.screenGridOverlay || []
       updateData.gridLabels = currentScene.screenGridOverlayLabels || []
       updateData.objectOverlay = []
+      updateData.polygonOverlay = []
     }
     
     this.setData(updateData)
     
+    // 更新覆盖层像素坐标
+    this.updateOverlayPixels()
+    
     console.log('模板设置完成，当前场景:', currentScene)
     console.log('覆盖模式:', updateData.overlayType, '对象数量:', updateData.objectOverlay.length)
+  },
+  
+  // 颜色调色板 - 第一个是红色
+  getColorPalette() {
+    return [
+      '#FF3B30', // Red - FIRST overlay
+      '#0A84FF', // Blue
+      '#34C759', // Green  
+      '#FF9F0A', // Orange
+      '#AF52DE', // Purple
+      '#32ADE6', // Light Blue
+      '#FF375F'  // Pink
+    ]
+  },
+  
+  // 更新覆盖层像素坐标
+  updateOverlayPixels() {
+    const that = this
+    
+    // 获取预览容器尺寸
+    wx.createSelectorQuery()
+      .select('#previewContainer')
+      .boundingClientRect(rect => {
+        if (!rect) return
+        
+        const containerW = rect.width
+        const containerH = rect.height
+        const sourceAspect = that.data.sourceAspect || '9:16'
+        
+        // 解析比例
+        const [vw, vh] = sourceAspect.split(':').map(Number)
+        
+        // 计算 object-fit: cover 的缩放和偏移
+        const scale = Math.max(containerW / vw, containerH / vh)
+        const drawnW = vw * scale
+        const drawnH = vh * scale
+        const offsetX = (containerW - drawnW) / 2
+        const offsetY = (containerH - drawnH) / 2
+        
+        const colors = that.getColorPalette()
+        
+        // 处理多边形覆盖
+        if (that.data.overlayType === 'polygons' && that.data.polygonOverlay.length > 0) {
+          that.drawPolygons(offsetX, offsetY, drawnW, drawnH, colors)
+        }
+        
+        // 处理对象覆盖
+        if (that.data.overlayType === 'objects' && that.data.objectOverlay.length > 0) {
+          const pixelOverlays = that.data.objectOverlay.map((obj, index) => {
+            const x = obj.x || 0
+            const y = obj.y || 0
+            const width = obj.width || obj.w || 0
+            const height = obj.height || obj.h || 0
+            
+            return {
+              left: offsetX + x * drawnW,
+              top: offsetY + y * drawnH,
+              width: width * drawnW,
+              height: height * drawnH,
+              label: obj.label,
+              labelLocalized: obj.labelLocalized,
+              color: colors[index % colors.length]
+            }
+          })
+          
+          that.setData({ objectOverlayPixels: pixelOverlays })
+        }
+      })
+      .exec()
+  },
+  
+  // 绘制多边形
+  drawPolygons(offsetX, offsetY, drawnW, drawnH, colors) {
+    const ctx = wx.createCanvasContext('polygonCanvas')
+    const polygons = this.data.polygonOverlay
+    
+    polygons.forEach((polygon, index) => {
+      const color = colors[index % colors.length]
+      ctx.setStrokeStyle(color)
+      ctx.setLineWidth(2)
+      ctx.setLineDash([5, 5])
+      
+      // 绘制多边形
+      if (polygon.points && polygon.points.length > 0) {
+        ctx.beginPath()
+        polygon.points.forEach((point, i) => {
+          const px = offsetX + point.x * drawnW
+          const py = offsetY + point.y * drawnH
+          if (i === 0) {
+            ctx.moveTo(px, py)
+          } else {
+            ctx.lineTo(px, py)
+          }
+        })
+        ctx.closePath()
+        ctx.stroke()
+        
+        // 绘制标签
+        const labelX = offsetX + polygon.points[0].x * drawnW + 10
+        const labelY = offsetY + polygon.points[0].y * drawnH + 20
+        
+        ctx.setFillStyle(color)
+        ctx.fillRect(labelX - 2, labelY - 14, 80, 20)
+        
+        ctx.setFillStyle('#FFFFFF')
+        ctx.setFontSize(12)
+        ctx.fillText(polygon.labelLocalized || polygon.label || '', labelX, labelY)
+      }
+    })
+    
+    ctx.draw()
   },
   
   // 根据人物位置确定相机方向

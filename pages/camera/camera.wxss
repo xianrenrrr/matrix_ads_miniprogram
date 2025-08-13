@@ -8,6 +8,12 @@
   overflow: hidden;
 }
 
+.preview-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
 .camera-preview {
   width: 100%;
   height: 100%;
@@ -70,6 +76,23 @@
 .grid-block-8 { top: 66.67%; left: 33.33%; width: 33.33%; height: 33.33%; }
 .grid-block-9 { top: 66.67%; left: 66.67%; width: 33.33%; height: 33.33%; }
 
+/* 多边形覆盖 */
+.polygon-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* 不阻塞触摸 */
+  z-index: 5;
+}
+
+.overlay-canvas {
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* Canvas 也不阻塞触摸 */
+}
+
 /* 对象覆盖 */
 .object-overlay {
   position: absolute;
@@ -77,12 +100,16 @@
   left: 0;
   width: 100%;
   height: 100%;
-  pointer-events: none;
+  pointer-events: none; /* 不阻塞触摸 */
+  z-index: 5;
 }
 
 .object-box {
   position: absolute;
   box-sizing: border-box;
+  border: 2px dashed;
+  border-radius: 8rpx;
+  pointer-events: none; /* 边框不阻塞触摸 */
 }
 
 .object-box-border {
@@ -708,4 +735,56 @@
 .upload-action-btn.retry-btn {
   background-color: #1f2937;
   color: white;
+}
+/* 图例侧边栏 */
+.legend-sidebar {
+  position: absolute;
+  right: 12rpx;
+  top: 120rpx;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 12rpx;
+  padding: 16rpx;
+  z-index: 9;
+  pointer-events: none; /* 不阻塞触摸 */
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12rpx;
+  min-width: 120rpx;
+}
+
+.legend-item:last-child {
+  margin-bottom: 0;
+}
+
+.legend-dot {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  margin-right: 8rpx;
+}
+
+.legend-label {
+  color: white;
+  font-size: 24rpx;
+  margin-right: 8rpx;
+  flex: 1;
+}
+
+.legend-confidence {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 20rpx;
+}
+
+/* 控制按钮确保高 z-index */
+.top-controls {
+  z-index: 10;
+  pointer-events: auto;
+}
+
+.bottom-controls {
+  z-index: 10;
+  pointer-events: auto;
 }
