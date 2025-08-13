@@ -143,74 +143,6 @@
   pointer-events: none; /* Canvas 也不阻塞触摸 */
 }
 
-/* 对象覆盖 */
-.object-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none; /* 不阻塞触摸 */
-  z-index: 5;
-}
-
-.object-box {
-  position: absolute;
-  box-sizing: border-box;
-  border: 2px dashed;
-  border-radius: 8rpx;
-  pointer-events: none; /* 边框不阻塞触摸 */
-}
-
-.object-box-border {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  border: 4rpx dashed #10b981;
-  border-radius: 8rpx;
-  background-color: rgba(16, 185, 129, 0.1);
-  box-sizing: border-box;
-}
-
-.object-label {
-  position: absolute;
-  top: -8rpx;
-  left: 0;
-  display: flex;
-  align-items: center;
-  font-size: 24rpx;
-  font-weight: 500;
-  white-space: nowrap;
-  z-index: 10;
-}
-
-.object-label-bg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(16, 185, 129, 0.9);
-  border-radius: 8rpx;
-}
-
-.object-label-text {
-  position: relative;
-  color: white;
-  padding: 8rpx 12rpx;
-  z-index: 1;
-}
-
-.object-confidence {
-  position: relative;
-  color: white;
-  padding: 8rpx 12rpx 8rpx 0;
-  opacity: 0.8;
-  font-size: 20rpx;
-  z-index: 1;
-}
 
 /* 录制状态指示器 */
 .recording-indicator {
@@ -785,47 +717,6 @@
 .upload-action-btn.retry-btn {
   background-color: #1f2937;
   color: white;
-}
-/* 图例侧边栏 */
-.legend-sidebar {
-  position: absolute;
-  right: 12rpx;
-  top: 120rpx;
-  background: rgba(0, 0, 0, 0.6);
-  border-radius: 12rpx;
-  padding: 16rpx;
-  z-index: 9;
-  pointer-events: none; /* 不阻塞触摸 */
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  margin-bottom: 12rpx;
-  min-width: 120rpx;
-}
-
-.legend-item:last-child {
-  margin-bottom: 0;
-}
-
-.legend-dot {
-  width: 16rpx;
-  height: 16rpx;
-  border-radius: 50%;
-  margin-right: 8rpx;
-}
-
-.legend-label {
-  color: white;
-  font-size: 24rpx;
-  margin-right: 8rpx;
-  flex: 1;
-}
-
-.legend-confidence {
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 20rpx;
 }
 
 /* 控制按钮确保高 z-index */

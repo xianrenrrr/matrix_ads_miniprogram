@@ -27,7 +27,6 @@ Page({
     // 对象覆盖层
     overlayType: 'grid', // 'grid' | 'objects' | 'polygons'
     objectOverlay: [], // 对象覆盖数据 {label, confidence, x, y, w, h}
-    objectOverlayPixels: [], // 对象覆盖像素坐标
     polygonOverlay: [], // 多边形覆盖数据
     polygonOverlayPixels: [], // 多边形覆盖像素坐标
     overlayRectsPixels: [], // MVP: [{left, top, width, height, colorHex, label, labelLocalized, confidence}]
@@ -212,7 +211,12 @@ Page({
       // MVP: 使用对象覆盖模式
       console.log('MVP: 使用对象覆盖模式，对象数量:', currentScene.overlayObjects.length)
       updateData.objectOverlay = this.processOverlayObjects(currentScene.overlayObjects)
-      updateData.legend = currentScene.legend || [] // Set legend from backend
+      // Process legend to add confidencePercent
+      const legend = currentScene.legend || []
+      updateData.legend = legend.map(item => ({
+        ...item,
+        confidencePercent: Math.round((item.confidence || 0) * 100)
+      }))
       updateData.polygonOverlay = []
       updateData.gridOverlay = []
       updateData.gridLabels = []
@@ -335,12 +339,12 @@ Page({
     rects.forEach((rect, index) => {
       const { left, top, width, height, colorHex, labelLocalized, label } = rect
       
-      // Draw rounded dashed rectangle (stroke only)
+      // Draw dashed rectangle (stroke only)
       ctx.setStrokeStyle(colorHex)
       ctx.setLineWidth(2)
       ctx.setLineDash([5, 5])
       ctx.beginPath()
-      ctx.roundRect(left, top, width, height, 8)
+      ctx.rect(left, top, width, height)
       ctx.stroke()
       
       // Draw label chip at (left+4, top+4)

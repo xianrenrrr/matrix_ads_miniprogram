@@ -84,7 +84,7 @@
     <block wx:for="{{legend}}" wx:key="index">
       <view class="legend-item">
         <view class="dot" style="background-color: {{item.colorHex}}"></view>
-        <text class="legend-text">{{item.labelLocalized || item.label}}（{{Math.round((item.confidence||0)*100)}}%）</text>
+        <text class="legend-text">{{item.labelLocalized || item.label}}（{{item.confidencePercent || 0}}%）</text>
       </view>
     </block>
   </view>
