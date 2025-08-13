@@ -129,13 +129,17 @@ Page({
       },
       success: (res) => {
         console.log('加载模板响应:', res)
-        if (res.statusCode === 200 && res.data) {
-          // Handle new ApiResponse format: {success, message, data, error}
-          const responseData = (res.data && res.data.data) || res.data;
+        
+        // Handle new ApiResponse format: {success, message, data, error}
+        const isApiSuccess = res.data && res.data.success === true;
+        const responseData = res.data && res.data.data ? res.data.data : {};
+        
+        if (res.statusCode === 200 && isApiSuccess) {
           this.setupTemplate(responseData)
         } else {
+          const errorMessage = res.data && res.data.error ? res.data.error : t('templateNotFound');
           wx.showToast({
-            title: t('templateNotFound'),
+            title: errorMessage,
             icon: 'none'
           })
         }
@@ -481,17 +485,18 @@ Page({
           wx.hideLoading()
 
           // Handle new ApiResponse format: {success, message, data, error}
-          var responseData = (parsedResponse && parsedResponse.data) || parsedResponse;
-          var success = (parsedResponse && parsedResponse.success !== undefined) ? parsedResponse.success : true;
+          const isApiSuccess = parsedResponse && parsedResponse.success === true;
+          const responseData = parsedResponse && parsedResponse.data ? parsedResponse.data : {};
 
-          if (success) {
+          if (response.statusCode === 200 && isApiSuccess) {
             console.log('Upload successful, showing AI feedback')
-            // Show AI feedback if available - pass the data part or full response
-            this.showAIFeedback(responseData.data ? responseData : parsedResponse)
+            // Show AI feedback if available
+            this.showAIFeedback(responseData)
           } else {
-            console.error('Upload failed with message:', (parsedResponse && parsedResponse.message) || (parsedResponse && parsedResponse.error))
+            const errorMessage = parsedResponse && (parsedResponse.error || parsedResponse.message) || t('uploadFailed');
+            console.error('Upload failed with message:', errorMessage)
             wx.showToast({
-              title: (parsedResponse && parsedResponse.message) || (parsedResponse && parsedResponse.error) || t('uploadFailed'),
+              title: errorMessage,
               icon: 'error'
             })
           }

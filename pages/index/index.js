@@ -68,9 +68,12 @@ Page({
       },
       success: (res) => {
         console.log('订阅模板响应:', res)
-        if (res.statusCode === 200 && res.data) {
-          // Handle new ApiResponse format: {success, message, data, error}
-          const responseData = (res.data && res.data.data) || res.data;
+        
+        // Handle new ApiResponse format: {success, message, data, error}
+        const isApiSuccess = res.data && res.data.success === true;
+        const responseData = res.data && res.data.data ? res.data.data : [];
+        
+        if (res.statusCode === 200 && isApiSuccess) {
           const templates = responseData
           console.log('获取到的模板数量:', templates.length)
           
@@ -83,9 +86,10 @@ Page({
           // 更新全局模板数据
           app.globalData.templates = templates
         } else {
-          console.log('获取模板失败:', res.data)
+          const errorMessage = res.data && res.data.error ? res.data.error : '获取模板失败';
+          console.log('获取模板失败:', errorMessage)
           wx.showToast({
-            title: '获取模板失败',
+            title: errorMessage,
             icon: 'none'
           })
         }
@@ -119,11 +123,12 @@ Page({
       },
       success: (res) => {
         console.log('仪表板统计响应:', res)
-        // Handle new ApiResponse format: {success, message, data, error}
-        const responseData = (res.data && res.data.data) || res.data;
-        const success = (res.data && res.data.success !== undefined) ? res.data.success : true;
         
-        if (res.statusCode === 200 && responseData && success) {
+        // Handle new ApiResponse format: {success, message, data, error}
+        const isApiSuccess = res.data && res.data.success === true;
+        const responseData = res.data && res.data.data ? res.data.data : {};
+        
+        if (res.statusCode === 200 && isApiSuccess) {
           this.setData({
             stats: {
               availableTemplates: responseData.availableTemplates || 0,
@@ -132,7 +137,8 @@ Page({
             }
           })
         } else {
-          console.log('获取统计数据失败:', res.data)
+          const errorMessage = res.data && res.data.error ? res.data.error : '获取统计数据失败';
+          console.log('获取统计数据失败:', errorMessage)
         }
       },
       fail: (err) => {

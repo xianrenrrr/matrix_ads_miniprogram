@@ -77,9 +77,11 @@ App({
         'Content-Type': 'application/json'
       },
       success: (res) => {
-        if (res.statusCode === 200) {
-          // Handle new ApiResponse format: {success, message, data, error}
-          const responseData = (res.data && res.data.data) || res.data;
+        // Handle new ApiResponse format: {success, message, data, error}
+        const isApiSuccess = res.data && res.data.success === true;
+        const responseData = res.data && res.data.data ? res.data.data : {};
+        
+        if (res.statusCode === 200 && isApiSuccess) {
           this.globalData.userInfo = responseData;
           this.globalData.isLoggedIn = true;
         } else {

@@ -70,10 +70,12 @@ Page({
       },
       success: function(response) {
         console.log('Template API response:', response);
-        // Handle new ApiResponse format: {success, message, data, error}
-        const responseData = (response.data && response.data.data) || response.data;
         
-        if (responseData && responseData.scenes) {
+        // Handle new ApiResponse format: {success, message, data, error}
+        const isApiSuccess = response.data && response.data.success === true;
+        const responseData = response.data && response.data.data ? response.data.data : {};
+        
+        if (response.statusCode === 200 && isApiSuccess && responseData.scenes) {
           console.log('Found scenes:', responseData.scenes.length);
           self.setData({
             template: responseData,
@@ -81,9 +83,10 @@ Page({
             loading: false
           });
         } else {
-          console.log('No scenes found in response:', response.data);
+          const errorMessage = response.data && response.data.error ? response.data.error : t('templateNotFoundOrNoScenes');
+          console.log('Template load failed:', errorMessage);
           wx.showToast({
-            title: t('templateNotFoundOrNoScenes'),
+            title: errorMessage,
             icon: 'error'
           });
           self.setData({ loading: false });
@@ -122,9 +125,12 @@ Page({
       },
       success: function(response) {
         console.log('Load submitted video response:', response);
-        if (response.statusCode === 200 && response.data) {
-          // Handle new ApiResponse format: {success, message, data, error}
-          var responseData = (response.data && response.data.data) || response.data;
+        
+        // Handle new ApiResponse format: {success, message, data, error}
+        const isApiSuccess = response.data && response.data.success === true;
+        const responseData = response.data && response.data.data ? response.data.data : {};
+        
+        if (response.statusCode === 200 && isApiSuccess) {
           var videoData = responseData;
           var scenes = videoData.scenes || {};
           var progress = videoData.progress || null;

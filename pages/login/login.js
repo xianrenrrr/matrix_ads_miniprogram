@@ -96,12 +96,11 @@ Page({
         console.log('状态码:', res.statusCode)
         console.log('响应数据:', res.data)
         
-        if (res.statusCode === 200) {
+        if (res.statusCode === 200 && res.data && res.data.success === true) {
           // Handle new ApiResponse format: {success, message, data: {token, user}, error}
-          const responseData = (res.data && res.data.data) || res.data;
-          const success = (res.data && res.data.success !== undefined) ? res.data.success : true;
+          const responseData = res.data.data || {};
           
-          if (responseData && success) {
+          if (responseData) {
             // 登录成功
             const { token, user } = responseData;
             console.log('登录成功，用户信息:', user)
@@ -141,9 +140,13 @@ Page({
           } else {
             // 后端返回失败
             console.log('后端返回失败:', res.data)
+            let errorMessage = '登录验证失败';
+            if (res.data) {
+              errorMessage = res.data.error || res.data.message || errorMessage;
+            }
             wx.showModal({
               title: '登录失败',
-              content: (res.data && res.data.message) || (res.data && res.data.error) || '登录验证失败',
+              content: errorMessage,
               showCancel: false
             })
           }
@@ -251,33 +254,31 @@ Page({
     // Decode URI components
     const decodedData = decodeURIComponent(qrData)
     
-    // Check for mini-program page path format: pages/signup/signup?token=xxx
-    if (decodedData.includes('pages/signup/signup') && decodedData.includes('token=')) {
-      const tokenMatch = decodedData.match(/token=([^&]+)/)
-      const token = tokenMatch ? tokenMatch[1] : null
-      if (token) {
-        console.log('检测到小程序路径格式QR码，token:', token)
-        this.handleInviteLinkSignup(token)
-        return
+    // Parse JSON QR code format
+    if (decodedData.startsWith('{')) {
+      try {
+        const qrDataObj = JSON.parse(decodedData)
+        console.log('检测到QR码数据:', qrDataObj)
+        
+        // Handle group join format
+        if (qrDataObj.type === 'group_join' && qrDataObj.token) {
+          console.log('群组邀请token:', qrDataObj.token)
+          this.handleInviteLinkSignup(qrDataObj.token)
+          return
+        }
+        
+        // Handle other JSON formats
+        if (qrDataObj.type === 'signup_invite') {
+          this.handleInviteSignup(qrDataObj)
+          return
+        }
+      } catch (error) {
+        console.error('QR码解析失败:', error)
       }
     }
     
-    // Check for direct group token format
-    if (decodedData.startsWith('group_')) {
-      console.log('检测到群组邀请token:', decodedData)
-      this.handleInviteLinkSignup(decodedData)
-      return
-    }
-    
-    // Check for other invite tokens (UUID format)
-    if (decodedData.length > 10 && (decodedData.includes('-') || decodedData.length === 32)) {
-      console.log('检测到邀请token:', decodedData)
-      this.handleInviteLinkSignup(decodedData)
-      return
-    }
-    
     // Invalid QR code format
-    console.error('二维码格式不支持:', decodedData)
+    console.error('不支持的QR码格式:', decodedData)
     wx.showModal({
       title: '二维码无效',
       content: '请扫描管理员生成的有效邀请二维码',
@@ -313,14 +314,14 @@ Page({
       method: 'GET',
       success: (res) => {
         // Handle new ApiResponse format: {success, message, data, error}
-        const responseData = (res.data && res.data.data) || res.data;
-        const success = (res.data && res.data.success !== undefined) ? res.data.success : true;
+        const isApiSuccess = res.data && res.data.success === true;
+        const responseData = res.data && res.data.data ? res.data.data : {};
         
-        if (res.statusCode === 200 && success) {
+        if (res.statusCode === 200 && isApiSuccess) {
           // 邀请有效，显示确认对话框
           wx.showModal({
             title: '确认注册',
-            content: `您即将加入管理员 ${responseData.managerName || res.data.managerName} 的团队，是否继续？`,
+            content: `您即将加入管理员 ${responseData.managerName} 的团队，是否继续？`,
             confirmText: '确认注册',
             cancelText: '取消',
             success: (modalRes) => {
@@ -328,8 +329,8 @@ Page({
                 // 显示注册表单
                 this.showSignupForm({
                   inviteToken: token,
-                  managerName: responseData.managerName || res.data.managerName,
-                  inviteeName: responseData.inviteeName || res.data.inviteeName
+                  managerName: responseData.managerName,
+                  inviteeName: responseData.inviteeName
                 })
               }
             }

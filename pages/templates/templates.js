@@ -44,9 +44,12 @@ Page({
       },
       success: (res) => {
         console.log('模板页面订阅模板响应:', res)
-        if (res.statusCode === 200 && res.data) {
-          // Handle new ApiResponse format: {success, message, data, error}
-          const responseData = (res.data && res.data.data) || res.data;
+        
+        // Handle new ApiResponse format: {success, message, data, error}
+        const isApiSuccess = res.data && res.data.success === true;
+        const responseData = res.data && res.data.data ? res.data.data : [];
+        
+        if (res.statusCode === 200 && isApiSuccess) {
           const templates = responseData.map(template => ({
             ...template,
             isSubscribed: true, // 这些都是已订阅的模板
@@ -65,14 +68,15 @@ Page({
           // 更新全局模板数据
           app.globalData.templates = templates
         } else {
-          console.log('获取模板失败:', res.data)
+          const errorMessage = res.data && res.data.error ? res.data.error : '获取模板失败';
+          console.log('获取模板失败:', errorMessage)
           this.setData({
             templates: [],
             allTemplates: [],
             loading: false
           })
           wx.showToast({
-            title: '获取模板失败',
+            title: errorMessage,
             icon: 'none'
           })
         }

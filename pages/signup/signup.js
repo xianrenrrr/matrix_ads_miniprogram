@@ -147,6 +147,7 @@ Page({
       inviteToken: inviteInfo.inviteToken || inviteInfo.token,
       username: formData.username.trim(),
       phone: formData.phone.trim(),
+      province: formData.city.trim(), // Use city as province for now
       city: formData.city.trim(),
       password: formData.password,
       role: 'content_creator'
@@ -165,10 +166,10 @@ Page({
         console.log('注册响应:', res)
         
         // Handle new ApiResponse format: {success, message, data, error}
-        const responseData = (res.data && res.data.data) || res.data;
-        const success = (res.data && res.data.success !== undefined) ? res.data.success : true;
+        const isApiSuccess = res.data && res.data.success === true;
+        const responseData = res.data && res.data.data ? res.data.data : {};
         
-        if (res.statusCode === 200 && success) {
+        if (res.statusCode === 200 && isApiSuccess) {
           // 注册成功
           wx.showToast({
             title: '注册成功',
@@ -178,8 +179,8 @@ Page({
           // 显示成功信息并引导用户登录
           setTimeout(() => {
             // Use group info from response if available, otherwise fallback to invite info
-            const groupName = responseData.groupName || res.data.groupName || inviteInfo.groupName || '团队';
-            const managerName = responseData.managerName || res.data.managerName || inviteInfo.managerName || '管理员';
+            const groupName = responseData.groupName || inviteInfo.groupName || '团队';
+            const managerName = responseData.managerName || inviteInfo.managerName || '管理员';
             
             wx.showModal({
               title: '注册成功！',
@@ -194,10 +195,17 @@ Page({
           }, 1500)
           
         } else {
-          // 注册失败
+          // 注册失败 - Handle ApiResponse error format
+          let errorMessage = '注册过程中出现错误，请稍后重试';
+          
+          if (res.data) {
+            // Extract error from ApiResponse format: {success: false, error: "..."}
+            errorMessage = res.data.error || res.data.message || errorMessage;
+          }
+          
           wx.showModal({
             title: '注册失败',
-            content: (res.data && res.data.message) || (res.data && res.data.error) || '注册过程中出现错误，请稍后重试',
+            content: errorMessage,
             showCancel: false
           })
         }
