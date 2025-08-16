@@ -38,18 +38,18 @@ Page({
       loading: false
     })
     
-    this.loadSubscribedTemplates()
+    this.loadAssignedTemplates()
     this.loadDashboardStats()
   },
 
   // 刷新数据
   refreshData() {
-    this.loadSubscribedTemplates()
+    this.loadAssignedTemplates()
     this.loadDashboardStats()
   },
 
-  // 加载已订阅的模板
-  loadSubscribedTemplates() {
+  // 加载已分配的模板
+  loadAssignedTemplates() {
     const app = getApp()
     if (!app.globalData.isLoggedIn || !app.globalData.userInfo) {
       console.log('用户未登录，无法加载模板')
@@ -60,14 +60,14 @@ Page({
     console.log('开始加载用户模板，用户ID:', userId)
 
     wx.request({
-      url: `${app.globalData.apiBaseUrl}/content-creator/users/${userId}/subscribed-templates`,
+      url: `${app.globalData.apiBaseUrl}/content-creator/users/${userId}/assigned-templates`,
       method: 'GET',
       header: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${wx.getStorageSync('access_token')}`
       },
       success: (res) => {
-        console.log('订阅模板响应:', res)
+        console.log('分配模板响应:', res)
         
         // Handle new ApiResponse format: {success, message, data, error}
         const isApiSuccess = res.data && res.data.success === true;

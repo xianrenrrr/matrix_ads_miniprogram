@@ -32,7 +32,7 @@
       <view 
         wx:for="{{templates}}" 
         wx:key="id"
-        class="template-card {{!item.isSubscribed ? 'unsubscribed' : ''}}"
+        class="template-card"
       >
         <!-- 模板缩略图 -->
         <view class="template-thumbnail">
@@ -43,10 +43,6 @@
             lazy-load="true"
           ></image>
           
-          <!-- 订阅状态标识 -->
-          <view wx:if="{{!item.isSubscribed}}" class="subscription-badge">
-            <text class="badge-text">未订阅</text>
-          </view>
           
           <!-- 难度标识 -->
           <view class="difficulty-badge" style="background-color: {{getDifficultyColor(item.difficulty)}}">
@@ -83,25 +79,14 @@
             <text class="creator-info">内容管理员创建</text>
             
             <!-- 操作按钮 -->
-            <view class="template-actions" wx:if="{{item.isSubscribed}}">
+            <view class="template-actions">
               <button 
-                class="action-btn primary-btn"
+                class="action-btn start-btn"
                 data-id="{{item.id}}"
                 bindtap="startRecording"
                 size="mini"
               >
                 开始录制
-              </button>
-            </view>
-            
-            <view class="template-actions" wx:else>
-              <button 
-                class="action-btn subscribe-btn"
-                data-id="{{item.id}}"
-                bindtap="subscribeTemplate"
-                size="mini"
-              >
-                去订阅
               </button>
             </view>
           </view>
@@ -112,6 +97,6 @@
 
   <!-- 底部提示 -->
   <view class="bottom-tips">
-    <text class="tip-text">在网页端可以订阅更多模板</text>
+    <text class="tip-text">模板由管理员分配</text>
   </view>
 </view>

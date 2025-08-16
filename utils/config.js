@@ -16,7 +16,7 @@ const config = {
       templates: '/content-creator/templates',
       templateDetail: '/content-creator/templates/{id}',
       subscribeTemplate: '/content-creator/users/{userId}/subscribe',
-      subscribedTemplates: '/content-creator/users/{userId}/subscribed-templates',
+      assignedTemplates: '/content-creator/users/{userId}/assigned-templates',
       
       // 视频相关 (Content Creator endpoints) 
       uploadVideo: '/content-creator/videos/upload',

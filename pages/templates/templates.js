@@ -36,14 +36,14 @@ Page({
     const userId = app.globalData.userInfo.id
 
     wx.request({
-      url: `${app.globalData.apiBaseUrl}/content-creator/users/${userId}/subscribed-templates`,
+      url: `${app.globalData.apiBaseUrl}/content-creator/users/${userId}/assigned-templates`,
       method: 'GET',
       header: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${wx.getStorageSync('access_token')}`
       },
       success: (res) => {
-        console.log('模板页面订阅模板响应:', res)
+        console.log('模板页面分配模板响应:', res)
         
         // Handle new ApiResponse format: {success, message, data, error}
         const isApiSuccess = res.data && res.data.success === true;
@@ -52,7 +52,7 @@ Page({
         if (res.statusCode === 200 && isApiSuccess) {
           const templates = responseData.map(template => ({
             ...template,
-            isSubscribed: true, // 这些都是已订阅的模板
+            isAssigned: true, // 这些都是已分配的模板
             duration: template.totalVideoLength,
             sceneCount: (template.scenes && template.scenes.length) || 0,
             difficulty: 'easy', // 可以根据场景数量判断难度
@@ -197,17 +197,6 @@ Page({
 
 
   // 订阅模板
-  subscribeTemplate(e) {
-    e.stopPropagation() // 阻止事件冒泡
-    
-    const templateId = e.currentTarget.dataset.id
-    
-    wx.showModal({
-      title: '订阅模板',
-      content: '请在网页端进行模板订阅操作',
-      showCancel: false
-    })
-  },
 
   // 下拉刷新
   onPullDownRefresh() {
