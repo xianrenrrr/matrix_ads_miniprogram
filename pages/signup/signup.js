@@ -97,6 +97,8 @@ Page({
       return false
     }
     
+    // TODO: REMOVE THIS BYPASS BEFORE PRODUCTION - Phone validation should be enabled
+    /*
     if (!phone.trim()) {
       wx.showToast({ title: '请输入手机号码', icon: 'none' })
       return false
@@ -107,6 +109,7 @@ Page({
       wx.showToast({ title: '请输入有效的手机号码', icon: 'none' })
       return false
     }
+    */
     
     if (!city.trim()) {
       wx.showToast({ title: '请输入城市', icon: 'none' })
