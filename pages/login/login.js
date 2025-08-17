@@ -58,6 +58,8 @@ Page({
       return
     }
     
+    // TODO: REMOVE THIS BYPASS BEFORE PRODUCTION - Phone validation should be enabled
+    /*
     // 验证手机号格式
     if (!/^1[3-9]\d{9}$/.test(phone.trim())) {
       wx.showToast({
@@ -66,6 +68,7 @@ Page({
       })
       return
     }
+    */
     
     if (!password.trim()) {
       wx.showToast({
