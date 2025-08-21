@@ -71,11 +71,9 @@
       <view class="card-title mb-24">快速操作</view>
       <view class="quick-actions">
         <button class="action-btn" bindtap="startRecording">
-          <text class="action-icon">📹</text>
           <text class="action-text">开始录制</text>
         </button>
         <button class="action-btn" bindtap="handleLogout">
-          <text class="action-icon">🚪</text>
           <text class="action-text">退出登录</text>
         </button>
       </view>

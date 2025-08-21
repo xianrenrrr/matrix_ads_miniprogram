@@ -140,6 +140,27 @@
   margin-bottom: 16px;
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+/* Status Indicator */
+.status-indicator {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+}
+
+.status-check {
+  color: #10b981;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.status-cross {
+  color: #ef4444;
+  font-size: 24px;
+  font-weight: bold;
 }
 
 .scene-header {
@@ -183,6 +204,13 @@
   font-weight: 600;
   color: #1f2937;
   display: block;
+}
+
+.similarity-inline {
+  font-size: 14px;
+  color: #000000;
+  margin-left: 10px;
+  font-weight: 500;
 }
 
 .scene-duration {

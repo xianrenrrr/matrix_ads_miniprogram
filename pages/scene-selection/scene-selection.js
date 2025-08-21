@@ -126,36 +126,60 @@ Page({
       success: function(response) {
         console.log('Load submitted video response:', response);
         
-        // Handle new ApiResponse format: {success, message, data, error}
+        // The API returns data directly at response.data level with success flag
         const isApiSuccess = response.data && response.data.success === true;
-        const responseData = response.data && response.data.data ? response.data.data : {};
         
         if (response.statusCode === 200 && isApiSuccess) {
-          var videoData = responseData;
+          // Data is directly in response.data, not response.data.data
+          var videoData = response.data;
           var scenes = videoData.scenes || {};
           var progress = videoData.progress || null;
-          
-          console.log('Scenes data:', scenes);
-          console.log('Progress data:', progress);
           
           // Convert scenes object to sceneMap format (keyed by scene number)
           var sceneMap = {};
           Object.keys(scenes).forEach(function(sceneKey) {
             var scene = scenes[sceneKey];
             if (scene && scene.sceneNumber) {
+              // Pre-compute similarity score percentage
+              var similarityPercent = null;
+              if (scene.similarityScore != null) {
+                var raw = scene.similarityScore;
+                similarityPercent = raw <= 1 ? Math.round(raw * 100) : Math.round(raw);
+              }
+              
+              // Add computed values to scene object
+              scene.similarityPercent = similarityPercent;
+              scene.hasScore = similarityPercent != null;
+              
+              // Translate status to Chinese
+              var statusText = '未提交';
+              switch(scene.status) {
+                case 'approved': statusText = '已批准'; break;
+                case 'pending': statusText = '待审核'; break;
+                case 'rejected': statusText = '已拒绝'; break;
+                default: statusText = '未提交';
+              }
+              scene.statusText = statusText;
+              scene.statusColor = self.getSceneStatusColor(scene.status || 'not-submitted');
+              
               sceneMap[scene.sceneNumber] = scene;
             }
           });
-          
-          console.log('Converted scene map:', sceneMap);
           
           self.setData({
             submissions: sceneMap,
             progress: progress
           });
-        } else {
-          console.log('No submission data found or API error');
+        } else if (response.statusCode === 404) {
+          console.log('No submission found for this template - this is normal for new users');
           // Set empty data for new template (no submissions yet)
+          self.setData({
+            submissions: {},
+            progress: null
+          });
+        } else {
+          console.log('API error or unexpected response');
+          // Set empty data
           self.setData({
             submissions: {},
             progress: null
@@ -310,21 +334,7 @@ Page({
     }
   },
 
-  // Get scene status for display
-  getSceneStatus: function(sceneNumber) {
-    var submission = this.data.submissions[sceneNumber];
-    if (!submission) return 'not-submitted';
-    return submission.status;
-  },
 
-  // Get similarity score as percentage
-  getSimilarityScore: function(sceneNumber) {
-    var submission = this.data.submissions[sceneNumber];
-    if (!submission || !submission.similarityScore) return 0;
-    const raw = submission.similarityScore || 0;
-    const similarity = raw <= 1 ? Math.round(raw * 100) : Math.round(raw);
-    return similarity;
-  },
 
   // Get scene status color
   getSceneStatusColor: function(status) {

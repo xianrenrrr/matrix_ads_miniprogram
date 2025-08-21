@@ -24,33 +24,33 @@
 
     <view class="scenes-list">
       <view wx:for="{{scenes}}" wx:key="index" class="scene-item">
+        <!-- Status Indicator in top right -->
+        <view class="status-indicator" wx:if="{{submissions[index + 1]}}">
+          <text wx:if="{{submissions[index + 1].status === 'approved'}}" class="status-check">✓</text>
+          <text wx:elif="{{submissions[index + 1].status === 'rejected'}}" class="status-cross">✗</text>
+        </view>
+        
         <!-- Scene Header -->
         <view class="scene-header">
           <view class="scene-number-container">
             <view class="scene-number" 
-                  style="background-color: {{getSceneStatusColor(getSceneStatus(index + 1))}}">
+                  style="background-color: {{submissions[index + 1] ? submissions[index + 1].statusColor : '#9ca3af'}}">
               {{index + 1}}
             </view>
-            <text class="scene-status">{{getSceneStatus(index + 1)}}</text>
+            <text class="scene-status">{{submissions[index + 1] ? submissions[index + 1].statusText : '未提交'}}</text>
           </view>
           
           <view class="scene-title-container">
             <text class="scene-title">{{item.sceneTitle || '场景 ' + (index + 1)}}</text>
+            <!-- Video Similarity Score on same line -->
+            <text class="similarity-inline" wx:if="{{submissions[index + 1] && submissions[index + 1].hasScore}}">
+              视频相似度: {{submissions[index + 1].similarityPercent}}%
+            </text>
           </view>
         </view>
 
         <!-- Scene Content -->
         <view class="scene-content" wx:if="{{submissions[index + 1]}}">
-          <!-- AI Similarity Score -->
-          <view class="similarity-section" wx:if="{{submissions[index + 1].similarityScore}}">
-            <text class="similarity-label">AI相似度:</text>
-            <text class="similarity-value {{submissions[index + 1].similarityScore >= 0.85 ? 'high-score' : ''}}">
-              {{getSimilarityScore(index + 1)}}%
-            </text>
-            <!-- Green checkmark for high scores -->
-            <text class="score-indicator" wx:if="{{submissions[index + 1].similarityScore >= 0.85}}">✓</text>
-          </view>
-
           <!-- AI Suggestions -->
           <view class="suggestions-section" wx:if="{{submissions[index + 1].aiSuggestions && submissions[index + 1].aiSuggestions.length > 0}}">
             <text class="suggestions-label">AI建议:</text>
@@ -65,13 +65,13 @@
         <!-- Scene Actions -->
         <view class="scene-actions">
           <!-- Record Button -->
-          <button class="record-button {{getSceneStatus(index + 1) === 'approved' ? 'completed' : ''}}"
+          <button class="record-button {{submissions[index + 1] && submissions[index + 1].statusText === '已批准' ? 'completed' : ''}}"
                   data-index="{{index}}"
                   bindtap="recordScene"
                   size="mini">
-            {{getSceneStatus(index + 1) === 'approved' ? '重新录制' : 
-              getSceneStatus(index + 1) === 'pending' ? '重新录制' :
-              getSceneStatus(index + 1) === 'rejected' ? '修改重录' : '录制'}}
+            {{submissions[index + 1] && submissions[index + 1].statusText === '已批准' ? '重新录制' : 
+              submissions[index + 1] && submissions[index + 1].statusText === '待审核' ? '重新录制' :
+              submissions[index + 1] && submissions[index + 1].statusText === '已拒绝' ? '修改重录' : '录制'}}
           </button>
         </view>
       </view>
@@ -92,7 +92,7 @@
           <text class="stat-label">待审核</text>
         </view>
         <view class="stat-item">
-          <text class="stat-number">{{Math.round(progress.completionPercentage || 0)}}%</text>
+          <text class="stat-number">{{progress.approved}}/{{progress.totalScenes}}</text>
           <text class="stat-label">完成度</text>
         </view>
       </view>
