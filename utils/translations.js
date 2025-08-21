@@ -83,7 +83,11 @@ const translations = {
     noSubmissionFound: '未找到提交',
     status: '状态',
     feedback: '反馈',
-    sceneFeedback: '场景反馈'
+    sceneFeedback: '场景反馈',
+    loadingSceneDetails: '加载场景详情...',
+    sceneDetails: '场景详情',
+    managerFeedback: '管理员反馈',
+    close: '关闭'
   },
   
   en: {
@@ -169,7 +173,11 @@ const translations = {
     noSubmissionFound: 'No submission found',
     status: 'Status',
     feedback: 'Feedback',
-    sceneFeedback: 'Scene Feedback'
+    sceneFeedback: 'Scene Feedback',
+    loadingSceneDetails: 'Loading scene details...',
+    sceneDetails: 'Scene Details',
+    managerFeedback: 'Manager Feedback',
+    close: 'Close'
   }
 }
 

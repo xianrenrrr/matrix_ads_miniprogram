@@ -131,7 +131,7 @@ Page({
         if (res.statusCode === 200 && isApiSuccess) {
           this.setData({
             stats: {
-              availableTemplates: responseData.availableTemplates || 0,
+              availableTemplates: responseData.assignedTemplates || 0,
               recordedVideos: responseData.recordedVideos || 0,
               publishedVideos: responseData.publishedVideos || 0
             }

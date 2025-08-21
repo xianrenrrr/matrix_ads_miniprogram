@@ -208,34 +208,106 @@ Page({
       return;
     }
 
-    var message = t('scene') + ' ' + sceneNumber + ' ' + t('status') + ': ' + submission.status;
+    // If we have a sceneId, fetch full details
+    if (submission.sceneId) {
+      this.fetchSceneDetails(submission.sceneId, sceneNumber);
+    } else {
+      // Fallback to simple display if no sceneId
+      this.showSceneFeedbackModal(submission, sceneNumber);
+    }
+  },
+
+  // Fetch full scene details with AI suggestions
+  fetchSceneDetails: function(sceneId, sceneNumber) {
+    var self = this;
+    wx.showLoading({ title: t('loadingSceneDetails') });
     
-    if (submission.similarityScore) {
+    wx.request({
+      url: config.API_BASE_URL + '/content-creator/scenes/' + sceneId,
+      method: 'GET',
+      header: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + wx.getStorageSync('access_token')
+      },
+      success: function(response) {
+        wx.hideLoading();
+        console.log('Scene details response:', response);
+        
+        const isApiSuccess = response.data && response.data.success === true;
+        const sceneData = response.data && response.data.data ? response.data.data : {};
+        
+        if (response.statusCode === 200 && isApiSuccess) {
+          self.showSceneFeedbackModal(sceneData, sceneNumber);
+        } else {
+          // Fallback to basic submission data
+          self.showSceneFeedbackModal(self.data.submissions[sceneNumber], sceneNumber);
+        }
+      },
+      fail: function(error) {
+        wx.hideLoading();
+        console.error('Error fetching scene details:', error);
+        // Fallback to basic submission data
+        self.showSceneFeedbackModal(self.data.submissions[sceneNumber], sceneNumber);
+      }
+    });
+  },
+
+  // Show scene feedback modal with detailed information
+  showSceneFeedbackModal: function(submission, sceneNumber) {
+    var message = t('scene') + ' ' + sceneNumber + '\n';
+    message += t('status') + ': ' + this.getStatusText(submission.status) + '\n\n';
+    
+    // Show similarity score
+    if (submission.similarityScore !== undefined) {
       const raw = submission.similarityScore || 0;
       const similarity = raw <= 1 ? Math.round(raw * 100) : Math.round(raw);
-      message += '\n' + t('aiSimilarity') + ': ' + similarity + '%';
+      message += t('aiSimilarity') + ': ' + similarity + '%\n\n';
     }
     
+    // Show AI suggestions
+    if (submission.aiSuggestions && submission.aiSuggestions.length > 0) {
+      message += t('aiSuggestions') + ':\n';
+      for (var i = 0; i < submission.aiSuggestions.length; i++) {
+        message += '• ' + submission.aiSuggestions[i] + '\n';
+      }
+      message += '\n';
+    }
+    
+    // Show feedback if any
     if (submission.feedback && submission.feedback.length > 0) {
-      message += '\n\n' + t('feedback') + ':\n';
+      message += t('managerFeedback') + ':\n';
       for (var i = 0; i < submission.feedback.length; i++) {
         message += '• ' + submission.feedback[i] + '\n';
       }
     }
 
+    // Show modal with options based on status
+    var showCancel = submission.status !== 'approved';
+    var confirmText = submission.status === 'approved' ? t('cameraPermissionOk') : t('reRecord');
+    
     wx.showModal({
-      title: t('sceneFeedback'),
+      title: t('sceneDetails'),
       content: message,
-      showCancel: true,
-      confirmText: t('reRecord'),
-      cancelText: t('cameraPermissionOk'),
+      showCancel: showCancel,
+      confirmText: confirmText,
+      cancelText: t('close'),
       success: function(res) {
-        if (res.confirm) {
+        if (res.confirm && submission.status !== 'approved') {
           // Navigate to re-record
           this.recordScene({ currentTarget: { dataset: { index: sceneNumber - 1 } } });
         }
       }.bind(this)
     });
+  },
+
+  // Get localized status text
+  getStatusText: function(status) {
+    switch(status) {
+      case 'approved': return t('statusApproved');
+      case 'pending': return t('statusPending');
+      case 'rejected': return t('statusRejected');
+      default: return status;
+    }
   },
 
   // Get scene status for display
