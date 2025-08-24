@@ -10,7 +10,7 @@
       binderror="onCameraError"
     >
     <!-- 网格覆盖 -->
-    <view wx:if="{{showOverlay && selectedTemplate && overlayType === 'grid'}}" class="grid-overlay">
+    <view wx:if="{{showOverlay && selectedTemplate && overlayType === 'grid'}}" class="grid-overlay" style="pointer-events: none;">
       <view class="grid-line grid-line-v1"></view>
       <view class="grid-line grid-line-v2"></view>
       <view class="grid-line grid-line-h1"></view>
@@ -30,17 +30,18 @@
     </view>
 
     <!-- 多边形覆盖 -->
-    <view wx:if="{{showOverlay && selectedTemplate && overlayType === 'polygons'}}" class="polygon-overlay">
+    <view wx:if="{{showOverlay && selectedTemplate && overlayType === 'polygons'}}" class="polygon-overlay" style="pointer-events: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 5;">
       <canvas 
         canvas-id="polygonCanvas"
         class="overlay-canvas"
         disable-scroll="true"
+        style="width: 100%; height: 100%;"
       ></canvas>
     </view>
 
     <!-- 对象覆盖层 (MVP: Canvas based) -->
-    <view wx:if="{{showOverlay && selectedTemplate && overlayType === 'objects'}}" id="overlayLayer" class="overlay-layer">
-      <canvas canvas-id="overlayCanvas" id="overlayCanvas"></canvas>
+    <view wx:if="{{showOverlay && selectedTemplate && overlayType === 'objects'}}" id="overlayLayer" class="overlay-layer" style="pointer-events: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 5;">
+      <canvas canvas-id="overlayCanvas" id="overlayCanvas" style="width: 100%; height: 100%;"></canvas>
     </view>
 
     <!-- 录制状态指示器 -->
@@ -80,11 +81,11 @@
   </view> <!-- end of previewContainer -->
   
   <!-- 图例 (MVP: Right side legend) -->
-  <view wx:if="{{legend && legend.length && showOverlay && overlayType === 'objects'}}" class="legend">
+  <view wx:if="{{legend && legend.length && showOverlay && (overlayType === 'objects' || overlayType === 'polygons')}}" class="legend">
     <block wx:for="{{legend}}" wx:key="index">
       <view class="legend-item">
         <view class="dot" style="background-color: {{item.colorHex}}"></view>
-        <text class="legend-text">{{item.labelLocalized || item.label}}（{{item.confidencePercent || 0}}%）</text>
+        <text class="legend-text">{{item.labelZh || item.labelLocalized || toZh(item.label) || item.label}}（{{item.confidencePercent || 0}}%）</text>
       </view>
     </block>
   </view>

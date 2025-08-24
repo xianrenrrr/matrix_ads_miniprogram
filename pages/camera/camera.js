@@ -5,6 +5,7 @@ const { toZh } = require('../../utils/objectLabels')
 Page({
   data: {
     t: t, // Translation function
+    toZh: toZh, // Chinese label function
     selectedTemplate: null,
     currentScene: 0,
     isRecording: false,
@@ -282,7 +283,7 @@ Page({
         
         // 处理多边形覆盖
         if (that.data.overlayType === 'polygons' && that.data.polygonOverlay.length > 0) {
-          that.drawPolygons(offsetX, offsetY, drawnW, drawnH, colors)
+          that.drawPolygonCanvas(containerW, containerH, that.data.polygonOverlay)
         }
         
         // MVP: 处理对象覆盖 (Canvas based)
@@ -311,13 +312,14 @@ Page({
       const width = (o.width || o.w || 0) * drawnW
       const height = (o.height || o.h || 0) * drawnH
       const color = (scene.legend && scene.legend[i]) ? scene.legend[i].colorHex : colors[i % colors.length]
-      const labelZh = o.labelLocalized || toZh(o.label) || o.label
+      const labelZh = o.labelZh || o.labelLocalized || toZh(o.label) || o.label || '未知'
       
       overlayRectsPixels.push({
         left, top, width, height, 
         colorHex: color, 
         label: o.label, 
-        labelLocalized: labelZh, 
+        labelZh: labelZh,
+        labelLocalized: o.labelLocalized || labelZh, 
         confidence: o.confidence
       })
     }
@@ -347,8 +349,8 @@ Page({
       ctx.rect(left, top, width, height)
       ctx.stroke()
       
-      // Draw label chip at (left+4, top+4)
-      const labelText = labelLocalized || label || ''
+      // Draw Chinese label chip at top-left
+      const labelText = rect.labelZh || labelLocalized || toZh(label) || label || '未知'
       if (labelText) {
         const chipX = left + 4
         const chipY = top + 4
@@ -855,5 +857,89 @@ Page({
 
   onUnload() {
     this.stopTimer()
+  },
+  
+  // Draw polygon overlay on canvas
+  drawPolygonCanvas(containerW, containerH, polygons) {
+    const ctx = wx.createCanvasContext('polygonCanvas', this)
+    ctx.clearRect(0, 0, containerW, containerH)
+    
+    // Calculate aspect ratio mapping (cover)
+    const sourceAspect = this.data.sourceAspect || '9:16'
+    const [sourceW, sourceH] = sourceAspect.split(':').map(Number)
+    const sourceRatio = sourceH / sourceW
+    const containerRatio = containerH / containerW
+    
+    let drawnW, drawnH, offsetX = 0, offsetY = 0
+    
+    if (containerRatio > sourceRatio) {
+      drawnW = containerW
+      drawnH = containerW * sourceRatio
+      offsetY = (containerH - drawnH) / 2
+    } else {
+      drawnH = containerH
+      drawnW = containerH / sourceRatio
+      offsetX = (containerW - drawnW) / 2
+    }
+    
+    const colors = this.getColorPalette()
+    
+    // Draw each polygon
+    polygons.forEach((polygon, index) => {
+      const color = colors[index % colors.length]
+      
+      // Draw dashed polygon stroke
+      ctx.setStrokeStyle(color)
+      ctx.setLineWidth(2)
+      ctx.setLineDash([5, 5])
+      
+      ctx.beginPath()
+      if (polygon.points && polygon.points.length > 0) {
+        polygon.points.forEach((point, i) => {
+          const x = offsetX + point.x * drawnW
+          const y = offsetY + point.y * drawnH
+          
+          if (i === 0) {
+            ctx.moveTo(x, y)
+          } else {
+            ctx.lineTo(x, y)
+          }
+        })
+        ctx.closePath()
+      }
+      ctx.stroke()
+      
+      // Draw Chinese label chip near first vertex
+      if (polygon.points && polygon.points.length > 0) {
+        const labelX = offsetX + polygon.points[0].x * drawnW
+        const labelY = offsetY + polygon.points[0].y * drawnH + 20
+        
+        const labelText = polygon.labelZh || polygon.labelLocalized || toZh(polygon.label) || polygon.label || '未知'
+        
+        // Label background
+        ctx.setFillStyle(color)
+        ctx.fillRect(labelX - 2, labelY - 14, 80, 20)
+        
+        // Label text
+        ctx.setFillStyle('#FFFFFF')
+        ctx.setFontSize(12)
+        ctx.fillText(labelText, labelX, labelY)
+      }
+    })
+    
+    ctx.draw()
+  },
+  
+  // Color palette (RED first)
+  getColorPalette() {
+    return [
+      '#FF3B30', // Red - FIRST overlay
+      '#0A84FF', // Blue
+      '#34C759', // Green  
+      '#FF9F0A', // Orange
+      '#AF52DE', // Purple
+      '#32ADE6', // Light Blue
+      '#FF375F'  // Pink
+    ]
   }
 })
