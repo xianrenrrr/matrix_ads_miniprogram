@@ -40,6 +40,9 @@ Page({
 
     this.loadTemplate();
     this.loadProgress();
+    
+    // Mark that initial load is complete
+    this.setData({ hasLoadedOnce: true });
   },
 
   // Load template data
@@ -444,8 +447,11 @@ Page({
   },
 
   onShow: function() {
-    // Reload progress when returning from camera
-    this.loadProgress();
+    // Only reload progress if we're returning from camera (not initial load)
+    // This prevents duplicate API calls on page load
+    if (this.data.hasLoadedOnce) {
+      this.loadProgress();
+    }
   },
 
   // Update button states based on submission status
