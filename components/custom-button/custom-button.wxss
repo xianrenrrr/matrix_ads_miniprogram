@@ -1,0 +1,99 @@
+/* components/custom-button/custom-button.wxss */
+
+.custom-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.button-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.button-icon {
+  margin-right: 6px;
+  font-size: 16px;
+}
+
+.button-text {
+  color: inherit;
+}
+
+/* Button Types */
+.primary {
+  background: #1f2937;
+  color: #ffffff;
+}
+
+.primary:active {
+  background: #374151;
+}
+
+.secondary {
+  background: #f3f4f6;
+  color: #1f2937;
+  border: 1px solid #e5e7eb;
+}
+
+.secondary:active {
+  background: #e5e7eb;
+}
+
+.success {
+  background: #059669;
+  color: #ffffff;
+  box-shadow: 0 1px 3px rgba(5, 150, 105, 0.2);
+}
+
+.success:active {
+  background: #047857;
+}
+
+.warning {
+  background: #f59e0b;
+  color: #ffffff;
+}
+
+.warning:active {
+  background: #d97706;
+}
+
+.danger {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+.danger:active {
+  background: #dc2626;
+}
+
+/* Sizes */
+.mini {
+  padding: 8px 12px;
+  font-size: 12px;
+}
+
+.small {
+  padding: 10px 16px;
+  font-size: 13px;
+}
+
+.large {
+  padding: 16px 24px;
+  font-size: 16px;
+}
+
+/* States */
+.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}

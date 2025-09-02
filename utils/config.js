@@ -77,7 +77,7 @@ const config = {
 const env = 'development' // 'development' | 'production'
 
 if (env === 'development') {
-  config.api.baseUrl = 'https://matrix-ads-backend.onrender.com' // 使用实际后端地址
+  config.api.baseUrl = 'http://localhost:8080' // 使用本地开发后端地址
   config.dev.enableDebug = true
   config.dev.mockApi = false
 } else {

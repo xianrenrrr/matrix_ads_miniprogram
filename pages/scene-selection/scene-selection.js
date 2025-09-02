@@ -17,7 +17,8 @@ Page({
     scenes: [],
     submissions: {},
     progress: null,
-    loading: true
+    loading: true,
+    videoUrl: null
   },
 
   onLoad: function(options) {
@@ -51,11 +52,27 @@ Page({
     var app = getApp();
     if (app.globalData.currentTemplate && app.globalData.currentTemplate.id === this.data.templateId) {
       console.log('Using template from globalData:', app.globalData.currentTemplate);
+      console.log('GlobalData template videoUrl:', app.globalData.currentTemplate.videoUrl);
+      console.log('GlobalData template videoId:', app.globalData.currentTemplate.videoId);
+      
+      // Process scenes with computed button text
+      var processedScenes = (app.globalData.currentTemplate.scenes || []).map(function(scene, index) {
+        scene.buttonText = '录制';
+        scene.buttonType = 'primary';
+        return scene;
+      });
+      
       self.setData({
         template: app.globalData.currentTemplate,
-        scenes: app.globalData.currentTemplate.scenes || [],
+        scenes: processedScenes,
         loading: false
       });
+      
+      // If template has videoId but no videoUrl, fetch the video URL
+      if (app.globalData.currentTemplate.videoId && !app.globalData.currentTemplate.videoUrl) {
+        self.fetchVideoUrl(app.globalData.currentTemplate.videoId);
+      }
+      
       wx.hideLoading();
       return;
     }
@@ -77,9 +94,19 @@ Page({
         
         if (response.statusCode === 200 && isApiSuccess && responseData.scenes) {
           console.log('Found scenes:', responseData.scenes.length);
+          console.log('Template videoUrl:', responseData.videoUrl);
+          console.log('Template data:', responseData);
+          
+          // Process scenes with computed button text
+          var processedScenes = responseData.scenes.map(function(scene, index) {
+            scene.buttonText = '录制';
+            scene.buttonType = 'primary';
+            return scene;
+          });
+          
           self.setData({
             template: responseData,
-            scenes: responseData.scenes,
+            scenes: processedScenes,
             loading: false
           });
         } else {
@@ -170,6 +197,9 @@ Page({
             submissions: sceneMap,
             progress: progress
           });
+          
+          // Update button states based on submissions
+          self.updateButtonStates();
         } else if (response.statusCode === 404) {
           console.log('No submission found for this template - this is normal for new users');
           // Set empty data for new template (no submissions yet)
@@ -197,9 +227,46 @@ Page({
     });
   },
 
+  // Video playback control for scene segments
+  onVideoPlay: function(e) {
+    const sceneIndex = e.currentTarget.dataset.sceneIndex;
+    const startTime = e.currentTarget.dataset.startTime / 1000; // Convert to seconds
+    const endTime = e.currentTarget.dataset.endTime / 1000;
+    
+    // Get video context
+    const videoContext = wx.createVideoContext(`sceneVideo${sceneIndex}`);
+    
+    // Seek to start time
+    videoContext.seek(startTime);
+    
+    // Set timer to pause at end time
+    this.setVideoTimer(videoContext, endTime - startTime);
+  },
+
+  onVideoTimeUpdate: function(e) {
+    const sceneIndex = e.currentTarget.dataset.sceneIndex;
+    const startTime = e.currentTarget.dataset.startTime / 1000;
+    const endTime = e.currentTarget.dataset.endTime / 1000;
+    const currentTime = e.detail.currentTime;
+    
+    // Pause video if it goes beyond scene end time
+    if (currentTime >= endTime) {
+      const videoContext = wx.createVideoContext(`sceneVideo${sceneIndex}`);
+      videoContext.pause();
+      videoContext.seek(startTime); // Reset to start
+    }
+  },
+
+  setVideoTimer: function(videoContext, duration) {
+    setTimeout(() => {
+      videoContext.pause();
+    }, duration * 1000);
+  },
+
   // Navigate to camera for specific scene
   recordScene: function(event) {
-    var sceneIndex = event.currentTarget.dataset.index;
+    var dataset = event.detail.dataset || event.currentTarget.dataset;
+    var sceneIndex = dataset.index;
     var scene = this.data.scenes[sceneIndex];
     
     if (!scene) {
@@ -379,5 +446,198 @@ Page({
   onShow: function() {
     // Reload progress when returning from camera
     this.loadProgress();
+  },
+
+  // Update button states based on submission status
+  updateButtonStates: function() {
+    var scenes = this.data.scenes.map((scene, index) => {
+      var sceneNumber = index + 1;
+      var submission = this.data.submissions[sceneNumber];
+      
+      if (submission) {
+        switch (submission.status) {
+          case 'approved':
+            scene.buttonText = '重新录制';
+            scene.buttonType = 'success';
+            break;
+          case 'pending':
+            scene.buttonText = '重新录制';
+            scene.buttonType = 'primary';
+            break;
+          case 'rejected':
+            scene.buttonText = '修改重录';
+            scene.buttonType = 'primary';
+            break;
+          default:
+            scene.buttonText = '录制';
+            scene.buttonType = 'primary';
+        }
+      } else {
+        scene.buttonText = '录制';
+        scene.buttonType = 'primary';
+      }
+      
+      return scene;
+    });
+    
+    this.setData({ scenes: scenes });
+  },
+
+  // Fetch video URL by videoId
+  fetchVideoUrl: function(videoId) {
+    var self = this;
+    var token = wx.getStorageSync('access_token');
+    var streamUrl = config.API_BASE_URL + '/content-manager/videos/' + videoId + '/stream';
+    
+    console.log('Getting signed video URL for videoId:', videoId);
+    console.log('Using stream URL:', streamUrl);
+    console.log('Using token:', token ? 'EXISTS' : 'MISSING');
+    
+    wx.request({
+      url: streamUrl,
+      method: 'GET',
+      header: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      },
+      success: function(response) {
+        console.log('Video stream response:', response);
+        console.log('Response statusCode:', response.statusCode);
+        console.log('Response data:', response.data);
+        
+        // Handle ApiResponse format: {success, message, data, error}
+        const isApiSuccess = response.data && response.data.success === true;
+        const signedUrl = response.data && response.data.data ? response.data.data : null;
+        
+        if (response.statusCode === 200 && isApiSuccess && signedUrl) {
+          console.log('Got signed video URL:', signedUrl);
+          
+          self.setData({
+            videoUrl: signedUrl
+          });
+          
+          console.log('Video URL set successfully, ready for scene examples');
+        } else {
+          console.log('Failed to get signed video URL - statusCode:', response.statusCode);
+          console.log('API success:', isApiSuccess);
+          console.log('Response data:', response.data);
+          
+          const errorMessage = response.data && response.data.error ? response.data.error : '视频链接获取失败';
+          wx.showToast({
+            title: errorMessage,
+            icon: 'error'
+          });
+        }
+      },
+      fail: function(error) {
+        console.error('Error fetching signed video URL:', error);
+        wx.showToast({
+          title: '网络错误',
+          icon: 'error'
+        });
+      }
+    });
+  },
+
+  // Play scene example video segment
+  playSceneExample: function(event) {
+    var dataset = event.detail.dataset || event.currentTarget.dataset;
+    var sceneIndex = parseInt(dataset.index);
+    var startTime = parseInt(dataset.startTime) || 0;
+    var endTime = parseInt(dataset.endTime) || 3000;
+    
+    console.log('[DEBUG 2025-09-02] playSceneExample - sceneIndex:', sceneIndex);
+    console.log('[DEBUG 2025-09-02] playSceneExample - scenes array:', this.data.scenes);
+    console.log('[DEBUG 2025-09-02] playSceneExample - scenes length:', this.data.scenes ? this.data.scenes.length : 'null');
+    
+    if (!this.data.scenes || sceneIndex >= this.data.scenes.length || sceneIndex < 0) {
+      console.log('Scene index out of bounds:', sceneIndex, 'scenes length:', this.data.scenes ? this.data.scenes.length : 0);
+      return;
+    }
+    
+    var scene = this.data.scenes[sceneIndex];
+    var template = this.data.template;
+    var videoUrl = this.data.videoUrl || (template && template.videoUrl);
+    
+    console.log('Scene object:', scene);
+    
+    if (!scene) {
+      console.log('Scene object is null/undefined for index:', sceneIndex);
+      return;
+    }
+    
+    if (!videoUrl) {
+      wx.showToast({
+        title: '视频链接正在获取中...',
+        icon: 'loading',
+        duration: 1500
+      });
+      return;
+    }
+    
+    console.log('Playing scene example with signed URL:', videoUrl);
+    
+    // Store current scene info for modal
+    this.setData({
+      currentExampleScene: {
+        index: sceneIndex,
+        title: (scene && scene.sceneTitle) || '场景 ' + (sceneIndex + 1),
+        startTimeMs: startTime,
+        endTimeMs: endTime,
+        videoUrl: videoUrl
+      },
+      showExampleModal: true
+    });
+    
+    // Auto-play video after modal shows
+    setTimeout(() => {
+      this.playExampleVideo();
+    }, 100);
+  },
+  
+  // Play the example video from start time
+  playExampleVideo: function() {
+    if (!this.data.currentExampleScene) return;
+    
+    const videoContext = wx.createVideoContext('exampleVideo');
+    const startTime = this.data.currentExampleScene.startTimeMs / 1000;
+    
+    videoContext.seek(startTime);
+    videoContext.play();
+  },
+  
+  // Handle example video time update
+  onExampleVideoTimeUpdate: function(e) {
+    if (!this.data.currentExampleScene) return;
+    
+    const endTime = this.data.currentExampleScene.endTimeMs / 1000;
+    const currentTime = e.detail.currentTime;
+    
+    // Loop video within scene segment
+    if (currentTime >= endTime) {
+      const videoContext = wx.createVideoContext('exampleVideo');
+      const startTime = this.data.currentExampleScene.startTimeMs / 1000;
+      videoContext.seek(startTime);
+    }
+  },
+  
+  // Close example modal
+  closeExampleModal: function() {
+    const videoContext = wx.createVideoContext('exampleVideo');
+    videoContext.pause();
+    
+    this.setData({
+      showExampleModal: false,
+      currentExampleScene: null
+    });
+  },
+  
+  // Handle video error
+  onVideoError: function(e) {
+    console.error('Video error:', e.detail);
+    wx.showToast({
+      title: '视频加载失败',
+      icon: 'none'
+    });
   }
 });

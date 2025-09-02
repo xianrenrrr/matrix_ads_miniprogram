@@ -30,8 +30,10 @@
           <text wx:elif="{{submissions[index + 1].status === 'rejected'}}" class="status-cross">✗</text>
         </view>
         
-        <!-- Scene Header -->
-        <view class="scene-header">
+        <!-- Scene Content without video on left -->
+        <view class="scene-content-wrapper">
+            <!-- Scene Header -->
+            <view class="scene-header">
           <view class="scene-number-container">
             <view class="scene-number" 
                   style="background-color: {{submissions[index + 1] ? submissions[index + 1].statusColor : '#9ca3af'}}">
@@ -62,17 +64,29 @@
           </view>
         </view>
 
-        <!-- Scene Actions -->
-        <view class="scene-actions">
-          <!-- Record Button -->
-          <button class="record-button {{submissions[index + 1] && submissions[index + 1].statusText === '已批准' ? 'completed' : ''}}"
-                  data-index="{{index}}"
-                  bindtap="recordScene"
-                  size="mini">
-            {{submissions[index + 1] && submissions[index + 1].statusText === '已批准' ? '重新录制' : 
-              submissions[index + 1] && submissions[index + 1].statusText === '待审核' ? '重新录制' :
-              submissions[index + 1] && submissions[index + 1].statusText === '已拒绝' ? '修改重录' : '录制'}}
-          </button>
+            <!-- Scene Actions -->
+            <view class="scene-actions">
+              <!-- Example Button -->
+              <custom-button
+                wx:if="{{template && (videoUrl || template.videoUrl)}}"
+                text="案例"
+                type="primary"
+                size="mini"
+                data-index="{{index}}"
+                data-start-time="{{item.startTimeMs || 0}}"
+                data-end-time="{{item.endTimeMs || 3000}}"
+                bindtap="playSceneExample">
+              </custom-button>
+              
+              <!-- Record Button -->
+              <custom-button
+                text="{{item.buttonText || '录制'}}"
+                type="{{item.buttonType || 'primary'}}"
+                size="mini"
+                data-index="{{index}}"
+                bindtap="recordScene">
+              </custom-button>
+            </view>
         </view>
       </view>
     </view>
@@ -94,6 +108,40 @@
         <view class="stat-item">
           <text class="stat-number">{{progress.approved}}/{{progress.totalScenes}}</text>
           <text class="stat-label">完成度</text>
+        </view>
+      </view>
+    </view>
+  </view>
+  
+  <!-- Example Video Modal -->
+  <view class="example-modal" wx:if="{{showExampleModal}}" catchtouchmove="true">
+    <view class="modal-overlay" bindtap="closeExampleModal"></view>
+    <view class="modal-content">
+      <view class="modal-header">
+        <text class="modal-title">{{currentExampleScene.title}} - 案例</text>
+        <view class="close-button" bindtap="closeExampleModal">✕</view>
+      </view>
+      
+      <view class="video-container">
+        <video 
+          id="exampleVideo"
+          class="example-video"
+          src="{{currentExampleScene.videoUrl}}"
+          show-progress="{{true}}"
+          show-fullscreen-btn="{{false}}"
+          show-play-btn="{{true}}"
+          show-center-play-btn="{{true}}"
+          controls="{{true}}"
+          bindtimeupdate="onExampleVideoTimeUpdate"
+          binderror="onVideoError"
+        >
+        </video>
+        
+        <view wx:if="{{!currentExampleScene.videoUrl}}" class="video-error">
+          <text>视频暂不可用</text>
+        </view>
+        <view class="time-info">
+          <text class="time-label">场景时间段: {{currentExampleScene.startTimeMs/1000}}s - {{currentExampleScene.endTimeMs/1000}}s</text>
         </view>
       </view>
     </view>

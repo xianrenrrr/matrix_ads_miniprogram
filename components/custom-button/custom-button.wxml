@@ -1,0 +1,12 @@
+<!--components/custom-button/custom-button.wxml-->
+<button 
+  class="custom-button {{type}} {{disabled ? 'disabled' : ''}}"
+  bindtap="handleTap"
+  disabled="{{disabled}}"
+  size="{{size}}"
+>
+  <view class="button-content">
+    <text wx:if="{{icon}}" class="button-icon">{{icon}}</text>
+    <text class="button-text">{{text}}</text>
+  </view>
+</button>

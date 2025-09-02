@@ -3,13 +3,6 @@
 ## Project Overview
 This is a WeChat Mini Program for video recording functionality within the Matrix Ads platform. Users can record guided videos using templates created by content managers.
 
-## Features (Planned)
-- **Template Selection**: Browse and select video templates created by content managers
-- **Camera Integration**: Access device camera for video recording
-- **Guided Recording**: Real-time overlay with framing guidance and teleprompter
-- **Video Upload**: Upload recorded videos to Firebase Storage
-- **Template Synchronization**: Sync with backend for template updates
-
 ## Architecture
 ```
 matrix_ads_miniprogram/
