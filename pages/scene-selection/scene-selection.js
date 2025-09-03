@@ -612,17 +612,34 @@ Page({
     videoContext.play();
   },
   
-  // Handle example video time update
+  // Ensure position is correct as soon as metadata is loaded
+  onExampleVideoLoaded: function() {
+    if (!this.data.currentExampleScene) return;
+    const startTime = this.data.currentExampleScene.startTimeMs / 1000;
+    const videoContext = wx.createVideoContext('exampleVideo');
+    videoContext.seek(startTime);
+  },
+  
+  // Always start at scene beginning when user presses Play
+  onExampleVideoPlay: function() {
+    if (!this.data.currentExampleScene) return;
+    const startTime = this.data.currentExampleScene.startTimeMs / 1000;
+    const videoContext = wx.createVideoContext('exampleVideo');
+    videoContext.seek(startTime);
+  },
+  
+  // Handle example video time update (stop at end, no loop)
   onExampleVideoTimeUpdate: function(e) {
     if (!this.data.currentExampleScene) return;
     
     const endTime = this.data.currentExampleScene.endTimeMs / 1000;
     const currentTime = e.detail.currentTime;
     
-    // Loop video within scene segment
+    // Stop at scene end and reset to beginning; require user to press Play again
     if (currentTime >= endTime) {
       const videoContext = wx.createVideoContext('exampleVideo');
       const startTime = this.data.currentExampleScene.startTimeMs / 1000;
+      videoContext.pause();
       videoContext.seek(startTime);
     }
   },
