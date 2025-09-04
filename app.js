@@ -1,16 +1,17 @@
 // app.js
 const config = require('./utils/config.js')
+const logger = require('./utils/logger')
 
 App({
   onLaunch() {
     // 小程序启动时触发
-    console.log('Matrix Ads Mini Program Launch')
+    logger.log('Matrix Ads Mini Program Launch')
     
     // 检查是否有新版本
     if (wx.canIUse('getUpdateManager')) {
       const updateManager = wx.getUpdateManager()
       updateManager.onCheckForUpdate((res) => {
-        console.log('检查更新结果:', res.hasUpdate)
+        logger.log('检查更新结果:', res.hasUpdate)
       })
       
       updateManager.onUpdateReady(() => {
@@ -40,15 +41,15 @@ App({
   },
   
   onShow() {
-    console.log('Matrix Ads Mini Program Show')
+    logger.log('Matrix Ads Mini Program Show')
   },
   
   onHide() {
-    console.log('Matrix Ads Mini Program Hide')
+    logger.log('Matrix Ads Mini Program Hide')
   },
   
   onError(msg) {
-    console.error('Mini Program Error:', msg)
+    logger.error('Mini Program Error:', msg)
   },
   
   // 检查登录状态
@@ -60,7 +61,7 @@ App({
       this.globalData.isLoggedIn = true
       this.globalData.userInfo = userInfo
       // 暂时跳过token验证，直接认为已登录
-      console.log('用户已登录:', userInfo)
+      logger.log('用户已登录:', userInfo)
     } else {
       // 没有登录信息，跳转到登录页
       this.redirectToLogin()

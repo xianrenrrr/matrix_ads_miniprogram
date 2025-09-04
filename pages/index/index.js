@@ -1,4 +1,5 @@
 // pages/index/index.js
+const logger = require('../../utils/logger');
 Page({
   data: {
     userInfo: null,
@@ -13,12 +14,12 @@ Page({
   },
 
   onLoad() {
-    console.log('首页加载')
+    logger.log('首页加载')
     this.initPage()
   },
 
   onShow() {
-    console.log('首页显示')
+    logger.log('首页显示')
     this.refreshData()
   },
 
@@ -52,12 +53,12 @@ Page({
   loadAssignedTemplates() {
     const app = getApp()
     if (!app.globalData.isLoggedIn || !app.globalData.userInfo) {
-      console.log('用户未登录，无法加载模板')
+      logger.warn('用户未登录，无法加载模板')
       return
     }
 
     const userId = app.globalData.userInfo.id
-    console.log('开始加载用户模板，用户ID:', userId)
+    logger.log('开始加载用户模板，用户ID:', userId)
 
     wx.request({
       url: `${app.globalData.apiBaseUrl}/content-creator/users/${userId}/assigned-templates`,
@@ -67,7 +68,7 @@ Page({
         'Authorization': `Bearer ${wx.getStorageSync('access_token')}`
       },
       success: (res) => {
-        console.log('分配模板响应:', res)
+        logger.log('分配模板响应:', res)
         
         // Handle new ApiResponse format: {success, message, data, error}
         const isApiSuccess = res.data && res.data.success === true;
@@ -75,7 +76,7 @@ Page({
         
         if (res.statusCode === 200 && isApiSuccess) {
           const templates = responseData
-          console.log('获取到的模板数量:', templates.length)
+          logger.log('获取到的模板数量:', templates.length)
           
           // 更新统计数据
           this.setData({
@@ -87,7 +88,7 @@ Page({
           app.globalData.templates = templates
         } else {
           const errorMessage = res.data && res.data.error ? res.data.error : '获取模板失败';
-          console.log('获取模板失败:', errorMessage)
+          logger.warn('获取模板失败:', errorMessage)
           wx.showToast({
             title: errorMessage,
             icon: 'none'
@@ -95,7 +96,7 @@ Page({
         }
       },
       fail: (err) => {
-        console.error('获取模板请求失败:', err)
+        logger.error('获取模板请求失败:', err)
         wx.showToast({
           title: '网络错误',
           icon: 'none'
@@ -108,7 +109,7 @@ Page({
   loadDashboardStats() {
     const app = getApp()
     if (!app.globalData.isLoggedIn || !app.globalData.userInfo) {
-      console.log('用户未登录，无法加载统计数据')
+      logger.warn('用户未登录，无法加载统计数据')
       return
     }
 
@@ -122,7 +123,7 @@ Page({
         'Authorization': `Bearer ${wx.getStorageSync('access_token')}`
       },
       success: (res) => {
-        console.log('仪表板统计响应:', res)
+        logger.log('仪表板统计响应:', res)
         
         // Handle new ApiResponse format: {success, message, data, error}
         const isApiSuccess = res.data && res.data.success === true;
@@ -138,11 +139,11 @@ Page({
           })
         } else {
           const errorMessage = res.data && res.data.error ? res.data.error : '获取统计数据失败';
-          console.log('获取统计数据失败:', errorMessage)
-        }
+          logger.warn('获取统计数据失败:', errorMessage)
+      }
       },
       fail: (err) => {
-        console.error('获取统计数据请求失败:', err)
+        logger.error('获取统计数据请求失败:', err)
       }
     })
   },
@@ -150,7 +151,7 @@ Page({
   // 选择模板进行录制
   selectTemplate(e) {
     const templateId = e.currentTarget.dataset.id
-    console.log('选择模板ID:', templateId)
+    logger.log('选择模板ID:', templateId)
     
     const app = getApp()
     const templates = app.globalData.templates || []

@@ -1,4 +1,5 @@
 // pages/camera/camera.js
+const logger = require('../../utils/logger');
 const { t } = require('../../utils/translations')
 const { toZh } = require('../../utils/objectLabels')
 
@@ -47,7 +48,7 @@ Page({
   },
 
   onLoad(options) {
-    console.log('录制页面加载', options)
+    logger.log('录制页面加载', options)
     
     // 保存传入的参数
     this.setData({
@@ -68,7 +69,7 @@ Page({
   },
 
   onShow() {
-    console.log('录制页面显示')
+    logger.log('录制页面显示')
     this.initCamera()
     // 更新覆盖层像素坐标（处理屏幕旋转等）
     if (this.data.selectedTemplate) {
@@ -77,7 +78,7 @@ Page({
   },
 
   onHide() {
-    console.log('录制页面隐藏')
+    logger.log('录制页面隐藏')
     this.stopRecording()
   },
 
@@ -93,7 +94,7 @@ Page({
           wx.authorize({
             scope: 'scope.camera',
             success: () => {
-              console.log('相机权限获取成功')
+              logger.log('相机权限获取成功')
             },
             fail: () => {
               wx.showModal({
@@ -139,7 +140,7 @@ Page({
         'Authorization': `Bearer ${wx.getStorageSync('access_token')}`
       },
       success: (res) => {
-        console.log('加载模板响应:', res)
+        logger.log('加载模板响应:', res)
         
         // Handle new ApiResponse format: {success, message, data, error}
         const isApiSuccess = res.data && res.data.success === true;
@@ -156,7 +157,7 @@ Page({
         }
       },
       fail: (err) => {
-        console.error('加载模板失败:', err)
+        logger.error('加载模板失败:', err)
         wx.showToast({
           title: t('networkError'),
           icon: 'none'
@@ -170,7 +171,7 @@ Page({
 
   // 设置模板数据
   setupTemplate(template) {
-    console.log('设置模板:', template)
+    logger.log('设置模板:', template)
     
     const scenes = template.scenes || []
     const sceneIndex = this.data.sceneIndex || 0
@@ -181,7 +182,7 @@ Page({
     const isPolygonOverlay = overlayType === 'polygons'
     const isObjectOverlay = overlayType === 'objects'
     
-    console.log(`场景 ${sceneIndex + 1} 覆盖类型:`, overlayType)
+    logger.log(`场景 ${sceneIndex + 1} 覆盖类型:`, overlayType)
     
     // 设置基础数据
     let updateData = {
@@ -848,7 +849,7 @@ Page({
 
   // 相机错误处理
   onCameraError(e) {
-    console.error('相机错误', e)
+    logger.error('相机错误', e)
     wx.showToast({
       title: t('cameraError'),
       icon: 'none'

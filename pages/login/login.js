@@ -1,4 +1,5 @@
 // pages/login/login.js
+const logger = require('../../utils/logger');
 Page({
   data: {
     loginMethod: 'password', // 'password' | 'qrcode'
@@ -10,7 +11,7 @@ Page({
   },
 
   onLoad() {
-    console.log('登录页面加载')
+    logger.log('登录页面加载')
     
     // 检查是否已经登录
     const app = getApp()
@@ -95,9 +96,9 @@ Page({
         platform: 'miniprogram'
       },
       success: (res) => {
-        console.log('登录响应完整数据:', res)
-        console.log('状态码:', res.statusCode)
-        console.log('响应数据:', res.data)
+        logger.log('登录响应完整数据:', res)
+        logger.log('状态码:', res.statusCode)
+        logger.log('响应数据:', res.data)
         
         if (res.statusCode === 200 && res.data && res.data.success === true) {
           // Handle new ApiResponse format: {success, message, data: {token, user}, error}
@@ -106,7 +107,7 @@ Page({
           if (responseData) {
             // 登录成功
             const { token, user } = responseData;
-            console.log('登录成功，用户信息:', user)
+            logger.log('登录成功，用户信息:', user)
             
             // 检查用户角色
             if (user.role !== 'content_creator') {
@@ -142,7 +143,7 @@ Page({
             
           } else {
             // 后端返回失败
-            console.log('后端返回失败:', res.data)
+            logger.warn('后端返回失败:', res.data)
             let errorMessage = '登录验证失败';
             if (res.data) {
               errorMessage = res.data.error || res.data.message || errorMessage;
@@ -155,7 +156,7 @@ Page({
           }
         } else {
           // HTTP状态码不是200
-          console.log('HTTP错误:', res.statusCode, res.data)
+          logger.warn('HTTP错误:', res.statusCode, res.data)
           wx.showModal({
             title: '登录失败',
             content: `服务器错误 (${res.statusCode}): ${(res.data && res.data.message) || '请稍后重试'}`,
@@ -164,9 +165,9 @@ Page({
         }
       },
       fail: (err) => {
-        console.error('登录请求失败完整错误:', err)
-        console.error('错误类型:', typeof err)
-        console.error('错误消息:', err.errMsg)
+        logger.error('登录请求失败完整错误:', err)
+        logger.error('错误类型:', typeof err)
+        logger.error('错误消息:', err.errMsg)
         
         let errorMsg = '请检查网络连接后重试'
         if (err.errMsg) {
@@ -222,11 +223,11 @@ Page({
     wx.scanCode({
       scanType: ['qrCode'],
       success: (res) => {
-        console.log('扫码结果:', res)
+        logger.log('扫码结果:', res)
         this.handleQRCodeResult(res.result)
       },
       fail: (err) => {
-        console.error('扫码失败:', err)
+        logger.error('扫码失败:', err)
         if (err.errMsg !== 'scanCode:fail cancel') {
           wx.showToast({
             title: '扫码失败',
@@ -242,7 +243,7 @@ Page({
 
   // 处理二维码扫描结果
   handleQRCodeResult(qrData) {
-    console.log('二维码数据:', qrData)
+    logger.log('二维码数据:', qrData)
     
     // Ensure qrData is a string and decode if needed
     if (typeof qrData !== 'string') {
@@ -261,11 +262,11 @@ Page({
     if (decodedData.startsWith('{')) {
       try {
         const qrDataObj = JSON.parse(decodedData)
-        console.log('检测到QR码数据:', qrDataObj)
+        logger.log('检测到QR码数据:', qrDataObj)
         
         // Handle group join format
         if (qrDataObj.type === 'group_join' && qrDataObj.token) {
-          console.log('群组邀请token:', qrDataObj.token)
+          logger.log('群组邀请token:', qrDataObj.token)
           this.handleInviteLinkSignup(qrDataObj.token)
           return
         }
@@ -276,12 +277,12 @@ Page({
           return
         }
       } catch (error) {
-        console.error('QR码解析失败:', error)
+        logger.error('QR码解析失败:', error)
       }
     }
     
     // Invalid QR code format
-    console.error('不支持的QR码格式:', decodedData)
+    logger.error('不支持的QR码格式:', decodedData)
     wx.showModal({
       title: '二维码无效',
       content: '请扫描管理员生成的有效邀请二维码',
@@ -347,7 +348,7 @@ Page({
         }
       },
       fail: (err) => {
-        console.error('验证邀请失败:', err)
+        logger.error('验证邀请失败:', err)
         wx.showModal({
           title: '网络错误',
           content: '请检查网络连接后重试',

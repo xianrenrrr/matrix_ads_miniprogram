@@ -144,7 +144,8 @@ Page({
     
     // Create composite video ID: userId_templateId
     var compositeVideoId = this.data.userId + '_' + this.data.templateId;
-    console.log('Using composite video ID:', compositeVideoId);
+    const logger = require('../../utils/logger');
+    logger.log('Using composite video ID:', compositeVideoId);
     
     wx.request({
       url: config.API_BASE_URL + '/content-creator/scenes/submitted-videos/' + compositeVideoId,
@@ -154,7 +155,7 @@ Page({
         'Authorization': 'Bearer ' + wx.getStorageSync('access_token')
       },
       success: function(response) {
-        console.log('Load submitted video response:', response);
+        logger.log('Load submitted video response:', response);
         
         // The API returns data directly at response.data level with success flag
         const isApiSuccess = response.data && response.data.success === true;
@@ -204,14 +205,14 @@ Page({
           // Update button states based on submissions
           self.updateButtonStates();
         } else if (response.statusCode === 404) {
-          console.log('No submission found for this template - this is normal for new users');
+          logger.log('No submission found for this template - this is normal for new users');
           // Set empty data for new template (no submissions yet)
           self.setData({
             submissions: {},
             progress: null
           });
         } else {
-          console.log('API error or unexpected response');
+          logger.warn('API error or unexpected response');
           // Set empty data
           self.setData({
             submissions: {},
@@ -220,7 +221,8 @@ Page({
         }
       },
       fail: function(error) {
-        console.error('Error loading submitted video:', error);
+        const log = require('../../utils/logger');
+        log.error('Error loading submitted video:', error);
         // Set empty data - this is normal for first-time users
         self.setData({
           submissions: {},
@@ -604,43 +606,36 @@ Page({
   // Play the example video from start time
   playExampleVideo: function() {
     if (!this.data.currentExampleScene) return;
-    
-    const videoContext = wx.createVideoContext('exampleVideo');
     const startTime = this.data.currentExampleScene.startTimeMs / 1000;
-    
-    videoContext.seek(startTime);
-    videoContext.play();
+    const segments = require('../../utils/videoSegments');
+    segments.ensureStartOnPlay('exampleVideo', startTime);
+    try { wx.createVideoContext('exampleVideo').play(); } catch (e) {}
   },
   
   // Ensure position is correct as soon as metadata is loaded
   onExampleVideoLoaded: function() {
     if (!this.data.currentExampleScene) return;
     const startTime = this.data.currentExampleScene.startTimeMs / 1000;
-    const videoContext = wx.createVideoContext('exampleVideo');
-    videoContext.seek(startTime);
+    const segments = require('../../utils/videoSegments');
+    segments.ensureStartOnLoaded('exampleVideo', startTime);
   },
   
   // Always start at scene beginning when user presses Play
   onExampleVideoPlay: function() {
     if (!this.data.currentExampleScene) return;
     const startTime = this.data.currentExampleScene.startTimeMs / 1000;
-    const videoContext = wx.createVideoContext('exampleVideo');
-    videoContext.seek(startTime);
+    const segments = require('../../utils/videoSegments');
+    segments.ensureStartOnPlay('exampleVideo', startTime);
   },
   
   // Handle example video time update (stop at end, no loop)
   onExampleVideoTimeUpdate: function(e) {
     if (!this.data.currentExampleScene) return;
-    
+    const segments = require('../../utils/videoSegments');
     const endTime = this.data.currentExampleScene.endTimeMs / 1000;
-    const currentTime = e.detail.currentTime;
-    
-    // Stop at scene end and reset to beginning; require user to press Play again
-    if (currentTime >= endTime) {
-      const videoContext = wx.createVideoContext('exampleVideo');
-      const startTime = this.data.currentExampleScene.startTimeMs / 1000;
-      videoContext.pause();
-      videoContext.seek(startTime);
+    const startTime = this.data.currentExampleScene.startTimeMs / 1000;
+    if (e.detail.currentTime >= endTime) {
+      segments.stopAtEnd('exampleVideo', endTime, startTime);
     }
   },
   

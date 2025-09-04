@@ -1,4 +1,5 @@
 // pages/templates/templates.js
+const logger = require('../../utils/logger');
 Page({
   data: {
     templates: [],
@@ -8,12 +9,12 @@ Page({
   },
 
   onLoad() {
-    console.log('模板页面加载')
+    logger.log('模板页面加载')
     this.loadTemplates()
   },
 
   onShow() {
-    console.log('模板页面显示')
+    logger.log('模板页面显示')
     // 检查登录状态
     const app = getApp()
     if (!app.globalData.isLoggedIn) {
@@ -43,7 +44,7 @@ Page({
         'Authorization': `Bearer ${wx.getStorageSync('access_token')}`
       },
       success: (res) => {
-        console.log('模板页面分配模板响应:', res)
+        logger.log('模板页面分配模板响应:', res)
         
         // Handle new ApiResponse format: {success, message, data, error}
         const isApiSuccess = res.data && res.data.success === true;
@@ -69,7 +70,7 @@ Page({
           app.globalData.templates = templates
         } else {
           const errorMessage = res.data && res.data.error ? res.data.error : '获取模板失败';
-          console.log('获取模板失败:', errorMessage)
+          logger.warn('获取模板失败:', errorMessage)
           this.setData({
             templates: [],
             allTemplates: [],
@@ -82,7 +83,7 @@ Page({
         }
       },
       fail: (err) => {
-        console.error('获取模板请求失败:', err)
+        logger.error('获取模板请求失败:', err)
         this.setData({
           templates: [],
           allTemplates: [],
@@ -109,7 +110,7 @@ Page({
   // 过滤模板
   filterTemplates() {
     const { searchText, allTemplates } = this.data
-    console.log('过滤模板:', { searchText, allTemplatesCount: allTemplates.length })
+    logger.log('过滤模板:', { searchText, allTemplatesCount: allTemplates.length })
     
     if (!searchText.trim()) {
       // 如果搜索文本为空，显示所有模板
@@ -129,7 +130,7 @@ Page({
       )
     })
     
-    console.log('过滤结果:', filteredTemplates.length)
+    logger.log('过滤结果:', filteredTemplates.length)
     this.setData({
       templates: filteredTemplates
     })
@@ -138,17 +139,17 @@ Page({
 
   // 开始录制
   startRecording(e) {
-    console.log('开始录制按钮被点击', e)
+    logger.log('开始录制按钮被点击', e)
     wx.showToast({
       title: '按钮点击成功！',
       icon: 'success'
     })
     
     const templateId = e.currentTarget.dataset.id
-    console.log('模板ID:', templateId)
+    logger.log('模板ID:', templateId)
     
     if (!templateId) {
-      console.log('没有模板ID')
+      logger.warn('没有模板ID')
       wx.showToast({
         title: '没有模板ID',
         icon: 'none'
@@ -157,10 +158,10 @@ Page({
     }
     
     const template = this.data.templates.find(t => t.id === templateId)
-    console.log('找到的模板:', template)
+    logger.log('找到的模板:', template)
     
     if (!template) {
-      console.log('模板不存在')
+      logger.warn('模板不存在')
       wx.showToast({
         title: '模板不存在',
         icon: 'none'
@@ -172,20 +173,20 @@ Page({
     
     // 保存选中的模板
     app.globalData.currentTemplate = template
-    console.log('准备跳转到录制页面')
+    logger.log('准备跳转到录制页面')
     
     // 跳转到场景选择页面
     wx.navigateTo({
       url: `/pages/scene-selection/scene-selection?templateId=${template.id}&userId=${app.globalData.userInfo.id}`,
       success: () => {
-        console.log('跳转到场景录制页面成功')
+        logger.log('跳转到场景录制页面成功')
         wx.showToast({
           title: '进入场景录制',
           icon: 'success'
         })
       },
       fail: (err) => {
-        console.error('跳转失败:', err)
+        logger.error('跳转失败:', err)
         wx.showToast({
           title: `跳转失败: ${err.errMsg}`,
           icon: 'none'
