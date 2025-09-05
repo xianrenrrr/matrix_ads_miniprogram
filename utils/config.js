@@ -74,7 +74,7 @@ const config = {
 }
 
 // 根据环境切换配置
-const env = 'development' // 'development' | 'production'
+const env = 'production' // 'development' | 'production'
 
 if (env === 'development') {
   config.api.baseUrl = 'http://localhost:8080' // 使用本地开发后端地址
