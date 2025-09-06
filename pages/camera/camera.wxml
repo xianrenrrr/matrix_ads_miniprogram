@@ -53,7 +53,7 @@
     <!-- 场景信息 -->
     <view wx:if="{{selectedTemplate}}" class="scene-info">
       <view class="scene-title">
-        {{t('scene')}} {{sceneNumber}}: {{selectedTemplate.scenes[sceneIndex].sceneTitle}}
+        {{t('scene')}} {{sceneNumber}} {{selectedTemplate.scenes[sceneIndex].sceneTitle}}
       </view>
       <view class="scene-time">
         {{recordTime}}{{t('secondsShort')}} / {{selectedTemplate.scenes[sceneIndex].sceneDurationInSeconds || maxRecordTime}}{{t('secondsShort')}}
@@ -96,11 +96,14 @@
       <text>{{showScriptSidebar ? '>' : '<'}}</text>
     </view>
     <view class="script-content">
-      <text class="script-text">{{selectedTemplate.scenes[sceneIndex].scriptLine}}</text>
+      <text class="script-detail">{{t('scriptLabel')}} {{currentScript}}</text>
       <view class="script-details">
-        <text class="script-detail">📍 {{t('personPosition')}}: {{selectedTemplate.scenes[sceneIndex].personPosition || t('unspecified')}}</text>
-        <text class="script-detail">🎬 {{t('movementInstructions')}}: {{selectedTemplate.scenes[sceneIndex].movementInstructions || t('noSpecialRequirements')}}</text>
-        <text class="script-detail">📷 {{t('cameraInstructions')}}: {{selectedTemplate.scenes[sceneIndex].specificCameraInstructions || t('followTemplate')}}</text>
+        <text class="script-detail">{{t('deviceOrientation')}} {{deviceOrientationText || t('unspecified')}}</text>
+        <text class="script-detail">{{t('movementInstructions')}} {{movementInstructions || t('noSpecialRequirements')}}</text>
+        <text class="script-detail">{{t('backgroundInstructions')}} {{backgroundInstructions || t('noSpecialRequirements')}}</text>
+        <text class="script-detail">{{t('cameraInstructions')}} {{cameraInstructions || t('followTemplate')}}</text>
+        <text class="script-detail" wx:if="{{audioNotesText}}">{{t('audioNotes')}} {{audioNotesText}}</text>
+        <!-- Example frame intentionally not shown in sidebar to reduce clutter -->
       </view>
     </view>
   </view>

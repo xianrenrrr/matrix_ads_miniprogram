@@ -110,6 +110,12 @@
   line-height: 1.5;
 }
 
+/* Common video info */
+.common-info { margin-top: 12px; }
+.info-row { display: flex; margin-top: 6px; }
+.info-label { color: #374151; font-size: 14px; }
+.info-value { color: #111827; font-size: 14px; }
+
 /* Scenes Container */
 .scenes-container {
   padding: 0 20px;

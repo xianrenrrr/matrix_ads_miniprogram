@@ -18,7 +18,9 @@ Page({
     submissions: {},
     progress: null,
     loading: true,
-    videoUrl: null
+    videoUrl: null,
+    // Sanitized template fields for display (avoid leading colons)
+    templateDisplay: null
   },
 
   onLoad: function(options) {
@@ -68,7 +70,8 @@ Page({
       self.setData({
         template: app.globalData.currentTemplate,
         scenes: processedScenes,
-        loading: false
+        loading: false,
+        templateDisplay: self.buildTemplateDisplay(app.globalData.currentTemplate)
       });
       
       // If template has videoId but no videoUrl, fetch the video URL
@@ -110,7 +113,8 @@ Page({
           self.setData({
             template: responseData,
             scenes: processedScenes,
-            loading: false
+            loading: false,
+            templateDisplay: self.buildTemplateDisplay(responseData)
           });
         } else {
           const errorMessage = response.data && response.data.error ? response.data.error : t('templateNotFoundOrNoScenes');
@@ -134,6 +138,26 @@ Page({
         wx.hideLoading();
       }
     });
+  },
+
+  // Helper: remove leading full-width/half-width colons and whitespace
+  stripLeading: function(str) {
+    if (!str || typeof str !== 'string') return str;
+    return str.replace(/^[\s:：]+/, '');
+  },
+
+  // Build sanitized fields for display card
+  buildTemplateDisplay: function(tpl) {
+    const strip = this.stripLeading;
+    const seconds = typeof tpl.totalVideoLength === 'number' ? tpl.totalVideoLength : '';
+    return {
+      videoPurpose: strip(tpl.videoPurpose || ''),
+      tone: strip(tpl.tone || ''),
+      totalVideoLength: seconds, // append unit in WXML
+      videoFormat: strip(tpl.videoFormat || ''),
+      lightingRequirements: strip(tpl.lightingRequirements || ''),
+      backgroundMusic: strip(tpl.backgroundMusic || '')
+    };
   },
 
   // Load user's progress for this template using submittedVideos collection

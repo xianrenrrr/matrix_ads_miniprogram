@@ -12,6 +12,34 @@
     <view class="info-card">
       <text class="info-title">{{t('templateInfo')}}</text>
       <text class="info-description">{{template.templateDescription || '请按照具体说明录制每个场景'}}</text>
+
+      <!-- Common video information -->
+      <view class="common-info">
+        <view class="info-row" wx:if="{{templateDisplay && templateDisplay.videoPurpose}}">
+          <text class="info-label">视频目标：</text>
+          <text class="info-value">{{templateDisplay.videoPurpose}}</text>
+        </view>
+        <view class="info-row" wx:if="{{templateDisplay && templateDisplay.tone}}">
+          <text class="info-label">语调：</text>
+          <text class="info-value">{{templateDisplay.tone}}</text>
+        </view>
+        <view class="info-row" wx:if="{{templateDisplay && templateDisplay.totalVideoLength}}">
+          <text class="info-label">总视频时长：</text>
+          <text class="info-value">{{templateDisplay.totalVideoLength}} 秒</text>
+        </view>
+        <view class="info-row" wx:if="{{templateDisplay && templateDisplay.videoFormat}}">
+          <text class="info-label">视频格式：</text>
+          <text class="info-value">{{templateDisplay.videoFormat}}</text>
+        </view>
+        <view class="info-row" wx:if="{{templateDisplay && templateDisplay.lightingRequirements}}">
+          <text class="info-label">灯光要求：</text>
+          <text class="info-value">{{templateDisplay.lightingRequirements}}</text>
+        </view>
+        <view class="info-row" wx:if="{{templateDisplay && templateDisplay.backgroundMusic}}">
+          <text class="info-label">背景音乐：</text>
+          <text class="info-value">{{templateDisplay.backgroundMusic}}</text>
+        </view>
+      </view>
     </view>
   </view>
 

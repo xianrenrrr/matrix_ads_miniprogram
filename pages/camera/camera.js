@@ -184,12 +184,15 @@ Page({
     
     logger.log(`场景 ${sceneIndex + 1} 覆盖类型:`, overlayType)
     
+    // Helper: strip leading full/half width colons and spaces
+    const strip = (v) => (typeof v === 'string' ? v.replace(/^[\s:：]+/, '') : v);
+
     // 设置基础数据
     let updateData = {
       selectedTemplate: template,
       currentScene: sceneIndex,
       maxRecordTime: currentScene.sceneDurationInSeconds || 30,
-      currentScript: currentScene.scriptLine || '',
+      currentScript: strip(currentScene.scriptLine || ''),
       sceneProgress: scenes.length > 0 ? (sceneIndex + 1) / scenes.length : 0,
       overlayType: overlayType,
       sourceAspect: currentScene.sourceAspect || '9:16',
@@ -197,9 +200,12 @@ Page({
       // 相机设置
       cameraPosition: this.getCameraPosition(currentScene.personPosition),
       // 指导信息
-      backgroundInstructions: currentScene.backgroundInstructions || '',
-      cameraInstructions: currentScene.specificCameraInstructions || '',
-      movementInstructions: currentScene.movementInstructions || ''
+      backgroundInstructions: strip(currentScene.backgroundInstructions || ''),
+      cameraInstructions: strip(currentScene.specificCameraInstructions || ''),
+      movementInstructions: strip(currentScene.movementInstructions || ''),
+      deviceOrientationText: strip(currentScene.deviceOrientation || ''),
+      audioNotesText: strip(currentScene.audioNotes || ''),
+      personPresentText: currentScene.presenceOfPerson ? t('yes') : t('no')
     }
     
     if (isPolygonOverlay && currentScene.overlayPolygons && currentScene.overlayPolygons.length > 0) {
