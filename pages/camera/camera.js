@@ -87,24 +87,16 @@ Page({
     const cameraContext = wx.createCameraContext()
     this.cameraContext = cameraContext
     
-    // 检查相机权限
+    // 检查相机与麦克风权限
     wx.getSetting({
       success: (res) => {
-        if (!res.authSetting['scope.camera']) {
-          wx.authorize({
-            scope: 'scope.camera',
-            success: () => {
-              logger.log('相机权限获取成功')
-            },
-            fail: () => {
-              wx.showModal({
-                title: t('cameraPermissionNeeded'),
-                content: t('cameraPermissionMessage'),
-                showCancel: false,
-                confirmText: t('cameraPermissionOk')
-              })
-            }
-          })
+        const needCamera = !res.authSetting['scope.camera']
+        const needRecord = !res.authSetting['scope.record']
+        if (needCamera) {
+          wx.authorize({ scope: 'scope.camera' })
+        }
+        if (needRecord) {
+          wx.authorize({ scope: 'scope.record' })
         }
       }
     })
@@ -574,6 +566,7 @@ Page({
 
   // 开始录制
   startRecording() {
+    console.log('[UI] startRecording tapped')
     if (!this.data.selectedTemplate) {
       wx.showToast({
         title: t('selectTemplate'),
@@ -583,22 +576,56 @@ Page({
     }
 
     const cameraContext = this.cameraContext
-    
-    cameraContext.startRecord({
-      success: () => {
-        console.log('开始录制')
-        this.setData({ 
-          isRecording: true,
-          recordTime: 0
+
+    // Ensure permissions
+    wx.getSetting({
+      success: (res) => {
+        const hasCamera = !!res.authSetting['scope.camera']
+        const hasRecord = !!res.authSetting['scope.record']
+        if (!hasCamera || !hasRecord) {
+          wx.showModal({
+            title: !hasRecord ? t('microphonePermissionNeeded') : t('cameraPermissionNeeded'),
+            content: !hasRecord ? t('microphonePermissionMessage') : t('cameraPermissionMessage'),
+            confirmText: t('openSettings'),
+            cancelText: t('close'),
+            success: (r) => {
+              if (r.confirm) {
+                wx.openSetting({})
+              }
+            }
+          })
+          return
+        }
+
+        // Permissions ok, start record
+        cameraContext.startRecord({
+          success: () => {
+            console.log('开始录制')
+            this.setData({ 
+              isRecording: true,
+              recordTime: 0
+            })
+            this.startTimer()
+          },
+          fail: (err) => {
+            console.error('录制失败', err)
+            const msg = (err && err.errMsg) || ''
+            if (msg.includes('microphone') || msg.includes('not allowed')) {
+              wx.showModal({
+                title: t('microphonePermissionNeeded'),
+                content: t('microphonePermissionMessage'),
+                confirmText: t('openSettings'),
+                cancelText: t('close'),
+                success: (r) => { if (r.confirm) wx.openSetting({}) }
+              })
+            } else {
+              wx.showToast({ title: t('recordingFailed'), icon: 'none' })
+            }
+          }
         })
-        this.startTimer()
       },
-      fail: (err) => {
-        console.error('录制失败', err)
-        wx.showToast({
-          title: t('recordingFailed'),
-          icon: 'none'
-        })
+      fail: () => {
+        wx.showToast({ title: t('recordingFailed'), icon: 'none' })
       }
     })
   },
@@ -893,10 +920,18 @@ Page({
   // 相机错误处理
   onCameraError(e) {
     logger.error('相机错误', e)
-    wx.showToast({
-      title: t('cameraError'),
-      icon: 'none'
-    })
+    const msg = (e && e.detail && e.detail.errMsg) || ''
+    if (msg.includes('microphone') || msg.includes('not allowed')) {
+      wx.showModal({
+        title: t('microphonePermissionNeeded'),
+        content: t('microphonePermissionMessage'),
+        confirmText: t('openSettings'),
+        cancelText: t('close'),
+        success: (r) => { if (r.confirm) wx.openSetting({}) }
+      })
+    } else {
+      wx.showToast({ title: t('cameraError'), icon: 'none' })
+    }
   },
 
   onUnload() {

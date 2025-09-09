@@ -177,7 +177,7 @@
 /* 场景信息 */
 .scene-info {
   position: absolute;
-  bottom: 200rpx;
+  bottom: 240rpx; /* moved slightly higher to avoid overlap */
   left: 50%;
   transform: translateX(-50%);
   background-color: rgba(0, 0, 0, 0.7);
@@ -244,13 +244,15 @@
 /* KTV overlay styles */
 .ktv-overlay {
   position: absolute;
-  bottom: 120rpx;
+  /* Keep above camera preview; avoid scene-info and bottom controls */
+  bottom: 360rpx;
   left: 40rpx;
   right: 40rpx;
   background: rgba(0, 0, 0, 0.6);
   border-radius: 12rpx;
   padding: 16rpx 20rpx;
-  z-index: 8;
+  z-index: 7;
+  pointer-events: none; /* Do not block taps on buttons */
 }
 .ktv-text {
   font-size: 32rpx;
