@@ -241,6 +241,30 @@
   font-weight: bold;
 }
 
+/* KTV overlay styles */
+.ktv-overlay {
+  position: absolute;
+  bottom: 120rpx;
+  left: 40rpx;
+  right: 40rpx;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 12rpx;
+  padding: 16rpx 20rpx;
+  z-index: 8;
+}
+.ktv-text {
+  font-size: 32rpx;
+  line-height: 44rpx;
+  color: #9ca3af; /* rest */
+}
+.ktv-highlight {
+  color: #ffffff;
+  font-weight: 600;
+}
+.ktv-rest {
+  color: #9ca3af;
+}
+
 /* 脚本侧边栏 */
 .script-sidebar {
   position: absolute;

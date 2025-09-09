@@ -75,6 +75,10 @@
         <view class="control-btn" bindtap="toggleOverlay">
           <text class="control-icon">{{showOverlay ? '📏' : '📐'}}</text>
         </view>
+        <!-- 新增：脚本KTV开关按钮 -->
+        <view class="control-btn" bindtap="toggleKtv">
+          <text class="control-icon">🎤</text>
+        </view>
       </view>
     </view>
   </camera>
@@ -88,6 +92,13 @@
         <text class="legend-text">{{item.labelZh || item.labelLocalized || toZh(item.label) || item.label}}（{{item.confidencePercent || 0}}%）</text>
       </view>
     </block>
+  </view>
+
+  <!-- KTV脚本覆盖层：底部显示逐字高亮 -->
+  <view wx:if="{{showKtv && currentScript}}" class="ktv-overlay">
+    <text class="ktv-text">
+      <text class="ktv-highlight">{{ktvHighlighted}}</text><text class="ktv-rest">{{ktvRest}}</text>
+    </text>
   </view>
 
   <!-- 脚本侧边栏 -->

@@ -1,6 +1,6 @@
 // pages/camera/camera.js
 const logger = require('../../utils/logger');
-const { t } = require('../../utils/translations')
+const { t, getLanguage } = require('../../utils/translations')
 const { toZh } = require('../../utils/objectLabels')
 
 Page({
@@ -137,7 +137,8 @@ Page({
       method: 'GET',
       header: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${wx.getStorageSync('access_token')}`
+        'Authorization': `Bearer ${wx.getStorageSync('access_token')}`,
+        'Accept-Language': getLanguage() === 'zh' ? 'zh-CN,zh;q=0.9' : 'en-US,en;q=0.9'
       },
       success: (res) => {
         logger.log('加载模板响应:', res)
@@ -240,6 +241,16 @@ Page({
       updateData.overlayRectsPixels = [] // Clear rect pixels for grid mode
     }
     
+    // Initialize KTV view state
+    const script = (updateData.currentScript || '').trim()
+    const totalLen = script.length
+    Object.assign(updateData, {
+      showKtv: false,
+      ktvHighlighted: '',
+      ktvRest: script,
+      ktvTotalLen: totalLen
+    })
+
     this.setData(updateData)
     
     // 更新覆盖层像素坐标
@@ -801,6 +812,30 @@ Page({
     this.setData({ showScriptSidebar: !this.data.showScriptSidebar })
   },
 
+  // 顶部按钮：切换KTV脚本显示
+  toggleKtv() {
+    const next = !this.data.showKtv
+    this.setData({ showKtv: next })
+    if (next) this.updateKtvProgress()
+  },
+
+  // 根据当前进度更新KTV高亮
+  updateKtvProgress() {
+    try {
+      const script = (this.data.currentScript || '').trim()
+      if (!this.data.showKtv || !script) return
+      const total = script.length || 1
+      const currentScene = this.data.selectedTemplate && this.data.selectedTemplate.scenes && this.data.selectedTemplate.scenes[this.data.currentScene]
+      const sceneMaxTime = (currentScene && currentScene.sceneDurationInSeconds) || this.data.maxRecordTime || 30
+      const elapsed = this.data.recordTime || 0
+      const progress = Math.max(0, Math.min(1, elapsed / sceneMaxTime))
+      const highlightCount = Math.floor(total * progress)
+      const highlighted = script.substring(0, highlightCount)
+      const rest = script.substring(highlightCount)
+      this.setData({ ktvHighlighted: highlighted, ktvRest: rest, ktvTotalLen: total })
+    } catch (e) { /* no-op */ }
+  },
+
   // 重录当前场景（从模态框调用）
   retakeCurrentScene() {
     this.setData({ showRecordingCompleteModal: false })
@@ -832,6 +867,8 @@ Page({
     this.timer = setInterval(() => {
       const recordTime = this.data.recordTime + 1
       this.setData({ recordTime })
+      // Update KTV highlight on each tick
+      this.updateKtvProgress()
       
       // 获取当前场景的时长限制
       const currentScene = this.data.selectedTemplate && this.data.selectedTemplate.scenes && this.data.selectedTemplate.scenes[this.data.currentScene]
