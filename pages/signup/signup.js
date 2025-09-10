@@ -97,19 +97,15 @@ Page({
       return false
     }
     
-    // TODO: REMOVE THIS BYPASS BEFORE PRODUCTION - Phone validation should be enabled
-    /*
+    // 手机号校验（中国大陆）
     if (!phone.trim()) {
       wx.showToast({ title: '请输入手机号码', icon: 'none' })
       return false
     }
-    
-    // 简单的手机号验证
     if (!/^1[3-9]\d{9}$/.test(phone.trim())) {
       wx.showToast({ title: '请输入有效的手机号码', icon: 'none' })
       return false
     }
-    */
     
     if (!city.trim()) {
       wx.showToast({ title: '请输入城市', icon: 'none' })
@@ -162,7 +158,8 @@ Page({
       url: `${app.globalData.apiBaseUrl}/auth/invite-signup`,
       method: 'POST',
       header: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Accept-Language': (require('../../utils/translations').getLanguage() === 'zh') ? 'zh-CN,zh;q=0.9' : 'en-US,en;q=0.9'
       },
       data: signupData,
       success: (res) => {
@@ -174,20 +171,19 @@ Page({
         
         if (res.statusCode === 200 && isApiSuccess) {
           // 注册成功
-          wx.showToast({
-            title: '注册成功',
-            icon: 'success'
-          })
+          wx.showToast({ title: '注册成功', icon: 'success' })
           
           // 显示成功信息并引导用户登录
           setTimeout(() => {
             // Use group info from response if available, otherwise fallback to invite info
             const groupName = responseData.groupName || inviteInfo.groupName || '团队';
             const managerName = responseData.managerName || inviteInfo.managerName || '管理员';
+            const role = responseData.role || 'content_creator';
+            const roleZh = role === 'content_manager' ? '内容管理员' : '内容创作者';
             
             wx.showModal({
-              title: '注册成功！',
-              content: `欢迎加入 ${groupName}！\n管理员：${managerName}\n\n请使用刚才设置的用户名和密码登录小程序。`,
+              title: '恭喜！',
+              content: `你已成为${roleZh}，加入「${groupName}」。\n管理员：${managerName}\n\n请使用刚才设置的账号和密码登录。`,
               confirmText: '去登录',
               showCancel: false,
               success: () => {
@@ -202,8 +198,8 @@ Page({
           let errorMessage = '注册过程中出现错误，请稍后重试';
           
           if (res.data) {
-            // Extract error from ApiResponse format: {success: false, error: "..."}
-            errorMessage = res.data.error || res.data.message || errorMessage;
+            // 优先显示本地化 message，其次显示后端 error 详情
+            errorMessage = res.data.message || res.data.error || errorMessage;
           }
           
           wx.showModal({

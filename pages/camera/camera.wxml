@@ -101,13 +101,13 @@
     </text>
   </view>
 
-  <!-- 脚本侧边栏 -->
-  <view wx:if="{{selectedTemplate && currentScript}}" class="script-sidebar {{showScriptSidebar ? 'show' : ''}}">
+  <!-- 脚本侧边栏（不展示台词，仅展示拍摄指导） -->
+  <view wx:if="{{selectedTemplate}}" class="script-sidebar {{showScriptSidebar ? 'show' : ''}}">
     <view class="script-toggle" bindtap="toggleScriptSidebar">
       <text>{{showScriptSidebar ? '>' : '<'}}</text>
     </view>
     <view class="script-content">
-      <text class="script-detail">{{t('scriptLabel')}} {{currentScript}}</text>
+      <!-- 台词在 KTV 覆盖层展示，这里不重复展示 -->
       <view class="script-details">
         <text class="script-detail">{{t('deviceOrientation')}} {{deviceOrientationText || t('unspecified')}}</text>
         <text class="script-detail">{{t('movementInstructions')}} {{movementInstructions || t('noSpecialRequirements')}}</text>
@@ -148,19 +148,15 @@
   <view wx:if="{{showRecordingCompleteModal}}" class="recording-complete-overlay">
     <view class="recording-complete-modal">
       <view class="recording-complete-header">
-        <text class="recording-complete-title">{{recordingCompleteText}}</text>
+        <text class="recording-complete-title">{{t('recordingComplete')}}</text>
       </view>
       <view class="recording-complete-body">
-        <text class="recording-complete-text">{{recordingCompleteMessageText}}</text>
-        <text class="recording-complete-duration">{{durationText}}: {{recordTime}}{{secondsShortText}}</text>
+        <text class="recording-complete-text">{{t('recordingCompleteMessage')}}</text>
+        <text class="recording-complete-duration">{{t('duration')}}: {{recordTime}}{{t('secondsShort')}}</text>
       </view>
       <view class="recording-complete-actions">
-        <button class="recording-action-btn retry-btn" bindtap="retakeCurrentScene">
-          {{reRecordText}}
-        </button>
-        <button class="recording-action-btn submit-btn" bindtap="submitScene">
-          {{submitSceneText}}
-        </button>
+        <button class="recording-action-btn retry-btn" bindtap="retakeCurrentScene">{{t('reRecord')}}</button>
+        <button class="recording-action-btn submit-btn" bindtap="submitScene">{{t('submitScene')}}</button>
       </view>
     </view>
   </view>

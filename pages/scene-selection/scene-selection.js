@@ -206,13 +206,11 @@ Page({
               scene.similarityPercent = similarityPercent;
               scene.hasScore = similarityPercent != null;
               
-              // Translate status to Chinese
+              // Normalize status: if a submission exists, show 已通过 or 未通过
+              var hasSubmission = !!scene.videoUrl || !!scene.sceneId || !!scene.status;
               var statusText = '未提交';
-              switch(scene.status) {
-                case 'approved': statusText = '已批准'; break;
-                case 'pending': statusText = '待审核'; break;
-                case 'rejected': statusText = '已拒绝'; break;
-                default: statusText = '未提交';
+              if (hasSubmission) {
+                statusText = (scene.status === 'approved') ? '已通过' : '未通过';
               }
               scene.statusText = statusText;
               scene.statusColor = self.getSceneStatusColor(scene.status || 'not-submitted');
