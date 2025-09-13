@@ -27,20 +27,18 @@ Page({
   initPage() {
     const app = getApp()
     
-    // 检查登录状态
-    if (!app.globalData.isLoggedIn) {
-      app.redirectToLogin()
-      return
-    }
-    
+    // 检查登录状态（当前不强制跳转，便于直接查看首页UI）
+
     this.setData({
       isLoggedIn: app.globalData.isLoggedIn,
       userInfo: app.globalData.userInfo,
       loading: false
     })
     
-    this.loadAssignedTemplates()
-    this.loadDashboardStats()
+    if (app.globalData.isLoggedIn && app.globalData.userInfo) {
+      this.loadAssignedTemplates()
+      this.loadDashboardStats()
+    }
   },
 
   // 刷新数据

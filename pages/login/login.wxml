@@ -3,7 +3,7 @@
   <!-- 头部 Logo 区域 -->
   <view class="header-section">
     <view class="logo-container">
-      <text class="logo-text">Matrix Ads</text>
+      <text class="logo-text">Glow AI</text>
     </view>
     <text class="subtitle">商家专用</text>
   </view>
@@ -133,7 +133,7 @@
 
   <!-- 底部信息 -->
   <view class="footer-section">
-    <text class="footer-text">Matrix Ads © 2024</text>
+    <text class="footer-text">Glow AI © 2024</text>
     <text class="version-text">小程序版本 v1.0.0</text>
   </view>
 </view>

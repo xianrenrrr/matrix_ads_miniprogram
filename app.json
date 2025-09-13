@@ -1,16 +1,16 @@
 {
   "pages": [
-    "pages/login/login",
-    "pages/signup/signup", 
     "pages/index/index",
     "pages/templates/templates",
     "pages/scene-selection/scene-selection",
-    "pages/camera/camera"
+    "pages/camera/camera",
+    "pages/login/login",
+    "pages/signup/signup"
   ],
   "window": {
     "backgroundTextStyle": "dark",
     "navigationBarBackgroundColor": "#ffffff",
-    "navigationBarTitleText": "Matrix Ads",
+    "navigationBarTitleText": "Glow AI",
     "navigationBarTextStyle": "black",
     "backgroundColor": "#ffffff"
   },

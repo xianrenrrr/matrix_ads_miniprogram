@@ -5,7 +5,7 @@ const logger = require('./utils/logger')
 App({
   onLaunch() {
     // 小程序启动时触发
-    logger.log('Matrix Ads Mini Program Launch')
+    logger.log('Glow AI Mini Program Launch')
     
     // 检查是否有新版本
     if (wx.canIUse('getUpdateManager')) {
@@ -41,11 +41,11 @@ App({
   },
   
   onShow() {
-    logger.log('Matrix Ads Mini Program Show')
+    logger.log('Glow AI Mini Program Show')
   },
   
   onHide() {
-    logger.log('Matrix Ads Mini Program Hide')
+    logger.log('Glow AI Mini Program Hide')
   },
   
   onError(msg) {
@@ -63,8 +63,10 @@ App({
       // 暂时跳过token验证，直接认为已登录
       logger.log('用户已登录:', userInfo)
     } else {
-      // 没有登录信息，跳转到登录页
-      this.redirectToLogin()
+      // 开发阶段：没有登录信息也不强制跳转登录
+      this.globalData.isLoggedIn = false
+      this.globalData.userInfo = null
+      logger.warn('未检测到登录信息，暂时跳过登录流程')
     }
   },
   
@@ -104,10 +106,10 @@ App({
     this.redirectToLogin()
   },
 
-  // 跳转到登录页
+  // 跳转到登录页（当前会跳到首页，便于跳过登录阶段）
   redirectToLogin() {
     wx.reLaunch({
-      url: '/pages/login/login'
+      url: '/pages/index/index'
     })
   },
   

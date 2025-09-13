@@ -3,7 +3,7 @@
   <!-- 头部信息 -->
   <view class="header-section">
     <view class="logo-container">
-      <text class="logo-text">Matrix Ads</text>
+      <text class="logo-text">Glow AI</text>
     </view>
     <text class="subtitle">创建您的账户</text>
   </view>

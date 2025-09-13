@@ -1,7 +1,7 @@
-# Matrix Ads WeChat Mini Program
+# Glow AI WeChat Mini Program
 
 ## Project Overview
-This is a WeChat Mini Program for video recording functionality within the Matrix Ads platform. Users can record guided videos using templates created by content managers.
+This is a WeChat Mini Program for video recording functionality within the Glow AI platform. Users can record guided videos using templates created by content managers.
 
 ## Architecture
 ```
