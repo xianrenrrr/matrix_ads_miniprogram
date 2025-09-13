@@ -42,6 +42,69 @@
   color: #6b7280;
 }
 
+/* Title indicator next to greeting */
+.title-row {
+  display: flex;
+  align-items: center;
+}
+
+/* Map-pin icon built with CSS */
+.pin-icon {
+  position: absolute;
+  left: -5rpx;     /* move 5rpx further left */
+  top: 51.93rpx;   /* 267.31 - 215.38 within box */
+  width: 30.77rpx; /* per design */
+  height: 30.77rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+/* Upright pin: circular head + diamond tail */
+.pin-shape {
+  width: 20rpx;              /* head diameter */
+  height: 20rpx;
+  background-color: #2772F0; /* rgb(39,114,240) */
+  border-radius: 50%;        /* perfect circle head */
+  position: relative;
+}
+
+.pin-dot {
+  position: absolute;
+  width: 8rpx;
+  height: 8rpx;
+  background-color: #ffffff;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* center perfectly */
+}
+
+.pin-tail {
+  position: absolute;
+  width: 10rpx;
+  height: 10rpx;
+  background-color: #2772F0;
+  bottom: -5rpx;            /* overlap slightly under the head */
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  border-radius: 2rpx;      /* soft point */
+}
+
+.title-texts { }
+
+.home-title { position: absolute; left: 26rpx; top: 46.16rpx; width: 359.62rpx; z-index: 2; }
+.home-subtitle { position: absolute; left: 26rpx; top: 155.77rpx; width: 359.62rpx; z-index: 2; }
+
+/* Home title tweaks to match design */
+.home-title {
+  font-size: 40rpx;   /* slightly larger than global */
+  font-weight: 700;   /* heavier */
+  color: #1f2a44;     /* deep navy tone */
+  line-height: 1.3;
+}
+
 .template-list {
   display: flex;
   flex-direction: column;
@@ -136,4 +199,25 @@
 .action-text {
   font-size: 24rpx;
   color: #6b7280;
+}
+.card-flush { padding: 0; }
+.greeting-box {
+  position: relative;
+  width: 673.08rpx;   /* per spec */
+  height: 234.62rpx;  /* per spec */
+  margin-left: 38.46rpx;
+  border-radius: 15.38rpx;
+  overflow: hidden;
+}
+
+/* Right-side illustration per design spec */
+.greeting-illustration {
+  position: absolute;
+  top: 0;
+  left: 302.92rpx; /* 5rpx further left */
+  width: 321.15rpx;
+  height: 234.62rpx;
+  opacity: 1;
+  pointer-events: none;
+  z-index: 1;
 }

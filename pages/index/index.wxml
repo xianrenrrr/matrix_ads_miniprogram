@@ -8,10 +8,24 @@
   <!-- 主要内容 -->
   <view wx:else class="container">
     <!-- 欢迎信息 -->
-    <view class="card">
+    <view class="card card-flush">
       <view>
-        <view class="card-title">你好，{{userInfo.username || '用户'}}</view>
-        <view class="card-subtitle">开始今天的创作吧</view>
+        <view class="greeting-box">
+          <view class="title-row">
+            <view class="pin-icon">
+              <view class="pin-shape">
+                <view class="pin-dot"></view>
+                <view class="pin-tail"></view>
+              </view>
+            </view>
+            <view class="title-texts">
+              <view class="card-title home-title">您好！{{userInfo.username || '用户'}}</view>
+              <view class="card-subtitle home-subtitle">开始今天的创作吧!</view>
+                        <image class="greeting-illustration" src="/assets/Mask group@3x.png" mode="aspectFit" />
+
+            </view>
+          </view>
+        </view>
       </view>
     </view>
 
