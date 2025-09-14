@@ -68,9 +68,9 @@
           
           <view class="scene-title-container">
             <text class="scene-title">{{item.sceneTitle || '场景 ' + (index + 1)}}</text>
-            <text class="status-badge {{submissions[index + 1] ? submissions[index + 1].statusClass : 'status-pending'}}">
+            <view class="status-badge {{submissions[index + 1] ? submissions[index + 1].statusClass : 'status-pending'}}">
               {{submissions[index + 1] ? submissions[index + 1].statusText : '未提交'}}
-            </text>
+            </view>
             <!-- Video Similarity Score on same line -->
             <text class="similarity-inline" wx:if="{{submissions[index + 1] && submissions[index + 1].hasScore}}">
               视频相似度: {{submissions[index + 1].similarityPercent}}%
@@ -94,25 +94,31 @@
             <!-- Scene Actions -->
             <view class="scene-actions">
               <!-- Example Button -->
-              <custom-button
-                wx:if="{{template && (videoUrl || template.videoUrl)}}"
-                text="案例"
-                type="primary"
-                size="mini"
-                data-index="{{index}}"
-                data-start-time="{{item.startTimeMs || 0}}"
-                data-end-time="{{item.endTimeMs || 3000}}"
-                bindtap="playSceneExample">
-              </custom-button>
+              <view class="btn-wrap example-wrap">
+                <custom-button
+                  wx:if="{{template && (videoUrl || template.videoUrl)}}"
+                  text="案例"
+                  type="outline"
+                  size="small"
+                  ext-class="full-size"
+                  data-index="{{index}}"
+                  data-start-time="{{item.startTimeMs || 0}}"
+                  data-end-time="{{item.endTimeMs || 3000}}"
+                  bindtap="playSceneExample">
+                </custom-button>
+              </view>
               
               <!-- Record Button -->
-              <custom-button
-                text="{{item.buttonText || '录制'}}"
-                type="{{item.buttonType || 'primary'}}"
-                size="mini"
-                data-index="{{index}}"
-                bindtap="recordScene">
-              </custom-button>
+              <view class="btn-wrap record-wrap">
+                <custom-button
+                  text="开始录制"
+                  type="danger"
+                  size="small"
+                  ext-class="full-size"
+                  data-index="{{index}}"
+                  bindtap="recordScene">
+                </custom-button>
+              </view>
             </view>
         </view>
       </view>

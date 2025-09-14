@@ -237,7 +237,7 @@
 
 .scene-status { display: none; }
 
-.scene-title-container { flex: 1; display: flex; align-items: center; gap: 8rpx; flex-wrap: wrap; }
+.scene-title-container { flex: 1; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 
 .scene-title {
   font-size: 16px;
@@ -255,15 +255,22 @@
 
 /* Inline status badges: pending (grey), rejected (red), approved (green) */
 .status-badge {
-  font-size: 22rpx;
-  line-height: 1;
-  padding: 6rpx 10rpx;
-  border-radius: 8rpx;
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  height: 22px;
+  line-height: 22px;
+  padding: 0 8px;
+  border-radius: 6px;
   border: 1px solid transparent;
+  background: transparent; /* default: no fill */
 }
-.status-pending { background: #f3f4f6; color: #6b7280; border-color: #e5e7eb; }
-.status-rejected { background: #fee2e2; color: #b91c1c; border-color: #fecaca; }
-.status-approved { background: #dcfce7; color: #16a34a; border-color: #bbf7d0; }
+/* 未提交 = grey text with dashed border */
+.status-pending { background: transparent; color: #6b7280; border: 1px dashed #6b7280; }
+/* 未通过 = red text with dashed red border */
+.status-rejected { background: transparent; color: #ef4444; border: 1px dashed #ef4444; }
+/* 已通过 = green text with dashed green border */
+.status-approved { background: transparent; color: #10b981; border: 1px dashed #10b981; }
 
 .scene-duration {
   font-size: 12px;
@@ -273,7 +280,7 @@
 }
 
 /* Scene Content */
-.scene-content { padding: 20rpx 24rpx; }
+.scene-content { padding: 12rpx 24rpx 8rpx 24rpx; }
 
 .scene-section {
   margin-bottom: 12px;
@@ -319,12 +326,18 @@
 
 /* Scene Actions */
 .scene-actions {
-  padding: 20rpx 24rpx;
+  padding: 12rpx 30.77rpx 24rpx; /* move divider up; give buttons more room */
   border-top: 2rpx solid #f3f4f6;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
+
+/* Fixed button sizes per spec using wrappers */
+.scene-actions .btn-wrap { width: 286.54rpx; height: 90rpx; }
+.scene-actions .example-wrap { margin-right: 38.46rpx; }
+/* Global helper to force component to fill wrapper */
+.full-size { width: 100%; height: 100%; padding: 0 !important; }
 
 .submission-status {
   flex: 1;

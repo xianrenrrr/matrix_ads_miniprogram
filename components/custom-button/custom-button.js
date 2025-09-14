@@ -1,5 +1,9 @@
 // components/custom-button/custom-button.js
 Component({
+  options: {
+    addGlobalClass: true
+  },
+  externalClasses: ['ext-class'],
   /**
    * Component properties
    */
@@ -10,7 +14,7 @@ Component({
     },
     type: {
       type: String,
-      value: 'primary' // primary, secondary, success, warning, danger
+      value: 'primary' // primary, secondary, success, warning, danger, outline
     },
     size: {
       type: String,
@@ -23,6 +27,10 @@ Component({
     disabled: {
       type: Boolean,
       value: false
+    },
+    extClass: {
+      type: String,
+      value: ''
     }
   },
 
