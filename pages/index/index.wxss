@@ -31,7 +31,7 @@
 }
 
 .stat-number {
-  font-size: 48rpx;
+  font-size: 70rpx;
   font-weight: 700;
   line-height: 1.2;
   margin-bottom: 8rpx;
@@ -278,9 +278,9 @@
 .greeting-pin {
   position: absolute;
   left: 34.62rpx;   /* from left edge of the big box */
-  top: 53.85rpx;    /* from top edge of the big box */
-  width: 20.51rpx;
-  height: 25.64rpx;
+  top: 47.85rpx;    /* from top edge of the big box */
+  width: 30.51rpx;
+  height: 38.64rpx;
   z-index: 2;
   pointer-events: none;
 }
