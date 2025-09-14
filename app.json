@@ -1,7 +1,6 @@
 {
   "pages": [
     "pages/index/index",
-    "pages/templates/templates",
     "pages/scene-selection/scene-selection",
     "pages/camera/camera",
     "pages/login/login",
@@ -14,22 +13,7 @@
     "navigationBarTextStyle": "black",
     "backgroundColor": "#ffffff"
   },
-  "tabBar": {
-    "color": "#6b7280",
-    "selectedColor": "#1f2937",
-    "backgroundColor": "#ffffff",
-    "borderStyle": "black",
-    "list": [
-      {
-        "pagePath": "pages/index/index",
-        "text": "首页"
-      },
-      {
-        "pagePath": "pages/templates/templates",
-        "text": "模板"
-      }
-    ]
-  },
+  
   "permission": {
     "scope.camera": {
       "desc": "用于拍摄视频内容和扫描邀请二维码注册"

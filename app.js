@@ -106,10 +106,10 @@ App({
     this.redirectToLogin()
   },
 
-  // 跳转到登录页（当前会跳到首页，便于跳过登录阶段）
+  // 跳转到登录页
   redirectToLogin() {
     wx.reLaunch({
-      url: '/pages/index/index'
+      url: '/pages/login/login'
     })
   },
   

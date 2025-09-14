@@ -41,5 +41,34 @@
         <image class="stat-icon stat-icon-3" src="/assets/Group 8935@2x copy.png" mode="aspectFit" />
       </view>
     </view>
+
+    <!-- 全部模版 标题（非盒子） -->
+    <text class="all-templates-link">全部模版</text>
+
+    <!-- 全部模版 列表 -->
+    <view wx:if="{{allTemplates.length}}" class="tpl-grid full-bleed">
+      <view
+        wx:for="{{allTemplates}}"
+        wx:key="id"
+        class="tpl-card"
+        data-id="{{item.id}}"
+        bindtap="selectTemplate"
+      >
+        <view class="tpl-thumb">
+          <image src="{{item.thumbnail || '/assets/default-template.jpg'}}" mode="aspectFill" class="tpl-thumb-img" />
+        </view>
+        <view class="tpl-title {{item._titleClass}}">{{item.templateTitle || '未命名模板'}}</view>
+        <view class="tpl-meta">
+          <view class="meta-item"><text class="meta-dot"></text><text>场景{{item.sceneCount || 0}}</text></view>
+          <view class="meta-item"><text class="meta-dot"></text><text>{{item.duration || 0}}秒</text></view>
+        </view>
+        <view class="tpl-actions">
+          <view class="record-btn">开始录制</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 退出登录 CTA -->
+    <view class="logout-cta" bindtap="handleLogout">退出登录</view>
   </view>
 </view>

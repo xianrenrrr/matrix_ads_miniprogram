@@ -9,6 +9,7 @@ Page({
       recordedVideos: 0,
       publishedVideos: 0
     },
+    allTemplates: [],
     availableDigitClass: 'num-1w',
     recordedDigitClass: 'num-1w',
     publishedDigitClass: 'num-1w',
@@ -42,12 +43,15 @@ Page({
       this.loadAssignedTemplates()
       this.loadDashboardStats()
     }
+    // Always load all templates for the "全部模版" section
+    this.loadAllTemplates()
   },
 
   // 刷新数据
   refreshData() {
     this.loadAssignedTemplates()
     this.loadDashboardStats()
+    this.loadAllTemplates()
   },
 
   // 加载已分配的模板
@@ -104,6 +108,38 @@ Page({
           title: '网络错误',
           icon: 'none'
         })
+      }
+    })
+  },
+
+  // 加载所有模板（用于“全部模版”区块），复用已验证的分配模板接口
+  loadAllTemplates() {
+    const app = getApp()
+    if (!app.globalData.isLoggedIn || !app.globalData.userInfo) {
+      return
+    }
+    const userId = app.globalData.userInfo.id
+    wx.request({
+      url: `${app.globalData.apiBaseUrl}/content-creator/users/${userId}/assigned-templates`,
+      method: 'GET',
+      header: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${wx.getStorageSync('access_token')}`
+      },
+      success: (res) => {
+        const isApiSuccess = res.data && res.data.success === true
+        const responseData = res.data && res.data.data ? res.data.data : []
+        if (res.statusCode === 200 && isApiSuccess) {
+          const templates = responseData.map(t => ({
+            ...t,
+            duration: t.totalVideoLength,
+            sceneCount: (t.scenes && t.scenes.length) || 0,
+            thumbnail: (t.scenes && t.scenes[0] && t.scenes[0].exampleFrame) || '/assets/default-template.jpg',
+            _titleClass: this.computeTitleClass(t.templateTitle)
+          }))
+          this.setData({ allTemplates: templates })
+          app.globalData.templates = templates
+        }
       }
     })
   },
@@ -165,6 +201,14 @@ Page({
     return 'num-3w'
   },
 
+  // 根据标题长度决定字号（两行内尽量容纳）
+  computeTitleClass(title) {
+    if (!title) return ''
+    const len = String(title).length
+    // Heuristic: if longer than 16 chars, use smaller font
+    return len > 16 ? 'tpl-title-sm' : ''
+  },
+
   // 选择模板进行录制
   selectTemplate(e) {
     const templateId = e.currentTarget.dataset.id
@@ -197,35 +241,7 @@ Page({
   },
 
 
-  // 查看全部模板
-  viewAllTemplates() {
-    if (!this.data.isLoggedIn) {
-      wx.showToast({
-        title: '请先登录',
-        icon: 'none'
-      })
-      return
-    }
-    
-    wx.switchTab({
-      url: '/pages/templates/templates'
-    })
-  },
-
-  // 开始录制
-  startRecording() {
-    if (!this.data.isLoggedIn) {
-      wx.showToast({
-        title: '请先登录',
-        icon: 'none'
-      })
-      return
-    }
-    
-    wx.switchTab({
-      url: '/pages/templates/templates'
-    })
-  },
+  // 已移除与模板页面相关的导航
 
   // 退出登录
   handleLogout() {

@@ -122,6 +122,84 @@
 .template-duration {
   margin-top: 4rpx;
 }
+/* New grid cards for 全部模版 */
+.tpl-grid {
+  display: grid;
+  grid-template-columns: 325rpx 325rpx; /* fixed card widths */
+  column-gap: 0; /* space is handled by justify-content + padding */
+  justify-content: space-between; /* push columns to edges */
+  /* Container has 32rpx padding; to achieve 38.46rpx from phone edges, use 38.46-32 = 6.46rpx */
+  padding-left: 6.46rpx;
+  padding-right: 6.46rpx;
+  row-gap: 24rpx;
+}
+
+.tpl-card {
+  background: #fff;
+  border: 2rpx solid #e5e7eb;
+  border-radius: 16rpx;
+  padding: 16rpx 16rpx 24rpx 16rpx; /* extra bottom padding to lift button */
+  width: 325rpx;          /* fixed width */
+  height: 417.31rpx;      /* fixed height */
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.tpl-thumb {
+  width: 100%;
+  height: 180rpx; /* make media area smaller */
+  border-radius: 12rpx;
+  overflow: hidden;
+  background: #f3f4f6;
+}
+
+.tpl-thumb-img { width: 100%; height: 100%; }
+
+.tpl-title {
+  font-size: 32rpx;   /* slightly smaller */
+  font-weight: 700;
+  color: #1f2a44;
+  margin: 12rpx 0 6rpx 0;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2; /* clamp to two lines */
+  overflow: hidden;
+}
+.tpl-title-sm { font-size: 28rpx; }
+
+.tpl-meta {
+  display: flex;
+  gap: 12rpx;
+  color: #9ca3af;
+  font-size: 22rpx; /* smaller meta */
+}
+.meta-item { display: flex; align-items: center; gap: 6rpx; }
+.meta-dot { display: inline-block; width: 6rpx; height: 6rpx; border-radius: 50%; background: #cbd5e1; }
+
+.tpl-actions { margin-top: auto; }
+.record-btn {
+  border: 2rpx solid #fca5a5;
+  color: #ef4444;
+  text-align: center;
+  padding: 14rpx 0; /* slightly smaller button */
+  border-radius: 9999rpx;
+  font-weight: 600;
+}
+
+/* Logout CTA button sizing and placement */
+.logout-cta {
+  width: 488.46rpx;
+  height: 69.23rpx;
+  margin: 50rpx auto 24rpx; /* 50rpx below templates, center horizontally */
+  background: #ffffff;
+  border: 2rpx solid #e5e7eb;
+  border-radius: 9999rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1f2a44;
+}
 
 .quick-actions {
   display: grid;
@@ -205,7 +283,7 @@
 /* Three-box stats aligned to greeting box edges */
 .stats-layer {
   display: grid;
-  grid-template-columns: repeat(3, 220.46rpx);
+  grid-template-columns: repeat(3, 213.46rpx);
   column-gap: 15.38rpx;
   justify-content: start;
   width: 100%;
@@ -260,13 +338,13 @@
 .stat-icon-2 { width: 26.78rpx; height: 19.23rpx; }
 .stat-icon-3 { width: 22.24rpx; height: 23.08rpx; }
 
-/* Icon positioned relative to the entire phone (viewport) */
-.page-icon {
-  position: fixed;
-  left: 75.31rpx;
-  top: 90.31rpx;
-  width: 30.77rpx;
-  height:30.77rpx;
-  pointer-events: none;
-  z-index: 10000; /* ensure above greeting box and text */
+/* 全部模版 标题样式 */
+.all-templates-link {
+  display: block;
+  /* Align 38.46rpx from phone left: container has 32rpx padding, so add 6.46rpx */
+  margin-left: 6.46rpx;
+  margin-top: 24rpx;
+  font-size: 40rpx;    /* same as 您好 */
+  font-weight: 700;
+  color: #1f2a44;      /* match home title color */
 }
