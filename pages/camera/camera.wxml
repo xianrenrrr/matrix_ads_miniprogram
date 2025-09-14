@@ -56,20 +56,29 @@
       <view class="control-btn back-btn" bindtap="goBack">
         <text class="control-icon">←</text>
       </view>
-      <view class="controls-right">
-        <view class="control-btn" bindtap="toggleFlash">
-          <text class="control-icon">{{flashMode === 'off' ? '🔦' : flashMode === 'on' ? '💡' : '⚡'}}</text>
-        </view>
-        <view class="control-btn" bindtap="switchCamera">
-          <text class="control-icon">🔄</text>
-        </view>
-        <view class="control-btn" bindtap="toggleOverlay">
-          <text class="control-icon">{{showOverlay ? '📏' : '📐'}}</text>
-        </view>
-        <!-- 新增：脚本KTV开关按钮 -->
-        <view class="control-btn" bindtap="toggleKtv">
-          <text class="control-icon">🎤</text>
-        </view>
+    </view>
+
+    <!-- 右侧控制栏 -->
+    <view class="right-controls">
+      <view class="control-btn" bindtap="toggleFlash">
+        <text class="control-icon">⚡</text>
+        <text class="control-label">闪光</text>
+      </view>
+      <view class="control-btn" bindtap="switchCamera">
+        <text class="control-icon">↻</text>
+        <text class="control-label">翻转</text>
+      </view>
+      <view class="control-btn" bindtap="toggleOverlay">
+        <text class="control-icon">⊞</text>
+        <text class="control-label">辅助线</text>
+      </view>
+      <view class="control-btn" bindtap="toggleKtv">
+        <text class="control-icon">♪</text>
+        <text class="control-label">脚本</text>
+      </view>
+      <view class="control-btn" bindtap="showTemplateInfo">
+        <text class="control-icon"><</text>
+        <text class="control-label">提示词</text>
       </view>
     </view>
   </camera>
@@ -93,23 +102,6 @@
   </view>
 
 
-  <!-- 脚本侧边栏（不展示台词，仅展示拍摄指导） -->
-  <view wx:if="{{selectedTemplate}}" class="script-sidebar {{showScriptSidebar ? 'show' : ''}}">
-    <view class="script-toggle" bindtap="toggleScriptSidebar">
-      <text>{{showScriptSidebar ? '>' : '<'}}</text>
-    </view>
-    <view class="script-content">
-      <!-- 台词在 KTV 覆盖层展示，这里不重复展示 -->
-      <view class="script-details">
-        <text class="script-detail">{{t('deviceOrientation')}} {{deviceOrientationText || t('unspecified')}}</text>
-        <text class="script-detail">{{t('movementInstructions')}} {{movementInstructions || t('noSpecialRequirements')}}</text>
-        <text class="script-detail">{{t('backgroundInstructions')}} {{backgroundInstructions || t('noSpecialRequirements')}}</text>
-        <text class="script-detail">{{t('cameraInstructions')}} {{cameraInstructions || t('followTemplate')}}</text>
-        <text class="script-detail" wx:if="{{audioNotesText}}">{{t('audioNotes')}} {{audioNotesText}}</text>
-        <!-- Example frame intentionally not shown in sidebar to reduce clutter -->
-      </view>
-    </view>
-  </view>
 
 
   <!-- 底部控制栏 -->

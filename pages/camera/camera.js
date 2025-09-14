@@ -21,6 +21,7 @@ Page({
     showScriptSidebar: false, // 显示脚本侧边栏
     showRecordingCompleteModal: false, // 显示录制完成弹窗
     showUploadFailureModal: false, // 显示上传失败弹窗
+    showHints: false, // 显示提示词
     uploadErrorMessage: '', // 上传错误信息
     pendingUploadData: null, // 待上传的数据
     // 九宫格网格
@@ -857,6 +858,11 @@ Page({
     overlayCtx.draw()
   },
 
+  // 切换提示词显示
+  toggleHints() {
+    this.setData({ showHints: !this.data.showHints })
+    console.log('Hints toggled to:', this.data.showHints)
+  },
 
   // 切换脚本侧边栏显示
   toggleScriptSidebar() {
