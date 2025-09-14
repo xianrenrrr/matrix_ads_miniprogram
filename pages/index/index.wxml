@@ -8,9 +8,9 @@
   <!-- 主要内容 -->
   <view wx:else class="container">
     <!-- 欢迎信息 -->
-    <view class="card card-flush">
+    <view class="card card-flush full-bleed">
       <view>
-        <view class="greeting-box row-wrap">
+        <view class="greeting-box">
           <view class="title-row">
             <image class="greeting-pin" src="/assets/Frame@2x.png" mode="aspectFit" />
             <view class="title-texts">
@@ -24,7 +24,7 @@
     </view>
 
     <!-- 统计数据（三列对齐到大矩形左右边） -->
-    <view class="stats-layer row-wrap">
+    <view class="stats-layer full-bleed">
       <view class="mini-stat-card">
         <view class="stat-number stat-number-box {{availableDigitClass}} text-primary">{{stats.availableTemplates}}</view>
         <view class="stat-label">可用模板</view>
@@ -46,7 +46,7 @@
     <text class="all-templates-link">全部模版</text>
 
     <!-- 全部模版 列表 -->
-    <view wx:if="{{allTemplates.length}}" class="tpl-grid row-wrap">
+    <view wx:if="{{allTemplates.length}}" class="tpl-grid full-bleed">
       <view
         wx:for="{{allTemplates}}"
         wx:key="id"
