@@ -132,12 +132,14 @@
   padding-left: 6.46rpx;
   padding-right: 6.46rpx;
   row-gap: 24rpx;
+  margin-top: 30rpx;
 }
 
 .tpl-card {
   background: #fff;
-  border: 2rpx solid #e5e7eb;
-  border-radius: 16rpx;
+  border: none;
+  border-radius: 15.38rpx;
+  box-shadow: 0 8rpx 24rpx rgba(0,0,0,0.06);
   padding: 16rpx 16rpx 24rpx 16rpx; /* extra bottom padding to lift button */
   width: 325rpx;          /* fixed width */
   height: 417.31rpx;      /* fixed height */
@@ -250,6 +252,7 @@
   overflow: hidden;
   background-color: #ffffff; /* match mini cards */
   box-shadow: 0 8rpx 24rpx rgba(0,0,0,0.06); /* same shadow as mini cards */
+  margin-left: 8rpx;
 }
 
 /* Right-side illustration per design spec */
@@ -283,11 +286,12 @@
 /* Three-box stats aligned to greeting box edges */
 .stats-layer {
   display: grid;
-  grid-template-columns: repeat(3, 213.46rpx);
+  grid-template-columns: repeat(3, 216.46rpx);
   column-gap: 15.38rpx;
   justify-content: start;
   width: 100%;
   margin-top: 19rpx;
+  margin-left: -25rpx;
 }
 
 .mini-stat-card {
