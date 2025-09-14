@@ -52,8 +52,8 @@
 
 .title-texts { }
 
-.home-title { position: absolute; left: 100.46rpx; top: 46.16rpx; width: 359.62rpx; z-index: 2; }
-.home-subtitle { position: absolute; left: 100.46rpx; top: 155.77rpx; width: 359.62rpx; z-index: 2; }
+.home-title { position: absolute; left: 75rpx; top: 46.15rpx; width: 359.62rpx; z-index: 2; }
+.home-subtitle { position: absolute; left: 75rpx; bottom: 46.15rpx; width: 359.62rpx; z-index: 2; }
 
 /* Home title tweaks to match design */
 .home-title {
@@ -158,13 +158,20 @@
   font-size: 24rpx;
   color: #6b7280;
 }
-.card-flush { padding: 0; }
+.card-flush {
+  padding: 0;
+  background: transparent; /* let inner box own the visuals */
+  box-shadow: none;
+  border: none;
+}
 .greeting-box {
   position: relative;
   width: 673.08rpx;
   height: 234.62rpx;  /* per spec height */
   border-radius: 15.38rpx;
   overflow: hidden;
+  background-color: #ffffff; /* match mini cards */
+  box-shadow: 0 8rpx 24rpx rgba(0,0,0,0.06); /* same shadow as mini cards */
 }
 
 /* Right-side illustration per design spec */
@@ -177,6 +184,17 @@
   opacity: 1;
   pointer-events: none;
   z-index: 1;
+}
+
+/* Blue pin icon (image) inside greeting box */
+.greeting-pin {
+  position: absolute;
+  left: 34.62rpx;   /* from left edge of the big box */
+  top: 53.85rpx;    /* from top edge of the big box */
+  width: 20.51rpx;
+  height: 25.64rpx;
+  z-index: 2;
+  pointer-events: none;
 }
 
 /* title-icon removed per request */
@@ -219,9 +237,28 @@
 .stats-layer .stat-label {
   position: absolute;
   left: 30.77rpx;
-  top: 126.15rpx; /* directly under the number box */
+  top: 138.46rpx; /* directly under the number box */
+  height: 23.08rpx;
+  line-height: 23.08rpx;
+  font-size: 23.08rpx;
+  right: 16rpx;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   margin: 0;
 }
+
+/* Stat icons: positioned from right and bottom inside each box */
+.stat-icon {
+  position: absolute;
+  right: 30.77rpx;
+  bottom: 42.31rpx;
+  pointer-events: none;
+}
+
+.stat-icon-1 { width: 14.93rpx; height: 23.08rpx; }
+.stat-icon-2 { width: 26.78rpx; height: 19.23rpx; }
+.stat-icon-3 { width: 22.24rpx; height: 23.08rpx; }
 
 /* Icon positioned relative to the entire phone (viewport) */
 .page-icon {
