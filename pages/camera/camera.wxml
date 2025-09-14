@@ -50,15 +50,6 @@
       <text class="recording-text">{{t('recording')}}</text>
     </view>
 
-    <!-- 场景信息 -->
-    <view wx:if="{{selectedTemplate}}" class="scene-info">
-      <view class="scene-title">
-        {{t('scene')}} {{sceneNumber}} {{selectedTemplate.scenes[sceneIndex].sceneTitle}}
-      </view>
-      <view class="scene-time">
-        {{recordTime}}{{t('secondsShort')}} / {{selectedTemplate.scenes[sceneIndex].sceneDurationInSeconds || maxRecordTime}}{{t('secondsShort')}}
-      </view>
-    </view>
 
     <!-- 顶部控制栏 -->
     <view class="top-controls">
@@ -100,6 +91,7 @@
       <text class="ktv-highlight">{{ktvHighlighted}}</text><text class="ktv-rest">{{ktvRest}}</text>
     </text>
   </view>
+
 
   <!-- 脚本侧边栏（不展示台词，仅展示拍摄指导） -->
   <view wx:if="{{selectedTemplate}}" class="script-sidebar {{showScriptSidebar ? 'show' : ''}}">

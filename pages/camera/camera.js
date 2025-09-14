@@ -831,8 +831,32 @@ Page({
 
   // 切换网格覆盖
   toggleOverlay() {
-    this.setData({ showOverlay: !this.data.showOverlay })
+    const newShowOverlay = !this.data.showOverlay
+    this.setData({ showOverlay: newShowOverlay })
+    console.log('Overlay toggled to:', newShowOverlay)
+
+    // 如果关闭覆盖层，确保清除所有canvas内容
+    if (!newShowOverlay) {
+      this.clearAllOverlays()
+    } else {
+      // 重新绘制覆盖层
+      this.updateOverlayPixels()
+    }
   },
+
+  // 清除所有覆盖层
+  clearAllOverlays() {
+    // 清除多边形canvas
+    const polygonCtx = wx.createCanvasContext('polygonCanvas', this)
+    polygonCtx.clearRect(0, 0, 1000, 1000)
+    polygonCtx.draw()
+
+    // 清除对象覆盖canvas
+    const overlayCtx = wx.createCanvasContext('overlayCanvas', this)
+    overlayCtx.clearRect(0, 0, 1000, 1000)
+    overlayCtx.draw()
+  },
+
 
   // 切换脚本侧边栏显示
   toggleScriptSidebar() {
