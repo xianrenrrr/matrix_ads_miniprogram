@@ -9,6 +9,9 @@ Page({
       recordedVideos: 0,
       publishedVideos: 0
     },
+    availableDigitClass: 'num-1w',
+    recordedDigitClass: 'num-1w',
+    publishedDigitClass: 'num-1w',
     recentTemplates: [],
     loading: true
   },
@@ -77,8 +80,10 @@ Page({
           logger.log('获取到的模板数量:', templates.length)
           
           // 更新统计数据
+          const av = templates.length || 0
           this.setData({
-            'stats.availableTemplates': templates.length,
+            'stats.availableTemplates': av,
+            availableDigitClass: this.computeDigitClass(av),
             recentTemplates: templates.slice(0, 3) // 显示最近3个模板
           })
           
@@ -128,12 +133,18 @@ Page({
         const responseData = res.data && res.data.data ? res.data.data : {};
         
         if (res.statusCode === 200 && isApiSuccess) {
+          const av = responseData.assignedTemplates || 0
+          const rv = responseData.recordedVideos || 0
+          const pv = responseData.publishedVideos || 0
           this.setData({
             stats: {
-              availableTemplates: responseData.assignedTemplates || 0,
-              recordedVideos: responseData.recordedVideos || 0,
-              publishedVideos: responseData.publishedVideos || 0
-            }
+              availableTemplates: av,
+              recordedVideos: rv,
+              publishedVideos: pv
+            },
+            availableDigitClass: this.computeDigitClass(av),
+            recordedDigitClass: this.computeDigitClass(rv),
+            publishedDigitClass: this.computeDigitClass(pv)
           })
         } else {
           const errorMessage = res.data && res.data.error ? res.data.error : '获取统计数据失败';
@@ -144,6 +155,14 @@ Page({
         logger.error('获取统计数据请求失败:', err)
       }
     })
+  },
+
+  // 计算数字宽度class
+  computeDigitClass(n) {
+    const len = String(Math.abs(parseInt(n || 0, 10))).length
+    if (len <= 1) return 'num-1w'
+    if (len === 2) return 'num-2w'
+    return 'num-3w'
   },
 
   // 选择模板进行录制

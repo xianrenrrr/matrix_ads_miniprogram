@@ -48,54 +48,12 @@
   align-items: center;
 }
 
-/* Map-pin icon built with CSS */
-.pin-icon {
-  position: absolute;
-  left: -5rpx;     /* move 5rpx further left */
-  top: 51.93rpx;   /* 267.31 - 215.38 within box */
-  width: 30.77rpx; /* per design */
-  height: 30.77rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2;
-}
-
-/* Upright pin: circular head + diamond tail */
-.pin-shape {
-  width: 20rpx;              /* head diameter */
-  height: 20rpx;
-  background-color: #2772F0; /* rgb(39,114,240) */
-  border-radius: 50%;        /* perfect circle head */
-  position: relative;
-}
-
-.pin-dot {
-  position: absolute;
-  width: 8rpx;
-  height: 8rpx;
-  background-color: #ffffff;
-  border-radius: 50%;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%); /* center perfectly */
-}
-
-.pin-tail {
-  position: absolute;
-  width: 10rpx;
-  height: 10rpx;
-  background-color: #2772F0;
-  bottom: -5rpx;            /* overlap slightly under the head */
-  left: 50%;
-  transform: translateX(-50%) rotate(45deg);
-  border-radius: 2rpx;      /* soft point */
-}
+/* removed pin icon styles per request */
 
 .title-texts { }
 
-.home-title { position: absolute; left: 26rpx; top: 46.16rpx; width: 359.62rpx; z-index: 2; }
-.home-subtitle { position: absolute; left: 26rpx; top: 155.77rpx; width: 359.62rpx; z-index: 2; }
+.home-title { position: absolute; left: 100.46rpx; top: 46.16rpx; width: 359.62rpx; z-index: 2; }
+.home-subtitle { position: absolute; left: 100.46rpx; top: 155.77rpx; width: 359.62rpx; z-index: 2; }
 
 /* Home title tweaks to match design */
 .home-title {
@@ -203,9 +161,8 @@
 .card-flush { padding: 0; }
 .greeting-box {
   position: relative;
-  width: 673.08rpx;   /* per spec */
-  height: 234.62rpx;  /* per spec */
-  margin-left: 38.46rpx;
+  width: 673.08rpx;
+  height: 234.62rpx;  /* per spec height */
   border-radius: 15.38rpx;
   overflow: hidden;
 }
@@ -214,10 +171,65 @@
 .greeting-illustration {
   position: absolute;
   top: 0;
-  left: 302.92rpx; /* 5rpx further left */
-  width: 321.15rpx;
+  left: 384.62rpx; /* keep relative layout */
+  width: 326.92rpx;
   height: 234.62rpx;
   opacity: 1;
   pointer-events: none;
   z-index: 1;
+}
+
+/* title-icon removed per request */
+
+/* Full-bleed card: cancel container side padding to reach phone edges */
+.full-bleed { margin-left: -32rpx; margin-right: -32rpx; }
+
+/* Three-box stats aligned to greeting box edges */
+.stats-layer {
+  display: grid;
+  grid-template-columns: repeat(3, 220.46rpx);
+  column-gap: 15.38rpx;
+  justify-content: start;
+  width: 100%;
+  margin-top: 19rpx;
+}
+
+.mini-stat-card {
+  position: relative;
+  height: 203.85rpx; /* fixed height from design */
+  background: #ffffff;
+  border-radius: 15.38rpx;
+  box-shadow: 0 8rpx 24rpx rgba(0,0,0,0.06);
+}
+
+/* Number box exact placement and sizing */
+.stat-number-box {
+  position: absolute;
+  top: 30.77rpx;
+  left: 30.77rpx;
+  height: 80.77rpx;
+  line-height: 80.77rpx;
+}
+
+.num-1w { width: 50rpx; }
+.num-2w { width: 82.69rpx; }
+.num-3w { width: 111.54rpx; }
+
+/* Place the stat label without affecting card height */
+.stats-layer .stat-label {
+  position: absolute;
+  left: 30.77rpx;
+  top: 126.15rpx; /* directly under the number box */
+  margin: 0;
+}
+
+/* Icon positioned relative to the entire phone (viewport) */
+.page-icon {
+  position: fixed;
+  left: 75.31rpx;
+  top: 90.31rpx;
+  width: 30.77rpx;
+  height:30.77rpx;
+  pointer-events: none;
+  z-index: 10000; /* ensure above greeting box and text */
 }

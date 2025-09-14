@@ -8,89 +8,39 @@
   <!-- 主要内容 -->
   <view wx:else class="container">
     <!-- 欢迎信息 -->
-    <view class="card card-flush">
+    <view class="card card-flush full-bleed">
       <view>
         <view class="greeting-box">
           <view class="title-row">
-            <view class="pin-icon">
-              <view class="pin-shape">
-                <view class="pin-dot"></view>
-                <view class="pin-tail"></view>
-              </view>
-            </view>
             <view class="title-texts">
               <view class="card-title home-title">您好！{{userInfo.username || '用户'}}</view>
               <view class="card-subtitle home-subtitle">开始今天的创作吧!</view>
-                        <image class="greeting-illustration" src="/assets/Mask group@3x.png" mode="aspectFit" />
-
+              <image class="greeting-illustration" src="/assets/Mask group@3x.png" mode="aspectFit" />
             </view>
           </view>
         </view>
       </view>
     </view>
 
-    <!-- 统计数据 -->
-    <view class="stats-grid">
-      <view class="stat-card">
-        <view class="stat-number text-primary">{{stats.availableTemplates}}</view>
+    <!-- 统计数据（三列对齐到大矩形左右边） -->
+    <view class="stats-layer full-bleed">
+      <view class="mini-stat-card">
+        <view class="stat-number stat-number-box {{availableDigitClass}} text-primary">{{stats.availableTemplates}}</view>
         <view class="stat-label">可用模板</view>
       </view>
-      <view class="stat-card">
-        <view class="stat-number text-success">{{stats.recordedVideos}}</view>
+      <view class="mini-stat-card">
+        <view class="stat-number stat-number-box {{recordedDigitClass}} text-success">{{stats.recordedVideos}}</view>
         <view class="stat-label">已录制</view>
       </view>
-      <view class="stat-card">
-        <view class="stat-number text-warning">{{stats.publishedVideos}}</view>
+      <view class="mini-stat-card">
+        <view class="stat-number stat-number-box {{publishedDigitClass}} text-warning">{{stats.publishedVideos}}</view>
         <view class="stat-label">已发布</view>
       </view>
     </view>
 
-    <!-- 最近模板 -->
-    <view class="card">
-      <view class="flex justify-between items-center mb-24">
-        <view class="card-title">最近模板</view>
-        <text class="text-primary" bindtap="viewAllTemplates">查看全部</text>
-      </view>
-      
-      <view wx:if="{{recentTemplates.length === 0}}" class="text-secondary text-center p-32">
-        暂无模板
-      </view>
-      
-      <view wx:else class="template-list">
-        <view 
-          wx:for="{{recentTemplates}}" 
-          wx:key="id" 
-          class="template-item"
-          data-id="{{item.id}}"
-          bindtap="selectTemplate"
-        >
-          <view class="template-thumbnail">
-            <image src="{{item.exampleFrame || '/assets/default-template.jpg'}}" mode="aspectFill" class="thumbnail-image"></image>
-          </view>
-          <view class="template-info">
-            <view class="template-title" wx:if="{{item.templateTitle}}">{{item.templateTitle}}</view>
-            <view class="template-desc text-secondary" wx:if="{{item.targetAudience}}">{{item.targetAudience}}</view>
-            <view class="template-duration text-xs text-secondary" wx:if="{{item.totalVideoLength || item.tone}}">
-              <text wx:if="{{item.totalVideoLength}}">{{item.totalVideoLength}}秒</text>
-              <text wx:if="{{item.totalVideoLength && item.tone}}"> · </text>
-              <text wx:if="{{item.tone}}">{{item.tone}}</text>
-            </view>
-          </view>
-        </view>
-      </view>
-    </view>
+    <!-- Absolute page icon (relative to viewport, highest layer) -->
+    <image class="page-icon" src="/assets/Frame@2x.png" mode="aspectFit" />
 
-    <!-- 快速操作 -->
-    <view class="card">
-      <view class="card-title mb-24">快速操作</view>
-      <view class="quick-actions">
-        <button class="action-btn" bindtap="startRecording">
-          <text class="action-text">开始录制</text>
-        </button>
-        <button class="action-btn" bindtap="handleLogout">
-          <text class="action-text">退出登录</text>
-        </button>
-      </view>
-    </view>
+    <!-- 最近模板 & 快速操作 已移除 per request -->
   </view>
 </view>
