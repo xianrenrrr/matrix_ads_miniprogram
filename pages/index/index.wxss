@@ -126,24 +126,23 @@
 .tpl-grid {
   display: grid;
   grid-template-columns: 325rpx 325rpx; /* fixed card widths */
-  column-gap: 0; /* space is handled by justify-content + padding */
-  justify-content: space-between; /* push columns to edges */
-  /* Container has 32rpx padding; to achieve 38.46rpx from phone edges, use 38.46-32 = 6.46rpx */
-  padding-left: 6.46rpx;
-  padding-right: 6.46rpx;
+  column-gap: 23.08rpx; /* (673.08 - 325*2) */
   row-gap: 24rpx;
+  margin-top: 16rpx; /* space below 全部模版 */
 }
 
 .tpl-card {
   background: #fff;
-  border: 2rpx solid #e5e7eb;
-  border-radius: 16rpx;
+  border: none; /* match big box and stat boxes */
+  border-radius: 15.38rpx;
+  box-shadow: 0 8rpx 24rpx rgba(0,0,0,0.06);
   padding: 16rpx 16rpx 24rpx 16rpx; /* extra bottom padding to lift button */
   width: 325rpx;          /* fixed width */
   height: 417.31rpx;      /* fixed height */
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  margin-bottom: 24rpx;   /* row gap for wrapped cards */
 }
 
 .tpl-thumb {
@@ -191,20 +190,15 @@
 .logout-cta {
   width: 488.46rpx;
   height: 69.23rpx;
-  margin: 50rpx auto 24rpx; /* 50rpx below templates, center horizontally */
+  margin: 50rpx 0 24rpx 6.46rpx; /* align left to the rail */
   background: #ffffff;
-  border: 2rpx solid #e5e7eb;
-  border-radius: 9999rpx;
+  border: none;
+  border-radius: 15.38rpx;
+  box-shadow: 0 8rpx 24rpx rgba(0,0,0,0.06);
   display: flex;
   align-items: center;
   justify-content: center;
   color: #1f2a44;
-}
-
-.quick-actions {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16rpx;
 }
 
 .action-btn {
@@ -278,20 +272,22 @@
 /* title-icon removed per request */
 
 /* Full-bleed card: cancel container side padding to reach phone edges */
-.full-bleed { margin-left: -32rpx; margin-right: -32rpx; }
+.full-bleed { margin-left: 0; margin-right: 0; }
+
+/* Shared row wrapper to align left/right with big box */
+.row-wrap { width: 673.08rpx; margin-left: auto; margin-right: auto; }
 
 /* Three-box stats aligned to greeting box edges */
 .stats-layer {
   display: grid;
   grid-template-columns: repeat(3, 213.46rpx);
-  column-gap: 15.38rpx;
-  justify-content: start;
-  width: 100%;
+  column-gap: 16.35rpx; /* (673.08 - 213.46*3) / 2 */
   margin-top: 19rpx;
 }
 
 .mini-stat-card {
   position: relative;
+  width: 213.46rpx; /* fixed width per design */
   height: 203.85rpx; /* fixed height from design */
   background: #ffffff;
   border-radius: 15.38rpx;
@@ -341,10 +337,9 @@
 /* 全部模版 标题样式 */
 .all-templates-link {
   display: block;
-  /* Align 38.46rpx from phone left: container has 32rpx padding, so add 6.46rpx */
-  margin-left: 6.46rpx;
-  margin-top: 24rpx;
-  font-size: 40rpx;    /* same as 您好 */
+  width: 673.08rpx;        /* match row width */
+  margin: 24rpx auto 0;    /* center the row */
+  font-size: 40rpx;        /* same as 您好 */
   font-weight: 700;
-  color: #1f2a44;      /* match home title color */
+  color: #1f2a44;          /* match home title color */
 }
