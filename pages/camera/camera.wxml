@@ -59,7 +59,7 @@
     </view>
 
     <!-- 右侧控制栏 -->
-    <view class="right-controls">
+    <view class="right-controls {{showHints ? 'shifted-left' : ''}}">
       <view class="control-btn" bindtap="toggleFlash">
         <text class="control-icon">⚡</text>
         <text class="control-label">闪光</text>
@@ -76,13 +76,46 @@
         <text class="control-icon">♪</text>
         <text class="control-label">脚本</text>
       </view>
-      <view class="control-btn" bindtap="showTemplateInfo">
-        <text class="control-icon"><</text>
+      <view class="control-btn" bindtap="toggleHints">
+        <text class="control-icon">{{showHints ? '>' : '<'}}</text>
         <text class="control-label">提示词</text>
       </view>
     </view>
   </camera>
   </view> <!-- end of previewContainer -->
+
+  <!-- 提示词侧边栏 -->
+  <view class="hints-sidebar {{showHints ? 'show' : ''}}">
+    <view class="hints-content">
+      <view class="hints-section">
+        <text class="hints-title">设备信息</text>
+        <view class="hints-details">
+          <text class="hints-detail">手机比例: {{sourceAspect || '9:16'}}</text>
+          <text class="hints-detail" wx:if="{{deviceOrientationText}}">方向: {{deviceOrientationText}}</text>
+        </view>
+      </view>
+
+      <view class="hints-section" wx:if="{{backgroundInstructions}}">
+        <text class="hints-title">背景要求</text>
+        <text class="hints-text">{{backgroundInstructions}}</text>
+      </view>
+
+      <view class="hints-section" wx:if="{{cameraInstructions}}">
+        <text class="hints-title">拍摄指导</text>
+        <text class="hints-text">{{cameraInstructions}}</text>
+      </view>
+
+      <view class="hints-section" wx:if="{{movementInstructions}}">
+        <text class="hints-title">运镜要求</text>
+        <text class="hints-text">{{movementInstructions}}</text>
+      </view>
+
+      <view class="hints-section" wx:if="{{audioNotesText}}">
+        <text class="hints-title">音频备注</text>
+        <text class="hints-text">{{audioNotesText}}</text>
+      </view>
+    </view>
+  </view>
   
   <!-- 图例 (MVP: Right side legend) -->
   <view wx:if="{{legend && legend.length && showOverlay && (overlayType === 'objects' || overlayType === 'polygons')}}" class="legend">
@@ -144,6 +177,7 @@
       </view>
     </view>
   </view>
+
 
 
   <!-- 模板选择提示 -->

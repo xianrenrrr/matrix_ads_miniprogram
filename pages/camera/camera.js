@@ -39,6 +39,8 @@ Page({
     backgroundInstructions: '',
     cameraInstructions: '',
     movementInstructions: '',
+    deviceOrientationText: '',
+    audioNotesText: '',
     // Translated strings for modal buttons
     reRecordText: t('reRecord'),
     submitSceneText: t('submitScene'),

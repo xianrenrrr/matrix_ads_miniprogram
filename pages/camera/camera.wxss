@@ -221,6 +221,11 @@
   padding: 12rpx 8rpx;
   gap: 6rpx;
   z-index: 10;
+  transition: right 0.3s ease;
+}
+
+.right-controls.shifted-left {
+  right: 310rpx;
 }
 
 .control-btn {
@@ -297,6 +302,72 @@
 }
 .ktv-rest {
   color: #9ca3af;
+}
+
+/* 提示词侧边栏 */
+.hints-sidebar {
+  position: absolute;
+  top: 0;
+  right: -280rpx;
+  width: 280rpx;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.9);
+  backdrop-filter: blur(10rpx);
+  transition: right 0.3s ease;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+}
+
+.hints-sidebar.show {
+  right: 0;
+}
+
+
+.hints-content {
+  flex: 1;
+  padding: 200rpx 20rpx 40rpx 20rpx;
+  overflow-y: auto;
+}
+
+.hints-section {
+  margin-bottom: 32rpx;
+}
+
+.hints-title {
+  display: block;
+  color: #ffffff;
+  font-size: 28rpx;
+  font-weight: 600;
+  margin-bottom: 12rpx;
+  border-bottom: 1rpx solid rgba(255, 255, 255, 0.2);
+  padding-bottom: 8rpx;
+}
+
+.hints-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.hints-detail {
+  display: block;
+  color: #e5e7eb;
+  font-size: 24rpx;
+  padding: 8rpx 12rpx;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 6rpx;
+}
+
+.hints-text {
+  display: block;
+  color: #e5e7eb;
+  font-size: 24rpx;
+  line-height: 1.5;
+  padding: 12rpx;
+  background-color: rgba(255, 255, 255, 0.08);
+  border-radius: 8rpx;
+  border-left: 3rpx solid #10b981;
 }
 
 /* 脚本侧边栏 */

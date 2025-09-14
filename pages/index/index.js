@@ -205,8 +205,9 @@ Page({
   computeTitleClass(title) {
     if (!title) return ''
     const len = String(title).length
-    // Heuristic: if longer than 16 chars, use smaller font
-    return len > 16 ? 'tpl-title-sm' : ''
+    // Only use extra small size for extremely long titles that won't fit in 2 lines
+    if (len > 25) return 'tpl-title-xs'  // Very long titles only
+    return ''  // Default smaller size (28rpx) for all other titles
   },
 
   // 选择模板进行录制
