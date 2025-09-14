@@ -63,15 +63,14 @@
             <!-- Scene Header -->
             <view class="scene-header">
           <view class="scene-number-container">
-            <view class="scene-number" 
-                  style="background-color: {{submissions[index + 1] ? submissions[index + 1].statusColor : '#9ca3af'}}">
-              {{index + 1}}
-            </view>
-            <text class="scene-status">{{submissions[index + 1] ? submissions[index + 1].statusText : '未提交'}}</text>
+            <view class="scene-number">{{index + 1}}</view>
           </view>
           
           <view class="scene-title-container">
             <text class="scene-title">{{item.sceneTitle || '场景 ' + (index + 1)}}</text>
+            <text class="status-badge {{submissions[index + 1] ? submissions[index + 1].statusClass : 'status-pending'}}">
+              {{submissions[index + 1] ? submissions[index + 1].statusText : '未提交'}}
+            </text>
             <!-- Video Similarity Score on same line -->
             <text class="similarity-inline" wx:if="{{submissions[index + 1] && submissions[index + 1].hasScore}}">
               视频相似度: {{submissions[index + 1].similarityPercent}}%

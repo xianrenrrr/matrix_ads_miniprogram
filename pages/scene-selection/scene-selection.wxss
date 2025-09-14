@@ -90,10 +90,10 @@
 
 .info-card {
   background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 2rpx solid #e2e8f0; /* unify with Home boxes */
+  border-radius: 15.38rpx;
+  padding: 24rpx;
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.06);
 }
 
 .info-title {
@@ -126,11 +126,11 @@
 }
 
 .scenes-title {
-  font-size: 24px;
-  font-weight: bold;
-  color: #1f2937;
+  font-size: 40rpx;  /* same as Home “全部模版” */
+  font-weight: 700;
+  color: #1f2a44;
   display: block;
-  margin-bottom: 5px;
+  margin-bottom: 8rpx;
 }
 
 .scenes-subtitle {
@@ -141,11 +141,11 @@
 /* Scene Item */
 .scene-item {
   background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 16px;
-  margin-bottom: 16px;
+  border: 2rpx solid #e2e8f0;
+  border-radius: 15.38rpx;
+  margin-bottom: 20rpx;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.06);
   position: relative;
 }
 
@@ -210,8 +210,8 @@
 .scene-header {
   display: flex;
   align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid #f3f4f6;
+  padding: 20rpx 24rpx;
+  border-bottom: 2rpx solid #f3f4f6;
 }
 
 .scene-number-container {
@@ -221,27 +221,23 @@
 }
 
 .scene-number {
-  width: 32px;
-  height: 32px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  font-weight: bold;
-  font-size: 14px;
-  margin-right: 10px;
-}
-
-.scene-status {
-  font-size: 12px;
   color: #6b7280;
-  text-transform: capitalize;
+  font-weight: 600;
+  font-size: 12px;
+  margin-right: 10px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
 }
 
-.scene-title-container {
-  flex: 1;
-}
+.scene-status { display: none; }
+
+.scene-title-container { flex: 1; display: flex; align-items: center; gap: 8rpx; flex-wrap: wrap; }
 
 .scene-title {
   font-size: 16px;
@@ -257,6 +253,18 @@
   font-weight: 500;
 }
 
+/* Inline status badges: pending (grey), rejected (red), approved (green) */
+.status-badge {
+  font-size: 22rpx;
+  line-height: 1;
+  padding: 6rpx 10rpx;
+  border-radius: 8rpx;
+  border: 1px solid transparent;
+}
+.status-pending { background: #f3f4f6; color: #6b7280; border-color: #e5e7eb; }
+.status-rejected { background: #fee2e2; color: #b91c1c; border-color: #fecaca; }
+.status-approved { background: #dcfce7; color: #16a34a; border-color: #bbf7d0; }
+
 .scene-duration {
   font-size: 12px;
   color: #6b7280;
@@ -265,9 +273,7 @@
 }
 
 /* Scene Content */
-.scene-content {
-  padding: 16px 20px;
-}
+.scene-content { padding: 20rpx 24rpx; }
 
 .scene-section {
   margin-bottom: 12px;
@@ -313,8 +319,8 @@
 
 /* Scene Actions */
 .scene-actions {
-  padding: 16px 20px;
-  border-top: 1px solid #f3f4f6;
+  padding: 20rpx 24rpx;
+  border-top: 2rpx solid #f3f4f6;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -355,28 +361,28 @@
 .example-button {
   display: flex;
   align-items: center;
-  background: #1f2937;
-  color: #ffffff;
-  border: none;
-  border-radius: 12px;
-  padding: 12px 20px;
-  font-size: 14px;
+  background: #ffffff; /* white pill */
+  color: #1f2a44;
+  border: 2rpx solid #e5e7eb;
+  border-radius: 9999rpx;
+  padding: 12rpx 24rpx;
+  font-size: 28rpx;
   font-weight: 600;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  margin-right: 10px;
+  box-shadow: none;
+  margin-right: 16rpx;
 }
 
 .record-button {
   display: flex;
   align-items: center;
-  background: #1f2937;
+  background: #ef4444; /* red pill per screenshot */
   color: #ffffff;
   border: none;
-  border-radius: 12px;
-  padding: 12px 20px;
-  font-size: 14px;
-  font-weight: 600;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: 9999rpx;
+  padding: 14rpx 28rpx;
+  font-size: 28rpx;
+  font-weight: 700;
+  box-shadow: 0 4rpx 12rpx rgba(239,68,68,0.25);
 }
 
 .record-button.completed {

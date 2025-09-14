@@ -209,10 +209,13 @@ Page({
               // Normalize status: if a submission exists, show 已通过 or 未通过
               var hasSubmission = !!scene.videoUrl || !!scene.sceneId || !!scene.status;
               var statusText = '未提交';
+              var statusClass = 'status-pending';
               if (hasSubmission) {
-                statusText = (scene.status === 'approved') ? '已通过' : '未通过';
+                if (scene.status === 'approved') { statusText = '已通过'; statusClass = 'status-approved'; }
+                else { statusText = '未通过'; statusClass = 'status-rejected'; }
               }
               scene.statusText = statusText;
+              scene.statusClass = statusClass;
               scene.statusColor = self.getSceneStatusColor(scene.status || 'not-submitted');
               
               sceneMap[scene.sceneNumber] = scene;

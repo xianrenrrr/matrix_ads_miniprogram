@@ -137,7 +137,7 @@
 
 .tpl-card {
   background: #fff;
-  border: none;
+  border: 2rpx solid #e2e8f0;
   border-radius: 15.38rpx;
   box-shadow: 0 8rpx 24rpx rgba(0,0,0,0.06);
   padding: 16rpx 16rpx 24rpx 16rpx; /* extra bottom padding to lift button */
@@ -195,19 +195,14 @@
   height: 69.23rpx;
   margin: 50rpx auto 24rpx; /* 50rpx below templates, center horizontally */
   background: #ffffff;
-  border: 2rpx solid #e5e7eb;
-  border-radius: 9999rpx;
+  border: 2rpx solid #e2e8f0;
+  border-radius: 15.38rpx;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #1f2a44;
 }
 
-.quick-actions {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16rpx;
-}
 
 .action-btn {
   background-color: #ffffff;
@@ -253,6 +248,7 @@
   background-color: #ffffff; /* match mini cards */
   box-shadow: 0 8rpx 24rpx rgba(0,0,0,0.06); /* same shadow as mini cards */
   margin-left: 8rpx;
+  border: 2rpx solid #e2e8f0; /* lighten border tone */
 }
 
 /* Right-side illustration per design spec */
@@ -286,12 +282,12 @@
 /* Three-box stats aligned to greeting box edges */
 .stats-layer {
   display: grid;
-  grid-template-columns: repeat(3, 216.46rpx);
+  grid-template-columns: repeat(3, 217rpx);
   column-gap: 15.38rpx;
   justify-content: start;
   width: 100%;
   margin-top: 19rpx;
-  margin-left: -25rpx;
+  margin-left: -23rpx;
 }
 
 .mini-stat-card {
@@ -300,6 +296,7 @@
   background: #ffffff;
   border-radius: 15.38rpx;
   box-shadow: 0 8rpx 24rpx rgba(0,0,0,0.06);
+  border: 2rpx solid #e2e8f0;
 }
 
 /* Number box exact placement and sizing */
@@ -346,8 +343,8 @@
 .all-templates-link {
   display: block;
   /* Align 38.46rpx from phone left: container has 32rpx padding, so add 6.46rpx */
-  margin-left: 6.46rpx;
-  margin-top: 24rpx;
+  margin-left: -20rpx;
+  margin-top: 30rpx;
   font-size: 40rpx;    /* same as 您好 */
   font-weight: 700;
   color: #1f2a44;      /* match home title color */
