@@ -20,7 +20,11 @@ Page({
     loading: true,
     videoUrl: null,
     // Sanitized template fields for display (avoid leading colons)
-    templateDisplay: null
+    templateDisplay: null,
+    // AI Suggestions modal state
+    showSuggestionsModal: false,
+    currentAISuggestions: null,
+    currentAISceneIndex: null
   },
 
   onLoad: function(options) {
@@ -185,11 +189,14 @@ Page({
         const isApiSuccess = response.data && response.data.success === true;
         
         if (response.statusCode === 200 && isApiSuccess) {
-          // Data is directly in response.data, not response.data.data
-          var videoData = response.data;
+          // Extract data from the nested structure
+          var videoData = response.data.data || response.data;
           var scenes = videoData.scenes || {};
           var progress = videoData.progress || null;
-          
+
+          console.log('DEBUG: Processing scenes data:', scenes);
+          console.log('DEBUG: Scene keys:', Object.keys(scenes));
+
           // Convert scenes object to sceneMap format (keyed by scene number)
           var sceneMap = {};
           Object.keys(scenes).forEach(function(sceneKey) {
@@ -206,13 +213,29 @@ Page({
               scene.similarityPercent = similarityPercent;
               scene.hasScore = similarityPercent != null;
               
-              // Normalize status: if a submission exists, show 已通过 or 未通过
-              var hasSubmission = !!scene.videoUrl || !!scene.sceneId || !!scene.status;
+              // Normalize status: check status field first
               var statusText = '未提交';
               var statusClass = 'status-pending';
-              if (hasSubmission) {
-                if (scene.status === 'approved') { statusText = '已通过'; statusClass = 'status-approved'; }
-                else { statusText = '未通过'; statusClass = 'status-rejected'; }
+
+              // Check if we have actual status from backend
+              if (scene.status) {
+                if (scene.status === 'approved') {
+                  statusText = '已通过';
+                  statusClass = 'status-approved';
+                } else if (scene.status === 'pending') {
+                  statusText = '待审核';
+                  statusClass = 'status-pending';
+                } else if (scene.status === 'rejected') {
+                  statusText = '未通过';
+                  statusClass = 'status-rejected';
+                }
+              } else {
+                // Fallback: check if there's any submission data
+                var hasSubmission = !!scene.videoUrl || !!scene.sceneId;
+                if (hasSubmission) {
+                  statusText = '待审核';
+                  statusClass = 'status-pending';
+                }
               }
               scene.statusText = statusText;
               scene.statusClass = statusClass;
@@ -314,6 +337,64 @@ Page({
            '&sceneNumber=' + (sceneIndex + 1) +
            '&returnPage=scene-selection'
     });
+  },
+
+  // Open AI suggestions modal for a scene
+  openAISuggestions: function(event) {
+    var dataset = event.detail?.dataset || event.currentTarget.dataset;
+    var sceneIndex = parseInt(dataset.index);
+    var sceneNumber = sceneIndex + 1;
+    var submission = this.data.submissions[sceneNumber];
+    var suggestions = submission && Array.isArray(submission.aiSuggestions) ? submission.aiSuggestions : [];
+
+    if (!suggestions || suggestions.length === 0) {
+      // Try fetching fresh details if we have a sceneId
+      if (submission && submission.sceneId) {
+        var self = this;
+        wx.request({
+          url: config.API_BASE_URL + '/content-creator/scenes/' + submission.sceneId,
+          method: 'GET',
+          header: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + wx.getStorageSync('access_token')
+          },
+          success: function(response) {
+            const ok = response.data && response.data.success === true;
+            const data = response.data && response.data.data ? response.data.data : {};
+            const list = ok && Array.isArray(data.aiSuggestions) ? data.aiSuggestions : [];
+            if (list.length > 0) {
+              self.setData({
+                showSuggestionsModal: true,
+                currentAISuggestions: list,
+                currentAISceneIndex: sceneIndex
+              });
+            }
+          }
+        });
+      }
+      return;
+    }
+
+    this.setData({
+      showSuggestionsModal: true,
+      currentAISuggestions: suggestions,
+      currentAISceneIndex: sceneIndex
+    });
+  },
+
+  // Close AI suggestions modal
+  closeAISuggestions: function() {
+    this.setData({
+      showSuggestionsModal: false,
+      currentAISuggestions: null,
+      currentAISceneIndex: null
+    });
+  },
+
+  // Placeholder: View recorded content (to be implemented)
+  viewRecorded: function(event) {
+    // Intentionally left empty per request; show a gentle hint
+    wx.showToast({ title: '即将开放', icon: 'none' });
   },
 
   // View scene feedback/results

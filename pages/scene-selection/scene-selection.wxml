@@ -60,16 +60,15 @@
 
     <view class="scenes-list">
       <view wx:for="{{scenes}}" wx:key="index" class="scene-item">
-        <!-- Status Indicator in top right -->
-        <view class="status-indicator" wx:if="{{submissions[index + 1]}}">
-          <text wx:if="{{submissions[index + 1].status === 'approved'}}" class="status-check">✓</text>
-          <text wx:elif="{{submissions[index + 1].status === 'rejected'}}" class="status-cross">✗</text>
-        </view>
         
         <!-- Scene Content without video on left -->
         <view class="scene-content-wrapper">
             <!-- Scene Header -->
             <view class="scene-header">
+          <!-- Similarity in header top-right (replaces old mark) -->
+          <view class="status-indicator" wx:if="{{submissions[index + 1] && submissions[index + 1].hasScore}}">
+            <text class="similarity-badge">视频相似度: {{submissions[index + 1].similarityPercent}}%</text>
+          </view>
           <view class="scene-number-container">
             <view class="scene-number">{{index + 1}}</view>
           </view>
@@ -79,50 +78,54 @@
             <view class="status-badge {{submissions[index + 1] ? submissions[index + 1].statusClass : 'status-pending'}}">
               {{submissions[index + 1] ? submissions[index + 1].statusText : '未提交'}}
             </view>
-            <!-- Video Similarity Score on same line -->
-            <text class="similarity-inline" wx:if="{{submissions[index + 1] && submissions[index + 1].hasScore}}">
-              视频相似度: {{submissions[index + 1].similarityPercent}}%
-            </text>
           </view>
         </view>
 
-        <!-- Scene Content -->
-        <view class="scene-content" wx:if="{{submissions[index + 1]}}">
-          <!-- AI Suggestions -->
-          <view class="suggestions-section" wx:if="{{submissions[index + 1].aiSuggestions && submissions[index + 1].aiSuggestions.length > 0}}">
-            <text class="suggestions-label">AI建议:</text>
-            <view class="suggestions-list">
-              <text wx:for="{{submissions[index + 1].aiSuggestions}}" wx:key="index" class="suggestion-item">
-                • {{item}}
-              </text>
-            </view>
-          </view>
-        </view>
+        <!-- Scene Content (no inline AI suggestions; moved to modal) -->
+        <view class="scene-content" wx:if="{{submissions[index + 1]}}"></view>
 
             <!-- Scene Actions -->
             <view class="scene-actions">
-              <!-- Example Button -->
-              <view class="btn-wrap example-wrap">
+              <!-- Example column: 查看录制 (top) + 案例 (main) -->
+              <view class="btn-wrap example-wrap stacked">
+                <custom-button
+                  wx:if="{{submissions[index + 1] && (submissions[index + 1].videoUrl || submissions[index + 1].sceneId)}}"
+                  text="查看录制"
+                  type="outline"
+                  size="small"
+                  ext-class="block-btn top-btn"
+                  data-index="{{index}}"
+                  bindtap="viewRecorded">
+                </custom-button>
                 <custom-button
                   wx:if="{{template && (videoUrl || template.videoUrl)}}"
                   text="案例"
                   type="outline"
                   size="small"
-                  ext-class="full-size"
+                  ext-class="block-btn"
                   data-index="{{index}}"
                   data-start-time="{{item.startTimeMs || 0}}"
                   data-end-time="{{item.endTimeMs || 3000}}"
                   bindtap="playSceneExample">
                 </custom-button>
               </view>
-              
-              <!-- Record Button -->
-              <view class="btn-wrap record-wrap">
+
+              <!-- Record column: AI建议 (top) + 开始录制 (main) -->
+              <view class="btn-wrap record-wrap stacked">
+                <custom-button
+                  wx:if="{{submissions[index + 1] && submissions[index + 1].aiSuggestions && submissions[index + 1].aiSuggestions.length > 0}}"
+                  text="AI建议"
+                  type="outline"
+                  size="small"
+                  ext-class="block-btn top-btn"
+                  data-index="{{index}}"
+                  bindtap="openAISuggestions">
+                </custom-button>
                 <custom-button
                   text="开始录制"
                   type="danger"
                   size="small"
-                  ext-class="full-size"
+                  ext-class="block-btn"
                   data-index="{{index}}"
                   bindtap="recordScene">
                 </custom-button>
@@ -187,6 +190,25 @@
         <view class="time-info">
           <text class="time-label">场景时间段: {{currentExampleScene.startTimeMs/1000}}s - {{currentExampleScene.endTimeMs/1000}}s</text>
         </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- AI Suggestions Modal (styled like camera recording-complete) -->
+  <view class="recording-complete-overlay" wx:if="{{showSuggestionsModal}}" catchtouchmove="true">
+    <view class="recording-complete-modal">
+      <view class="recording-complete-header">
+        <text class="recording-complete-title">AI建议</text>
+      </view>
+      <view class="recording-complete-body">
+        <block wx:if="{{currentAISuggestions && currentAISuggestions.length > 0}}">
+          <view class="suggestions-list-modal">
+            <text wx:for="{{currentAISuggestions}}" wx:key="index" class="suggestion-line">{{item}}</text>
+          </view>
+        </block>
+      </view>
+      <view class="recording-complete-actions">
+        <button class="recording-action-btn submit-btn" bindtap="closeAISuggestions">好的</button>
       </view>
     </view>
   </view>

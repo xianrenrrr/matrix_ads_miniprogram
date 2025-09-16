@@ -1,6 +1,6 @@
 <!--components/custom-button/custom-button.wxml-->
 <button 
-  class="custom-button {{type}} {{disabled ? 'disabled' : ''}} ext-class {{size}}"
+  class="custom-button {{type}} {{disabled ? 'disabled' : ''}} {{extClass}} {{size}}"
   bindtap="handleTap"
   disabled="{{disabled}}"
   size="{{size}}"
