@@ -139,8 +139,41 @@ Page({
           }))
           this.setData({ allTemplates: templates })
           app.globalData.templates = templates
+          // Fetch publish status for each template to switch button to 下载通过视频 when published
+          this.populatePublishStatusForTemplates(templates)
         }
       }
+    })
+  },
+
+  // For each template, query submitted-videos composite id to get publishStatus and compiledVideoUrl
+  populatePublishStatusForTemplates(templates) {
+    const app = getApp()
+    const userId = app.globalData?.userInfo?.id
+    if (!userId || !Array.isArray(templates)) return
+    templates.forEach((tpl, idx) => {
+      const compositeId = `${userId}_${tpl.id}`
+      wx.request({
+        url: `${app.globalData.apiBaseUrl}/content-creator/scenes/submitted-videos/${compositeId}`,
+        method: 'GET',
+        header: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${wx.getStorageSync('access_token')}`
+        },
+        success: (res) => {
+          const ok = res.data && res.data.success === true
+          const data = ok && (res.data.data || res.data)
+          if (ok && data) {
+            const publishStatus = data.publishStatus || null
+            const compiledVideoUrl = data.compiledVideoUrl || null
+            const key = `allTemplates[${idx}]`
+            this.setData({
+              [`${key}._publishStatus`]: publishStatus,
+              [`${key}._compiledVideoUrl`]: compiledVideoUrl
+            })
+          }
+        }
+      })
     })
   },
 
@@ -233,6 +266,30 @@ Page({
         icon: 'none'
       })
     }
+  },
+
+  // 下载通过视频（从模板卡片）
+  downloadPublishedFromCard(e) {
+    const idx = e.currentTarget.dataset.index
+    const item = this.data.allTemplates[idx]
+    const url = item && item._compiledVideoUrl
+    if (!url) {
+      wx.showToast({ title: '暂无已发布视频', icon: 'none' })
+      return
+    }
+    wx.showLoading({ title: '下载中...' })
+    wx.downloadFile({
+      url,
+      success: (res) => {
+        const filePath = res.tempFilePath
+        wx.saveVideoToPhotosAlbum({
+          filePath,
+          success: () => { wx.hideLoading(); wx.showToast({ title: '保存成功', icon: 'success' }) },
+          fail: () => { wx.hideLoading(); wx.openDocument({ filePath, showMenu: true }) }
+        })
+      },
+      fail: () => { wx.hideLoading(); wx.showToast({ title: '下载失败', icon: 'none' }) }
+    })
   },
 
   // 登录
