@@ -174,6 +174,30 @@
   50% { opacity: 0.5; }
 }
 
+/* 录制时间显示 */
+.recording-timer {
+  text-align: center;
+  margin-bottom: 32rpx;
+  padding: 16rpx 24rpx;
+  background-color: rgba(0, 0, 0, 0.7);
+  border-radius: 24rpx;
+  display: inline-block;
+}
+
+.timer-text {
+  color: white;
+  font-size: 28rpx;
+  font-weight: 500;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.remaining-text {
+  color: #fbbf24;
+  font-size: 24rpx;
+  font-weight: 500;
+}
+
 /* 场景信息 */
 .scene-info {
   position: absolute;
@@ -583,7 +607,7 @@
 }
 
 .prompt-content {
-  background-color: #ffffff;
+  background-color: #f5f5f5;
   border-radius: 24rpx;
   padding: 48rpx;
   text-align: center;
@@ -644,7 +668,7 @@
 }
 
 .script-modal {
-  background-color: #ffffff;
+  background-color: #f5f5f5;
   border-radius: 24rpx;
   width: 90%;
   max-height: 70%;
@@ -696,7 +720,7 @@
   font-size: 28rpx;
   color: #6b7280;
   padding: 16rpx;
-  background-color: #f9fafb;
+  background-color: #f5f5f5;
   border-radius: 12rpx;
 }
 
@@ -723,7 +747,7 @@
 }
 
 .recording-complete-modal {
-  background-color: #ffffff;
+  background-color: #f5f5f5;
   border-radius: 24rpx;
   width: 80%;
   max-width: 600rpx;
@@ -751,6 +775,14 @@
 .recording-complete-text {
   font-size: 28rpx;
   color: #6b7280;
+  margin-bottom: 16rpx;
+  display: block;
+}
+
+.recording-complete-duration {
+  font-size: 24rpx;
+  color: #9ca3af;
+  display: block;
 }
 
 .recording-complete-actions {
@@ -772,6 +804,11 @@
 
 .recording-action-btn.retry-btn {
   background-color: #ef4444;
+  color: white;
+}
+
+.recording-action-btn.submit-btn {
+  background-color: #10b981;
   color: white;
 }
 
@@ -800,7 +837,7 @@
 }
 
 .upload-failure-modal {
-  background-color: #ffffff;
+  background-color: #f5f5f5;
   border-radius: 24rpx;
   width: 85%;
   max-width: 600rpx;
@@ -837,7 +874,7 @@
   display: block;
   font-size: 24rpx;
   color: #9ca3af;
-  background-color: #f9fafb;
+  background-color: #f5f5f5;
   padding: 12rpx;
   border-radius: 8rpx;
   margin-top: 16rpx;

@@ -1,4 +1,5 @@
 {
+  "navigationStyle": "custom",
   "navigationBarTitleText": "Glow AI",
   "enablePullDownRefresh": true,
   "backgroundTextStyle": "light"

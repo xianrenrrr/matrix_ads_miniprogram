@@ -1,5 +1,10 @@
 <!-- pages/index/index.wxml -->
 <view class="page-container">
+  <!-- 头部 -->
+  <view class="header">
+    <text class="header-title">Glow AI</text>
+  </view>
+
   <!-- 加载状态 -->
   <view wx:if="{{loading}}" class="loading">
     <view class="loading-spinner"></view>

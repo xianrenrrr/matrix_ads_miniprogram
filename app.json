@@ -4,7 +4,8 @@
     "pages/scene-selection/scene-selection",
     "pages/camera/camera",
     "pages/login/login",
-    "pages/signup/signup"
+    "pages/signup/signup",
+    "pages/phone-login/phone-login"
   ],
   "window": {
     "backgroundTextStyle": "dark",

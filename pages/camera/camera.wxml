@@ -51,6 +51,7 @@
     </view>
 
 
+
     <!-- 顶部控制栏 -->
     <view class="top-controls">
       <view class="control-btn back-btn" bindtap="goBack">
@@ -139,9 +140,15 @@
 
   <!-- 底部控制栏 -->
   <view class="bottom-controls">
+    <!-- 录制时间显示 -->
+    <view wx:if="{{selectedTemplate}}" class="recording-timer">
+      <text class="timer-text">{{recordTime}}秒 / {{maxRecordTime}}秒</text>
+      <text wx:if="{{isRecording}}" class="remaining-text">剩余 {{maxRecordTime - recordTime}}秒</text>
+    </view>
+
     <!-- 录制按钮 -->
     <view class="record-controls">
-      <button 
+      <button
         wx:if="{{!isRecording && !currentRecording}}"
         class="record-btn record-btn-start"
         bindtap="startRecording"
@@ -149,8 +156,8 @@
       >
         <view class="record-icon"></view>
       </button>
-      
-      <button 
+
+      <button
         wx:elif="{{isRecording}}"
         class="record-btn record-btn-stop"
         bindtap="stopRecording"

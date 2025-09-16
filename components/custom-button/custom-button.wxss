@@ -44,7 +44,7 @@
 }
 
 .secondary {
-  background: #ffffff;
+  background: #f5f5f5;
   color: #1f2937;
   border: 2rpx solid #e5e7eb;
 }
@@ -99,7 +99,7 @@
 
 /* Outline variant */
 .outline {
-  background: #ffffff;
+  background: #f5f5f5;
   color: #1f2937;
   border: 2rpx solid #e5e7eb;
 }

@@ -1,6 +1,14 @@
 <!--pages/scene-selection/scene-selection.wxml-->
 <view class="scene-selection-container">
 
+  <!-- 头部 -->
+  <view class="header">
+    <view class="back-btn" bindtap="goBack">
+      <text class="back-icon">‹</text>
+    </view>
+    <text class="header-title">模板详情</text>
+  </view>
+
   <!-- Loading State -->
   <view class="loading-container" wx:if="{{loading}}">
     <view class="loading-spinner"></view>

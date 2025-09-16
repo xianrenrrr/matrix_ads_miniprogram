@@ -40,14 +40,7 @@ Page({
     cameraInstructions: '',
     movementInstructions: '',
     deviceOrientationText: '',
-    audioNotesText: '',
-    // Translated strings for modal buttons
-    reRecordText: t('reRecord'),
-    submitSceneText: t('submitScene'),
-    recordingCompleteText: t('recordingComplete'),
-    recordingCompleteMessageText: t('recordingCompleteMessage'),
-    durationText: t('duration'),
-    secondsShortText: t('secondsShort')
+    audioNotesText: ''
   },
 
   onLoad(options) {
@@ -604,7 +597,7 @@ Page({
         cameraContext.startRecord({
           success: () => {
             console.log('开始录制')
-            this.setData({ 
+            this.setData({
               isRecording: true,
               recordTime: 0
             })
@@ -923,18 +916,28 @@ Page({
 
   // 开始计时器
   startTimer() {
+    // 获取当前场景的时长限制
+    const currentScene = this.data.selectedTemplate && this.data.selectedTemplate.scenes && this.data.selectedTemplate.scenes[this.data.currentScene]
+    const sceneMaxTime = (currentScene && currentScene.sceneDurationInSeconds) || this.data.maxRecordTime
+
+    // 对于1秒或以下的场景，设置自动停止定时器
+    if (sceneMaxTime <= 1) {
+      setTimeout(() => {
+        if (this.data.isRecording) {
+          console.log(`场景 ${this.data.currentScene + 1} 录制时间到达 ${sceneMaxTime} 秒，自动停止`)
+          this.stopRecording()
+        }
+      }, sceneMaxTime * 1000)
+    }
+
     this.timer = setInterval(() => {
       const recordTime = this.data.recordTime + 1
       this.setData({ recordTime })
       // Update KTV highlight on each tick
       this.updateKtvProgress()
-      
-      // 获取当前场景的时长限制
-      const currentScene = this.data.selectedTemplate && this.data.selectedTemplate.scenes && this.data.selectedTemplate.scenes[this.data.currentScene]
-      const sceneMaxTime = (currentScene && currentScene.sceneDurationInSeconds) || this.data.maxRecordTime
-      
-      // 自动停止录制
-      if (recordTime >= sceneMaxTime) {
+
+      // 自动停止录制并显示弹窗（对于大于1秒的场景）
+      if (recordTime >= sceneMaxTime && sceneMaxTime > 1) {
         console.log(`场景 ${this.data.currentScene + 1} 录制时间到达 ${sceneMaxTime} 秒，自动停止`)
         this.stopRecording()
       }

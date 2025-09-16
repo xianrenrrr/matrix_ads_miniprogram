@@ -1,116 +1,202 @@
 <!-- pages/signup/signup.wxml -->
 <view class="signup-container">
-  <!-- 头部信息 -->
+
+  <!-- 头部标题 -->
   <view class="header-section">
-    <view class="logo-container">
-      <text class="logo-text">Glow AI</text>
+    <view class="back-btn" bindtap="goBack">
+      <text class="back-icon">‹</text>
     </view>
-    <text class="subtitle">创建您的账户</text>
+    <text class="title">扫码注册</text>
   </view>
 
-  <!-- 邀请信息 -->
-  <view class="invite-info">
-    <view class="invite-card">
-      <text class="invite-title">📧 邀请信息</text>
-      <view class="invite-details">
-        <text class="detail-item">管理员: {{inviteInfo.managerName}}</text>
-        <text class="detail-item" wx:if="{{inviteInfo.inviteeName}}">邀请人: {{inviteInfo.inviteeName}}</text>
+  <!-- QR扫描界面 -->
+  <view wx:if="{{!inviteInfo.token}}" class="qr-scan-view">
+    <!-- 主标题 -->
+    <view class="main-title-section">
+      <text class="main-title">扫码快速注册</text>
+    </view>
+
+    <!-- 说明步骤 -->
+    <view class="steps-section">
+      <view class="step-item">
+        <view class="step-number">1</view>
+        <text class="step-text">管理员生成邀请二维码</text>
+      </view>
+      <view class="step-item">
+        <view class="step-number">2</view>
+        <text class="step-text">获取邀请二维码后打开小程序</text>
+      </view>
+      <view class="step-item">
+        <view class="step-number">3</view>
+        <text class="step-text">使用下方按钮扫描注册</text>
       </view>
     </view>
+
+    <!-- QR码扫描区域 -->
+    <view class="qr-scan-area">
+      <!-- 扫描框 -->
+      <view class="scan-frame">
+        <!-- 四个角的边框 -->
+        <view class="corner corner-top-left"></view>
+        <view class="corner corner-top-right"></view>
+        <view class="corner corner-bottom-left"></view>
+        <view class="corner corner-bottom-right"></view>
+
+        <!-- 中间的图标 -->
+        <view class="qr-icon">
+          <view class="icon-row">
+            <view class="icon-square"></view>
+            <view class="icon-square"></view>
+          </view>
+          <view class="icon-row">
+            <view class="icon-square"></view>
+            <view class="icon-bars">
+              <view class="bar"></view>
+              <view class="bar"></view>
+              <view class="bar"></view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <text class="scan-hint">使用下方按钮扫描注册</text>
+    </view>
+
+    <!-- 开始扫描按钮 -->
+    <view class="scan-button-section">
+      <button class="scan-btn" bindtap="startScan">开始扫描</button>
+    </view>
   </view>
 
-  <!-- 注册表单 -->
-  <view class="form-container">
-    <view class="form-group">
-      <view class="input-group">
-        <input 
-          type="text"
+  <!-- 注册表单界面 -->
+  <view wx:if="{{inviteInfo.token}}" class="form-view">
+    <!-- 邀请信息显示 -->
+    <view class="invite-info-section">
+      <text class="invite-title">受邀加入：{{inviteInfo.groupName || '团队'}}</text>
+      <text class="invite-manager">邀请人：{{inviteInfo.managerName || '管理员'}}</text>
+    </view>
+
+    <!-- 表单 -->
+    <view class="form-container">
+      <!-- 用户名输入 -->
+      <view class="input-container">
+        <input
           class="form-input"
+          type="text"
           placeholder="请输入用户名"
-          placeholder-class="input-placeholder"
           value="{{formData.username}}"
           bindinput="onUsernameInput"
           maxlength="50"
         />
       </view>
-    </view>
 
-    <view class="form-group">
-      <view class="input-group">
-        <input 
-          type="text"
+      <!-- 手机号输入 -->
+      <view class="input-container">
+        <input
           class="form-input"
-          placeholder="请输入手机号码"
-          placeholder-class="input-placeholder"
+          type="number"
+          placeholder="请输入手机号"
           value="{{formData.phone}}"
           bindinput="onPhoneInput"
           maxlength="11"
         />
       </view>
-    </view>
 
-    <!-- 城市输入 -->
-    <view class="form-group">
-      <view class="input-group">
-        <input 
-          type="text"
+      <!-- 城市输入 -->
+      <view class="input-container">
+        <input
           class="form-input"
-          placeholder="请输入所在城市"
-          placeholder-class="input-placeholder"
+          type="text"
+          placeholder="请输入城市"
           value="{{formData.city}}"
           bindinput="onCityInput"
-          maxlength="20"
+          maxlength="50"
         />
       </view>
-    </view>
 
-    <view class="form-group">
-      <view class="input-group">
-        <input 
-          type="password"
+      <!-- 密码输入 -->
+      <view class="input-container">
+        <input
           class="form-input"
-          placeholder="请设置密码"
-          placeholder-class="input-placeholder"
+          type="password"
+          placeholder="请设置密码（至少6位）"
           value="{{formData.password}}"
           bindinput="onPasswordInput"
           maxlength="100"
         />
       </view>
-    </view>
 
-    <view class="form-group">
-      <view class="input-group">
-        <input 
-          type="password"
+      <!-- 确认密码输入 -->
+      <view class="input-container">
+        <input
           class="form-input"
+          type="password"
           placeholder="请确认密码"
-          placeholder-class="input-placeholder"
           value="{{formData.confirmPassword}}"
           bindinput="onConfirmPasswordInput"
           maxlength="100"
         />
       </view>
-    </view>
 
-    <!-- 注册按钮 -->
-    <button 
-      class="signup-btn primary-btn {{loading ? 'loading' : ''}}"
-      disabled="{{loading}}"
-      bindtap="handleSignup"
-    >
-      <text wx:if="{{loading}}" class="loading-text">注册中...</text>
-      <text wx:else>立即注册</text>
-    </button>
-
-    <!-- 注册说明 -->
-    <view class="signup-notes">
-      <text class="note-text">📝 注册完成后，您将成为 {{inviteInfo.managerName}} 团队的成员</text>
-      <text class="note-text">🎬 您可以开始录制视频并提交给管理员审核</text>
+      <!-- 注册按钮 -->
+      <button
+        class="submit-btn {{loading ? 'loading' : ''}}"
+        disabled="{{loading}}"
+        bindtap="handleSignup"
+      >
+        <text wx:if="{{loading}}">注册中...</text>
+        <text wx:else>完成注册</text>
+      </button>
     </view>
   </view>
 
-  <!-- 返回按钮 -->
-  <view class="footer-actions">
-    <text class="back-btn" bindtap="goBack">← 返回登录页</text>
+
+  <!-- 用户协议弹窗 -->
+  <view wx:if="{{showAgreementModal}}" class="agreement-modal-overlay" bindtap="hideUserAgreement">
+    <view class="agreement-modal" catchtap="">
+      <view class="modal-header">
+        <text class="modal-title">用户使用协议</text>
+        <text class="modal-close" bindtap="hideUserAgreement">×</text>
+      </view>
+      <scroll-view class="modal-content" scroll-y="true">
+        <view class="agreement-content">
+          <text class="section-title">欢迎使用视频创作平台</text>
+          <text class="section-text">感谢您选择我们的视频创作平台。在使用本服务前，请仔细阅读以下条款。</text>
+
+          <text class="section-title">1. 服务说明</text>
+          <text class="section-text">本平台为您提供基于AI技术的视频模板创作和录制服务，帮助您高效创建专业视频内容。</text>
+
+          <text class="section-title">2. 用户权利</text>
+          <text class="section-text">• 您有权使用平台提供的所有视频模板和创作工具</text>
+          <text class="section-text">• 您创作的原创内容归您所有</text>
+          <text class="section-text">• 您可以随时导出和分享您的作品</text>
+
+          <text class="section-title">3. 用户义务</text>
+          <text class="section-text">• 提供真实、准确的注册信息</text>
+          <text class="section-text">• 不得上传违法、有害或侵权内容</text>
+          <text class="section-text">• 遵守平台使用规范和社区准则</text>
+
+          <text class="section-title">4. 隐私保护</text>
+          <text class="section-text">我们严格保护您的个人信息和创作内容，仅在提供服务必要时使用，不会向第三方泄露您的隐私数据。</text>
+
+          <text class="section-title">5. 知识产权</text>
+          <text class="section-text">• 平台提供的模板和素材仅供个人和商业使用</text>
+          <text class="section-text">• 请尊重他人知识产权，不得盗用他人作品</text>
+          <text class="section-text">• 如发现侵权行为，我们将依法处理</text>
+
+          <text class="section-title">6. 服务变更</text>
+          <text class="section-text">我们保留根据业务发展需要调整服务内容的权利，重要变更将提前通知用户。</text>
+
+          <text class="section-title">7. 联系我们</text>
+          <text class="section-text">如有任何问题或建议，请通过平台客服联系我们，我们将竭诚为您服务。</text>
+
+          <text class="footer-text">本协议最终解释权归平台所有</text>
+          <text class="footer-text">生效日期：2024年1月1日</text>
+        </view>
+      </scroll-view>
+      <view class="modal-footer">
+        <button class="agree-btn" bindtap="agreeAndClose">同意并关闭</button>
+      </view>
+    </view>
   </view>
 </view>

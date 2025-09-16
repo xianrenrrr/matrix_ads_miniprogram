@@ -1,0 +1,52 @@
+<!-- pages/phone-login/phone-login.wxml -->
+<view class="phone-login-container">
+  <!-- 头部 -->
+  <view class="header">
+    <view class="back-btn" bindtap="goBack">
+      <text class="back-icon">‹</text>
+    </view>
+    <text class="header-title">账户登录</text>
+  </view>
+
+  <!-- 页面标题 -->
+  <view class="page-title">
+    <text class="title-text">手机号码登录</text>
+  </view>
+
+  <!-- 表单 -->
+  <view class="form-container">
+    <!-- 手机号输入 -->
+    <view class="input-container">
+      <input
+        class="phone-input"
+        type="number"
+        placeholder="请输入手机号"
+        value="{{phone}}"
+        bindinput="onPhoneInput"
+        maxlength="11"
+      />
+    </view>
+
+    <!-- 密码输入 -->
+    <view class="input-container">
+      <input
+        class="password-input"
+        type="password"
+        placeholder="请输入密码"
+        value="{{password}}"
+        bindinput="onPasswordInput"
+        maxlength="100"
+      />
+    </view>
+
+    <!-- 确定按钮 -->
+    <button
+      class="submit-btn {{loading ? 'loading' : ''}}"
+      disabled="{{loading}}"
+      bindtap="handleLogin"
+    >
+      <text wx:if="{{loading}}">登录中...</text>
+      <text wx:else>确定</text>
+    </button>
+  </view>
+</view>

@@ -1,8 +1,5 @@
 {
+  "navigationStyle": "custom",
   "usingComponents": {},
-  "navigationBarTitleText": "创建账户",
-  "navigationBarBackgroundColor": "#ffffff",
-  "navigationBarTextStyle": "black",
-  "backgroundColor": "#ffffff",
-  "backgroundTextStyle": "dark"
+  "navigationBarTitleText": "扫码注册"
 }

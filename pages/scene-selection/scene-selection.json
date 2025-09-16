@@ -1,4 +1,6 @@
 {
+  "navigationStyle": "custom",
+  "navigationBarTitleText": "模板详情",
   "usingComponents": {
     "custom-button": "../../components/custom-button/custom-button"
   }
