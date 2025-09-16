@@ -66,6 +66,8 @@ Page({
   },
 
   onLoad: function(options) {
+    this._sceneDetailCache = {};
+    this._sceneDetailLoading = {};
     var templateId = options.templateId;
     var userId = options.userId;
     
@@ -389,27 +391,12 @@ Page({
     var suggestions = submission && Array.isArray(submission.aiSuggestions) ? submission.aiSuggestions : [];
 
     if (!suggestions || suggestions.length === 0) {
-      // Try fetching fresh details if we have a sceneId
       if (submission && submission.sceneId) {
         var self = this;
-        wx.request({
-          url: config.API_BASE_URL + '/content-creator/scenes/' + submission.sceneId,
-          method: 'GET',
-          header: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + wx.getStorageSync('access_token')
-          },
-          success: function(response) {
-            const ok = response.data && response.data.success === true;
-            const data = response.data && response.data.data ? response.data.data : {};
-            const list = ok && Array.isArray(data.aiSuggestions) ? data.aiSuggestions : [];
-            if (list.length > 0) {
-              self.setData({
-                showSuggestionsModal: true,
-                currentAISuggestions: list,
-                currentAISceneIndex: sceneIndex
-              });
-            }
+        this._fetchSceneDetailCached(submission.sceneId, function(data) {
+          const list = Array.isArray(data.aiSuggestions) ? data.aiSuggestions : [];
+          if (list.length > 0) {
+            self.setData({ showSuggestionsModal: true, currentAISuggestions: list, currentAISceneIndex: sceneIndex });
           }
         });
       }
@@ -644,13 +631,38 @@ Page({
   },
 
   onShow: function() {
-    // Skip first onShow after onLoad to avoid double API calls
-    if (!this.data.initialShowDone) {
-      this.setData({ initialShowDone: true });
-      return;
+    const app = getApp();
+    if (app.globalData && app.globalData.justRecorded) {
+      app.globalData.justRecorded = false;
+      this.loadProgress();
     }
-    // Subsequent returns (e.g., from camera) should refresh progress
-    this.loadProgress();
+  },
+
+  // Cached fetch for scene detail by ID
+  _fetchSceneDetailCached: function(sceneId, onSuccess, onFail) {
+    if (!sceneId) { onFail && onFail(); return; }
+    if (this._sceneDetailCache[sceneId]) { onSuccess && onSuccess(this._sceneDetailCache[sceneId]); return; }
+    if (this._sceneDetailLoading[sceneId]) { return; }
+    this._sceneDetailLoading[sceneId] = true;
+    var self = this;
+    wx.request({
+      url: config.API_BASE_URL + '/content-creator/scenes/' + sceneId,
+      method: 'GET',
+      header: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + wx.getStorageSync('access_token')
+      },
+      success: function(res) {
+        const ok = res.data && res.data.success === true;
+        const data = ok && res.data.data ? res.data.data : null;
+        if (data) {
+          self._sceneDetailCache[sceneId] = data;
+          onSuccess && onSuccess(data);
+        } else { onFail && onFail(); }
+      },
+      fail: function() { onFail && onFail(); },
+      complete: function() { delete self._sceneDetailLoading[sceneId]; }
+    });
   },
 
   // Update button states based on submission status

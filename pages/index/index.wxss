@@ -171,16 +171,6 @@ page {
   position: relative;     /* enable absolute positioning for children */
 }
 
-/* Published green check mark at top-right */
-.tpl-published-mark {
-  position: absolute;
-  top: 8rpx;
-  right: 8rpx;
-  z-index: 5;
-  color: #10b981; /* green */
-  font-size: 28rpx;
-  font-weight: 700;
-}
 
 .tpl-thumb {
   width: 100%;

@@ -95,7 +95,7 @@
                   size="small"
                   ext-class="block-btn top-btn"
                   data-index="{{index}}"
-                  bind:tap="viewRecorded">
+                  catch:tap="viewRecorded">
                 </custom-button>
                 <custom-button
                   wx:if="{{template && (videoUrl || template.videoUrl)}}"
@@ -106,7 +106,7 @@
                   data-index="{{index}}"
                   data-start-time="{{item.startTimeMs || 0}}"
                   data-end-time="{{item.endTimeMs || 3000}}"
-                  bind:tap="playSceneExample">
+                  catch:tap="playSceneExample">
                 </custom-button>
               </view>
 
@@ -119,7 +119,7 @@
                   size="small"
                   ext-class="block-btn top-btn"
                   data-index="{{index}}"
-                  bind:tap="openAISuggestions">
+                  catch:tap="openAISuggestions">
                 </custom-button>
                 <custom-button
                   text="开始录制"
@@ -127,7 +127,7 @@
                   size="default"
                   ext-class="block-btn"
                   data-index="{{index}}"
-                  bind:tap="recordScene">
+                  catch:tap="recordScene">
                 </custom-button>
               </view>
             </view>
@@ -154,16 +154,6 @@
           <text class="stat-label">完成度</text>
         </view>
       </view>
-    </view>
-    <!-- Download Published Video -->
-    <view wx:if="{{publishStatus === 'published' && compiledVideoUrl}}" class="published-download">
-      <custom-button
-        text="下载已发布视频"
-        type="outline"
-        size="default"
-        ext-class="block-btn"
-        bindtap="downloadPublishedVideo"
-      />
     </view>
   </view>
   

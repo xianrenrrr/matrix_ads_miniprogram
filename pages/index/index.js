@@ -128,38 +128,16 @@ Page({
   // 加载所有模板（用于“全部模版”区块），复用已验证的分配模板接口
   loadAllTemplates() {
     const app = getApp()
-    if (!app.globalData.isLoggedIn || !app.globalData.userInfo) {
-      return
-    }
-    if (this._loadingAll) return
-    this._loadingAll = true
-    const userId = app.globalData.userInfo.id
-    wx.request({
-      url: `${app.globalData.apiBaseUrl}/content-creator/users/${userId}/assigned-templates`,
-      method: 'GET',
-      header: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${wx.getStorageSync('access_token')}`
-      },
-      success: (res) => {
-        const isApiSuccess = res.data && res.data.success === true
-        const responseData = res.data && res.data.data ? res.data.data : []
-        if (res.statusCode === 200 && isApiSuccess) {
-          const templates = responseData.map(t => ({
-            ...t,
-            duration: t.totalVideoLength,
-            sceneCount: (t.scenes && t.scenes.length) || 0,
-            thumbnail: (t.scenes && t.scenes[0] && t.scenes[0].exampleFrame) || '/assets/default-template.jpg',
-            _titleClass: this.computeTitleClass(t.templateTitle)
-          }))
-          this.setData({ allTemplates: templates })
-          app.globalData.templates = templates
-          // Fetch publish status for each template to switch button to 下载通过视频 when published
-          this.populatePublishStatusForTemplates(templates)
-        }
-      },
-      complete: () => { this._loadingAll = false }
-    })
+    if (!app.globalData.templates || !app.globalData.templates.length) return
+    const templates = app.globalData.templates.map(t => ({
+      ...t,
+      duration: t.totalVideoLength,
+      sceneCount: (t.scenes && t.scenes.length) || 0,
+      thumbnail: (t.scenes && t.scenes[0] && t.scenes[0].exampleFrame) || '/assets/default-template.jpg',
+      _titleClass: this.computeTitleClass(t.templateTitle)
+    }))
+    this.setData({ allTemplates: templates })
+    this.populatePublishStatusForTemplates(templates)
   },
 
   // For each template, query submitted-videos composite id to get publishStatus and compiledVideoUrl
@@ -169,7 +147,8 @@ Page({
     if (!userId || !Array.isArray(templates)) return
     templates.forEach((tpl, idx) => {
       const compositeId = `${userId}_${tpl.id}`
-      if (this._statusFetched.has(compositeId)) return
+      // If this card already has status, don't refetch; otherwise fetch now
+      if (tpl._publishStatus) return
       wx.request({
         url: `${app.globalData.apiBaseUrl}/content-creator/scenes/submitted-videos/${compositeId}`,
         method: 'GET',
@@ -188,7 +167,6 @@ Page({
               [`${key}._publishStatus`]: publishStatus,
               [`${key}._compiledVideoUrl`]: compiledVideoUrl
             })
-            this._statusFetched.add(compositeId)
           }
         }
       })

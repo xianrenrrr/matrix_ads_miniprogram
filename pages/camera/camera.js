@@ -811,6 +811,8 @@ Page({
   returnToSceneSelection() {
     const returnPage = this.data.returnPage
     if (returnPage === 'scene-selection') {
+      const app = getApp();
+      app.globalData.justRecorded = true;
       wx.navigateBack({ delta: 1 })
     } else {
       wx.switchTab({ url: '/pages/templates/templates' })

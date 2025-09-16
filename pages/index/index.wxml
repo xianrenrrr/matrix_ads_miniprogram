@@ -59,8 +59,6 @@
         data-id="{{item.id}}"
         bindtap="selectTemplate"
       >
-        <!-- Published mark in top-right -->
-        <view wx:if="{{item._publishStatus === 'published'}}" class="tpl-published-mark">✓</view>
         <view class="tpl-thumb">
           <image src="{{item.thumbnail || '/assets/default-template.jpg'}}" mode="aspectFill" class="tpl-thumb-img" />
         </view>
