@@ -21,7 +21,7 @@
   top: 0;
   right: 0;
   bottom: 0;
-  z-index: 5;
+  z-index: 1;
   pointer-events: none; /* IMPORTANT: no touch blocking */
 }
 
@@ -78,6 +78,7 @@
   width: 100%;
   height: 100%;
   pointer-events: none;
+  z-index: 1;
 }
 
 .grid-line {
@@ -134,7 +135,7 @@
   width: 100%;
   height: 100%;
   pointer-events: none; /* 不阻塞触摸 */
-  z-index: 5;
+  z-index: 1;
 }
 
 .overlay-canvas {
@@ -802,14 +803,18 @@
   max-width: 150rpx;
 }
 
+.recording-action-btn::after {
+  border: none;
+}
+
 .recording-action-btn.retry-btn {
   background-color: #ef4444;
-  color: white;
+  color: white !important;
 }
 
 .recording-action-btn.submit-btn {
   background-color: #10b981;
-  color: white;
+  color: white !important;
 }
 
 .recording-action-btn.continue-btn {

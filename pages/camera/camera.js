@@ -680,7 +680,7 @@ Page({
       return
     }
 
-    wx.showLoading({ title: t('uploadingScene') })
+    wx.showLoading({ title: '上传场景中...' })
     this.uploadSceneVideo(recording)
   },
 
@@ -737,13 +737,19 @@ Page({
 
           if (response.statusCode === 200 && isApiSuccess) {
             console.log('Upload successful, showing AI feedback')
+            wx.showToast({
+              title: '上传成功',
+              icon: 'success'
+            })
             // Show AI feedback if available
-            this.showAIFeedback(responseData)
+            setTimeout(() => {
+              this.showAIFeedback(responseData)
+            }, 1500)
           } else {
-            const errorMessage = parsedResponse && (parsedResponse.error || parsedResponse.message) || t('uploadFailed');
+            const errorMessage = parsedResponse && (parsedResponse.error || parsedResponse.message) || '上传失败';
             console.error('Upload failed with message:', errorMessage)
             wx.showToast({
-              title: errorMessage,
+              title: '上传失败',
               icon: 'error'
             })
           }
@@ -751,7 +757,7 @@ Page({
           console.error('Error parsing response:', error, 'Raw response:', response.data)
           wx.hideLoading()
           wx.showToast({
-            title: t('uploadFailedInvalidResponse'),
+            title: '上传失败',
             icon: 'error'
           })
         }
@@ -760,7 +766,7 @@ Page({
         console.error('Upload request failed:', error)
         wx.hideLoading()
         wx.showToast({
-          title: t('networkErrorPrefix') + (error.errMsg || t('uploadFailed')),
+          title: '上传失败',
           icon: 'error'
         })
       }
