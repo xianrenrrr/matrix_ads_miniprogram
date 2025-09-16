@@ -123,8 +123,8 @@
                 </custom-button>
                 <custom-button
                   text="开始录制"
-                  type="danger"
-                  size="small"
+                  type="danger-outline"
+                  size="default"
                   ext-class="block-btn"
                   data-index="{{index}}"
                   bindtap="recordScene">
