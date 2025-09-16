@@ -213,19 +213,8 @@ page {
   left: 16rpx;
   right: 16rpx;
 }
-.record-btn {
-  border: 2rpx solid #fca5a5;
-  color: #ef4444;
-  text-align: center;
-  background: #f5f5f5; /* match page background */
-  height: 60rpx; /* unified height */
-  line-height: 60rpx; /* vertically center text */
-  padding: 0;
-  margin: 0 12rpx; /* slightly reduce width visually */
-  border-radius: 9999rpx;
-  font-weight: 600;
-  font-size: 28rpx; /* match custom-button default */
-}
+/* Match scene detail button dimensions via ext-class */
+.block-btn { width: 100% !important; padding: 0 !important; height: 76rpx; font-size: 26rpx; }
 
 /* Logout CTA button sizing and placement */
 .logout-cta {
