@@ -24,7 +24,41 @@ Page({
     // AI Suggestions modal state
     showSuggestionsModal: false,
     currentAISuggestions: null,
-    currentAISceneIndex: null
+    currentAISceneIndex: null,
+    publishStatus: null,
+    compiledVideoUrl: null
+  },
+
+  // Download compiled published video
+  downloadPublishedVideo: function() {
+    var url = this.data.compiledVideoUrl;
+    if (!url) {
+      wx.showToast({ title: '暂无已发布视频', icon: 'none' });
+      return;
+    }
+    wx.showLoading({ title: '下载中...' });
+    wx.downloadFile({
+      url: url,
+      success: (res) => {
+        const filePath = res.tempFilePath;
+        wx.saveVideoToPhotosAlbum({
+          filePath: filePath,
+          success: () => {
+            wx.hideLoading();
+            wx.showToast({ title: '保存成功', icon: 'success' });
+          },
+          fail: () => {
+            wx.hideLoading();
+            // If cannot save to album, fallback to open the file
+            wx.openDocument({ filePath, showMenu: true });
+          }
+        });
+      },
+      fail: () => {
+        wx.hideLoading();
+        wx.showToast({ title: '下载失败', icon: 'none' });
+      }
+    });
   },
 
   onLoad: function(options) {
@@ -193,6 +227,8 @@ Page({
           var videoData = response.data.data || response.data;
           var scenes = videoData.scenes || {};
           var progress = videoData.progress || null;
+          var publishStatus = videoData.publishStatus || null;
+          var compiledVideoUrl = videoData.compiledVideoUrl || null;
 
           console.log('DEBUG: Processing scenes data:', scenes);
           console.log('DEBUG: Scene keys:', Object.keys(scenes));
@@ -247,7 +283,9 @@ Page({
           
           self.setData({
             submissions: sceneMap,
-            progress: progress
+            progress: progress,
+            publishStatus: publishStatus,
+            compiledVideoUrl: compiledVideoUrl
           });
           
           // Update button states based on submissions

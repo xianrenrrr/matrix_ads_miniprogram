@@ -527,6 +527,11 @@ page {
   margin-top: 2px;
 }
 
+/* Download published button wrapper */
+.published-download {
+  margin-top: 12rpx;
+}
+
 /* Example Video Modal - Fullscreen */
 .example-modal {
   position: fixed;

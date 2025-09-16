@@ -155,6 +155,16 @@
         </view>
       </view>
     </view>
+    <!-- Download Published Video -->
+    <view wx:if="{{publishStatus === 'published' && compiledVideoUrl}}" class="published-download">
+      <custom-button
+        text="下载已发布视频"
+        type="outline"
+        size="default"
+        ext-class="block-btn"
+        bindtap="downloadPublishedVideo"
+      />
+    </view>
   </view>
   
   <!-- Example Video Modal -->
