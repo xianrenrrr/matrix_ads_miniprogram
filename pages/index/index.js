@@ -165,7 +165,7 @@ Page({
           const data = ok && (res.data.data || res.data)
           if (ok && data) {
             const publishStatus = data.publishStatus || null
-            const compiledVideoUrl = data.compiledVideoUrl || null
+            const compiledVideoUrl = data.compiledVideoSignedUrl || data.compiledVideoUrl || null
             const key = `allTemplates[${idx}]`
             this.setData({
               [`${key}._publishStatus`]: publishStatus,
@@ -278,14 +278,32 @@ Page({
       return
     }
     wx.showLoading({ title: '下载中...' })
+    const targetPath = `${wx.env.USER_DATA_PATH}/compiled_${Date.now()}.mp4`
     wx.downloadFile({
       url,
+      filePath: targetPath,
       success: (res) => {
-        const filePath = res.tempFilePath
+        const filePath = res.filePath || res.tempFilePath
+        if (res.statusCode !== 200 || !filePath) {
+          wx.hideLoading();
+          wx.showToast({ title: '下载失败', icon: 'none' })
+          return
+        }
         wx.saveVideoToPhotosAlbum({
           filePath,
           success: () => { wx.hideLoading(); wx.showToast({ title: '保存成功', icon: 'success' }) },
-          fail: () => { wx.hideLoading(); wx.openDocument({ filePath, showMenu: true }) }
+          fail: (err) => {
+            wx.hideLoading();
+            if (err && /auth/.test(err.errMsg || '')) {
+              wx.showModal({
+                title: '需要相册权限',
+                content: '请在设置中允许保存到相册后重试',
+                success: (r) => { if (r.confirm) wx.openSetting({}) }
+              })
+            } else {
+              wx.showToast({ title: '保存失败', icon: 'none' })
+            }
+          }
         })
       },
       fail: () => { wx.hideLoading(); wx.showToast({ title: '下载失败', icon: 'none' }) }

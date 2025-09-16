@@ -26,7 +26,11 @@ Page({
     currentAISuggestions: null,
     currentAISceneIndex: null,
     publishStatus: null,
-    compiledVideoUrl: null
+    compiledVideoUrl: null,
+    initialShowDone: false,
+    // Recorded video preview modal
+    showRecordedModal: false,
+    currentRecordedScene: null
   },
 
   // Download compiled published video
@@ -81,8 +85,7 @@ Page({
     this.loadTemplate();
     this.loadProgress();
     
-    // Mark that initial load is complete
-    this.setData({ hasLoadedOnce: true });
+    // Do not mark shown here to avoid double-fetch on first entry
   },
 
   // Load template data
@@ -228,7 +231,7 @@ Page({
           var scenes = videoData.scenes || {};
           var progress = videoData.progress || null;
           var publishStatus = videoData.publishStatus || null;
-          var compiledVideoUrl = videoData.compiledVideoUrl || null;
+          var compiledVideoUrl = videoData.compiledVideoSignedUrl || videoData.compiledVideoUrl || null;
 
           console.log('DEBUG: Processing scenes data:', scenes);
           console.log('DEBUG: Scene keys:', Object.keys(scenes));
@@ -420,6 +423,58 @@ Page({
     });
   },
 
+  // 查看录制：固定用 sceneId 调后端取视频地址，再用“案例”样式弹窗播放
+  viewRecorded: function(event) {
+    var sceneIndex = parseInt((event.currentTarget.dataset || {}).index);
+    var sceneNumber = sceneIndex + 1;
+    var submission = this.data.submissions && this.data.submissions[sceneNumber];
+    if (!submission || !submission.sceneId) {
+      wx.showToast({ title: '暂无录制', icon: 'none' });
+      return;
+    }
+    var self = this;
+    wx.showLoading({ title: '加载中' });
+    wx.request({
+      url: config.API_BASE_URL + '/content-creator/scenes/' + submission.sceneId,
+      method: 'GET',
+      header: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + wx.getStorageSync('access_token')
+      },
+      success: function(res) {
+        wx.hideLoading();
+        var ok = res.data && res.data.success === true;
+        var data = ok && res.data.data ? res.data.data : {};
+        var url = data.videoSignedUrl || data.videoUrl;
+        if (!url) {
+          wx.showToast({ title: '暂无录制', icon: 'none' });
+          return;
+        }
+        // Reuse Example modal for consistent UX
+        self.setData({
+          showExampleModal: true,
+          currentExampleScene: {
+            index: sceneIndex,
+            title: submission.sceneTitle || ('场景 ' + sceneNumber),
+            startTimeMs: 0,
+            endTimeMs: 0,
+            videoUrl: url
+          }
+        });
+        setTimeout(() => { try { self.playExampleVideo(); } catch (e) {} }, 100);
+      },
+      fail: function() {
+        wx.hideLoading();
+        wx.showToast({ title: '网络错误', icon: 'none' });
+      }
+    });
+  },
+
+  closeRecordedModal: function() {
+    try { wx.createVideoContext('recordedVideo').pause(); } catch (e) {}
+    this.setData({ showRecordedModal: false, currentRecordedScene: null });
+  },
+
   // Close AI suggestions modal
   closeAISuggestions: function() {
     this.setData({
@@ -429,11 +484,7 @@ Page({
     });
   },
 
-  // Placeholder: View recorded content (to be implemented)
-  viewRecorded: function(event) {
-    // Intentionally left empty per request; show a gentle hint
-    wx.showToast({ title: '即将开放', icon: 'none' });
-  },
+  
 
   // View scene feedback/results
   viewSceneFeedback: function(event) {
@@ -593,11 +644,13 @@ Page({
   },
 
   onShow: function() {
-    // Only reload progress if we're returning from camera (not initial load)
-    // This prevents duplicate API calls on page load
-    if (this.data.hasLoadedOnce) {
-      this.loadProgress();
+    // Skip first onShow after onLoad to avoid double API calls
+    if (!this.data.initialShowDone) {
+      this.setData({ initialShowDone: true });
+      return;
     }
+    // Subsequent returns (e.g., from camera) should refresh progress
+    this.loadProgress();
   },
 
   // Update button states based on submission status
@@ -776,9 +829,10 @@ Page({
   onExampleVideoTimeUpdate: function(e) {
     if (!this.data.currentExampleScene) return;
     const segments = require('../../utils/videoSegments');
-    const endTime = this.data.currentExampleScene.endTimeMs / 1000;
+    const endTime = (this.data.currentExampleScene.endTimeMs || 0) / 1000;
     const startTime = this.data.currentExampleScene.startTimeMs / 1000;
-    if (e.detail.currentTime >= endTime) {
+    // Only enforce stop when an explicit endTime is provided (> 0)
+    if (endTime > 0 && e.detail.currentTime >= endTime) {
       segments.stopAtEnd('exampleVideo', endTime, startTime);
     }
   },

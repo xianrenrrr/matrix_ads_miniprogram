@@ -59,6 +59,8 @@
         data-id="{{item.id}}"
         bindtap="selectTemplate"
       >
+        <!-- Published mark in top-right -->
+        <view wx:if="{{item._publishStatus === 'published'}}" class="tpl-published-mark">✓</view>
         <view class="tpl-thumb">
           <image src="{{item.thumbnail || '/assets/default-template.jpg'}}" mode="aspectFill" class="tpl-thumb-img" />
         </view>
@@ -68,14 +70,27 @@
           <view class="meta-item"><text class="meta-dot"></text><text>{{item.duration || 0}}秒</text></view>
         </view>
         <view class="tpl-actions">
+          <!-- If published: show download; else: start recording -->
+          <block wx:if="{{item._publishStatus === 'published'}}">
           <custom-button
-            text="开始录制"
+            text="下载通过视频"
             type="danger-outline"
             size="default"
             ext-class="block-btn"
-            data-id="{{item.id}}"
-            bindtap="selectTemplate"
+            data-index="{{index}}"
+            bind:tap="downloadPublishedFromCard"
           />
+          </block>
+          <block wx:else>
+            <custom-button
+              text="开始录制"
+              type="danger-outline"
+              size="default"
+              ext-class="block-btn"
+              data-id="{{item.id}}"
+              bind:tap="selectTemplate"
+            />
+          </block>
         </view>
       </view>
     </view>

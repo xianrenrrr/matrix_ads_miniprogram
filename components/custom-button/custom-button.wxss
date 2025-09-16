@@ -46,7 +46,7 @@
 .secondary {
   background: #f5f5f5;
   color: #1f2937;
-  border: 2rpx solid #e5e7eb;
+  border: 2rpx solid #d1d5db; /* darker outline */
 }
 
 .secondary:active {
@@ -85,7 +85,7 @@
 .danger-outline {
   background: #f5f5f5; /* match general page background */
   color: #ef4444;
-  border: 2rpx solid #fca5a5;
+  border: 2rpx solid #ef4444; /* darker red outline */
 }
 
 /* Sizes */
@@ -108,7 +108,7 @@
 .outline {
   background: #f5f5f5;
   color: #1f2937;
-  border: 2rpx solid #e5e7eb;
+  border: 2rpx solid #d1d5db; /* darker outline */
 }
 
 /* States */

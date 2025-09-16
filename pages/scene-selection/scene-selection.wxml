@@ -95,7 +95,7 @@
                   size="small"
                   ext-class="block-btn top-btn"
                   data-index="{{index}}"
-                  bindtap="viewRecorded">
+                  bind:tap="viewRecorded">
                 </custom-button>
                 <custom-button
                   wx:if="{{template && (videoUrl || template.videoUrl)}}"
@@ -106,7 +106,7 @@
                   data-index="{{index}}"
                   data-start-time="{{item.startTimeMs || 0}}"
                   data-end-time="{{item.endTimeMs || 3000}}"
-                  bindtap="playSceneExample">
+                  bind:tap="playSceneExample">
                 </custom-button>
               </view>
 
@@ -119,7 +119,7 @@
                   size="small"
                   ext-class="block-btn top-btn"
                   data-index="{{index}}"
-                  bindtap="openAISuggestions">
+                  bind:tap="openAISuggestions">
                 </custom-button>
                 <custom-button
                   text="开始录制"
@@ -127,7 +127,7 @@
                   size="default"
                   ext-class="block-btn"
                   data-index="{{index}}"
-                  bindtap="recordScene">
+                  bind:tap="recordScene">
                 </custom-button>
               </view>
             </view>
@@ -197,7 +197,7 @@
         <view wx:if="{{!currentExampleScene.videoUrl}}" class="video-error">
           <text>视频暂不可用</text>
         </view>
-        <view class="time-info">
+        <view class="time-info" wx:if="{{currentExampleScene && currentExampleScene.endTimeMs > 0}}">
           <text class="time-label">场景时间段: {{currentExampleScene.startTimeMs/1000}}s - {{currentExampleScene.endTimeMs/1000}}s</text>
         </view>
       </view>
@@ -219,7 +219,34 @@
       </view>
       <view class="recording-complete-actions">
         <button class="recording-action-btn submit-btn" bindtap="closeAISuggestions">好的</button>
+  </view>
+
+  <!-- Recorded Video Modal (same style as Example modal) -->
+  <view class="example-modal" wx:if="{{showRecordedModal}}" catchtouchmove="true">
+    <view class="modal-overlay" bindtap="closeRecordedModal"></view>
+    <view class="modal-content">
+      <view class="modal-header">
+        <text class="modal-title">{{currentRecordedScene.title}} - 查看录制</text>
+        <view class="close-button" bindtap="closeRecordedModal">✕</view>
+      </view>
+      
+      <view class="video-container">
+        <video 
+          id="recordedVideo"
+          class="example-video"
+          src="{{currentRecordedScene.videoUrl}}"
+          show-progress="{{true}}"
+          show-fullscreen-btn="{{false}}"
+          show-play-btn="{{true}}"
+          show-center-play-btn="{{true}}"
+          controls="{{true}}"
+        >
+        </video>
       </view>
     </view>
   </view>
+</view>
+  </view>
+
+  
 </view>
