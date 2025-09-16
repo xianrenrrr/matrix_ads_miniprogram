@@ -55,7 +55,7 @@ Component({
         text: this.properties.text,
         type: this.properties.type,
         dataset: e.currentTarget.dataset
-      });
+      }, { bubbles: false, composed: false, capturePhase: false });
     }
   }
 });

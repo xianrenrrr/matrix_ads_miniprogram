@@ -19,11 +19,21 @@ Page({
 
   onLoad() {
     logger.log('首页加载')
+    this._initialShown = false
+    this._loadingAssigned = false
+    this._loadingAll = false
+    this._loadingStats = false
+    this._downloading = false
+    this._statusFetched = new Set()
     this.initPage()
   },
 
   onShow() {
     logger.log('首页显示')
+    if (!this._initialShown) {
+      this._initialShown = true
+      return
+    }
     this.refreshData()
   },
 
@@ -61,6 +71,8 @@ Page({
       logger.warn('用户未登录，无法加载模板')
       return
     }
+    if (this._loadingAssigned) return
+    this._loadingAssigned = true
 
     const userId = app.globalData.userInfo.id
     logger.log('开始加载用户模板，用户ID:', userId)
@@ -108,7 +120,8 @@ Page({
           title: '网络错误',
           icon: 'none'
         })
-      }
+      },
+      complete: () => { this._loadingAssigned = false }
     })
   },
 
@@ -118,6 +131,8 @@ Page({
     if (!app.globalData.isLoggedIn || !app.globalData.userInfo) {
       return
     }
+    if (this._loadingAll) return
+    this._loadingAll = true
     const userId = app.globalData.userInfo.id
     wx.request({
       url: `${app.globalData.apiBaseUrl}/content-creator/users/${userId}/assigned-templates`,
@@ -142,7 +157,8 @@ Page({
           // Fetch publish status for each template to switch button to 下载通过视频 when published
           this.populatePublishStatusForTemplates(templates)
         }
-      }
+      },
+      complete: () => { this._loadingAll = false }
     })
   },
 
@@ -153,6 +169,7 @@ Page({
     if (!userId || !Array.isArray(templates)) return
     templates.forEach((tpl, idx) => {
       const compositeId = `${userId}_${tpl.id}`
+      if (this._statusFetched.has(compositeId)) return
       wx.request({
         url: `${app.globalData.apiBaseUrl}/content-creator/scenes/submitted-videos/${compositeId}`,
         method: 'GET',
@@ -171,6 +188,7 @@ Page({
               [`${key}._publishStatus`]: publishStatus,
               [`${key}._compiledVideoUrl`]: compiledVideoUrl
             })
+            this._statusFetched.add(compositeId)
           }
         }
       })
@@ -270,11 +288,14 @@ Page({
 
   // 下载通过视频（从模板卡片）
   downloadPublishedFromCard(e) {
+    if (this._downloading) return
+    this._downloading = true
     const idx = e.currentTarget.dataset.index
     const item = this.data.allTemplates[idx]
     const url = item && item._compiledVideoUrl
     if (!url) {
       wx.showToast({ title: '暂无已发布视频', icon: 'none' })
+      this._downloading = false
       return
     }
     wx.showLoading({ title: '下载中...' })
@@ -287,6 +308,7 @@ Page({
         if (res.statusCode !== 200 || !filePath) {
           wx.hideLoading();
           wx.showToast({ title: '下载失败', icon: 'none' })
+          this._downloading = false
           return
         }
         wx.saveVideoToPhotosAlbum({
@@ -303,10 +325,12 @@ Page({
             } else {
               wx.showToast({ title: '保存失败', icon: 'none' })
             }
+            this._downloading = false
           }
         })
       },
-      fail: () => { wx.hideLoading(); wx.showToast({ title: '下载失败', icon: 'none' }) }
+      fail: () => { wx.hideLoading(); wx.showToast({ title: '下载失败', icon: 'none' }); this._downloading = false },
+      complete: () => { this._downloading = false }
     })
   },
 
