@@ -139,7 +139,10 @@
   <!-- Overall Progress -->
   <view class="progress-summary" wx:if="{{!loading && progress}}">
     <view class="progress-card">
-      <text class="progress-title">总体进度</text>
+      <view class="progress-header">
+        <text class="progress-title">总体进度</text>
+        <text wx:if="{{publishStatus === 'approved'}}" class="scenes-subtitle">（等待人工审核中）</text>
+      </view>
       <view class="progress-stats">
         <view class="stat-item">
           <text class="stat-number">{{progress.approved}}</text>
