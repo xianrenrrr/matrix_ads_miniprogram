@@ -197,12 +197,27 @@ Page({
         } else {
           // 注册失败 - Handle ApiResponse error format
           let errorMessage = '注册过程中出现错误，请稍后重试';
-          
+
           if (res.data) {
             // 优先显示本地化 message，其次显示后端 error 详情
             errorMessage = res.data.message || res.data.error || errorMessage;
           }
-          
+
+          // 当后端未按语言返回时，本地兜底中英映射
+          try {
+            const lang = require('../../utils/translations').getLanguage();
+            if (lang === 'zh' && typeof errorMessage === 'string') {
+              const lower = errorMessage.toLowerCase();
+              if (lower.includes('username already exists')) {
+                errorMessage = '用户名已存在';
+              } else if (lower.includes('phone number already exists')) {
+                errorMessage = '手机号已存在';
+              }
+            }
+          } catch (e) {
+            // ignore mapping errors
+          }
+
           wx.showModal({
             title: '注册失败',
             content: errorMessage,
@@ -421,6 +436,21 @@ Page({
 
           if (res.data) {
             errorMessage = res.data.message || res.data.error || errorMessage;
+          }
+
+          // 当后端未按语言返回时，本地兜底中英映射
+          try {
+            const lang = require('../../utils/translations').getLanguage();
+            if (lang === 'zh' && typeof errorMessage === 'string') {
+              const lower = errorMessage.toLowerCase();
+              if (lower.includes('username already exists')) {
+                errorMessage = '用户名已存在';
+              } else if (lower.includes('phone number already exists')) {
+                errorMessage = '手机号已存在';
+              }
+            }
+          } catch (e) {
+            // ignore mapping errors
           }
 
           wx.showModal({

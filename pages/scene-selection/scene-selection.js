@@ -815,37 +815,30 @@ Page({
   // Play the example video from start time
   playExampleVideo: function() {
     if (!this.data.currentExampleScene) return;
-    const startTime = this.data.currentExampleScene.startTimeMs / 1000;
-    const segments = require('../../utils/videoSegments');
-    segments.ensureStartOnPlay('exampleVideo', startTime);
+    // 依赖 <video initial-time> 起始位置，避免强制 seek 导致进度条跳动
     try { wx.createVideoContext('exampleVideo').play(); } catch (e) {}
   },
   
   // Ensure position is correct as soon as metadata is loaded
   onExampleVideoLoaded: function() {
     if (!this.data.currentExampleScene) return;
-    const startTime = this.data.currentExampleScene.startTimeMs / 1000;
-    const segments = require('../../utils/videoSegments');
-    segments.ensureStartOnLoaded('exampleVideo', startTime);
+    // 不再在元数据加载时强制 seek，避免与进度条冲突
   },
   
   // Always start at scene beginning when user presses Play
   onExampleVideoPlay: function() {
     if (!this.data.currentExampleScene) return;
-    const startTime = this.data.currentExampleScene.startTimeMs / 1000;
-    const segments = require('../../utils/videoSegments');
-    segments.ensureStartOnPlay('exampleVideo', startTime);
+    // 不强制重置到片段开始，让用户自行控制进度
   },
   
   // Handle example video time update (stop at end, no loop)
   onExampleVideoTimeUpdate: function(e) {
     if (!this.data.currentExampleScene) return;
-    const segments = require('../../utils/videoSegments');
     const endTime = (this.data.currentExampleScene.endTimeMs || 0) / 1000;
-    const startTime = this.data.currentExampleScene.startTimeMs / 1000;
     // Only enforce stop when an explicit endTime is provided (> 0)
     if (endTime > 0 && e.detail.currentTime >= endTime) {
-      segments.stopAtEnd('exampleVideo', endTime, startTime);
+      // 仅暂停，不再自动回到片段开始，避免进度条在起点与终点来回跳动
+      try { wx.createVideoContext('exampleVideo').pause(); } catch (err) {}
     }
   },
   

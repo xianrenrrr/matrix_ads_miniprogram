@@ -566,7 +566,8 @@ page {
   left: 0;
   right: 0;
   z-index: 1002;
-  padding: 44rpx 30rpx 20rpx;
+  /* 下移关闭按钮，避免贴近状态栏/刘海区域，便于点击 */
+  padding: 96rpx 30rpx 20rpx;
   background: linear-gradient(180deg, rgba(0,0,0,0.6) 0%, transparent 100%);
 }
 
