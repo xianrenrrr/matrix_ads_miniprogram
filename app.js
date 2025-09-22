@@ -5,7 +5,7 @@ const logger = require('./utils/logger')
 App({
   onLaunch() {
     // 小程序启动时触发
-    logger.log('Glow AI Mini Program Launch')
+    logger.log('Teki AI Mini Program Launch')
     
     // 检查是否有新版本
     if (wx.canIUse('getUpdateManager')) {
@@ -41,11 +41,11 @@ App({
   },
   
   onShow() {
-    logger.log('Glow AI Mini Program Show')
+    logger.log('Teki AI Mini Program Show')
   },
   
   onHide() {
-    logger.log('Glow AI Mini Program Hide')
+    logger.log('Teki AI Mini Program Hide')
   },
   
   onError(msg) {

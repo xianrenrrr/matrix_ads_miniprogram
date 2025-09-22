@@ -1,7 +1,7 @@
-# Glow AI WeChat Mini Program
+# Teki AI WeChat Mini Program
 
 ## Project Overview
-This is a WeChat Mini Program for video recording functionality within the Glow AI platform. Users can record guided videos using templates created by content managers.
+This is a WeChat Mini Program for video recording functionality within the Teki AI platform. Users can record guided videos using templates created by content managers.
 
 ## Architecture
 ```

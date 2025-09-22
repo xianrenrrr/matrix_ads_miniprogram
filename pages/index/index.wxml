@@ -2,7 +2,7 @@
 <view class="page-container">
   <!-- 头部 -->
   <view class="header">
-    <text class="header-title">Glow AI</text>
+    <text class="header-title">Teki AI</text>
   </view>
 
   <!-- 加载状态 -->

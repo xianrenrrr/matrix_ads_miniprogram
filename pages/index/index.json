@@ -1,6 +1,6 @@
 {
   "navigationStyle": "custom",
-  "navigationBarTitleText": "Glow AI",
+  "navigationBarTitleText": "Teki AI",
   "enablePullDownRefresh": true,
   "backgroundTextStyle": "light",
   "usingComponents": {
