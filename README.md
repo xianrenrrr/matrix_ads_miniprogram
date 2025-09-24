@@ -1,7 +1,7 @@
-# Teki AI WeChat Mini Program
+# Xpectra AI WeChat Mini Program
 
 ## Project Overview
-This is a WeChat Mini Program for video recording functionality within the Teki AI platform. Users can record guided videos using templates created by content managers.
+This is a WeChat Mini Program for video recording functionality within the Xpectra AI platform. Users can record guided videos using templates created by content managers.
 
 ## Architecture
 ```
