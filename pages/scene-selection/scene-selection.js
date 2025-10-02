@@ -235,8 +235,7 @@ Page({
           var publishStatus = videoData.publishStatus || null;
           var compiledVideoUrl = videoData.compiledVideoSignedUrl || videoData.compiledVideoUrl || null;
 
-          console.log('DEBUG: Processing scenes data:', scenes);
-          console.log('DEBUG: Scene keys:', Object.keys(scenes));
+
 
           // Convert scenes object to sceneMap format (keyed by scene number)
           var sceneMap = {};
