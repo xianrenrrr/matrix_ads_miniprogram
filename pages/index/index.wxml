@@ -28,25 +28,6 @@
       </view>
     </view>
 
-    <!-- 统计数据（三列对齐到大矩形左右边） -->
-    <view class="stats-layer full-bleed">
-      <view class="mini-stat-card">
-        <view class="stat-number stat-number-box {{availableDigitClass}} text-primary">{{stats.availableTemplates}}</view>
-        <view class="stat-label">可用模板</view>
-        <image class="stat-icon stat-icon-1" src="/assets/Group 8935@2x copy 2.png" mode="aspectFit" />
-      </view>
-      <view class="mini-stat-card">
-        <view class="stat-number stat-number-box {{recordedDigitClass}} text-success">{{stats.recordedVideos}}</view>
-        <view class="stat-label">已录制</view>
-        <image class="stat-icon stat-icon-2" src="/assets/Group 8935@2x.png" mode="aspectFit" />
-      </view>
-      <view class="mini-stat-card">
-        <view class="stat-number stat-number-box {{publishedDigitClass}} text-warning">{{stats.publishedVideos}}</view>
-        <view class="stat-label">已发布</view>
-        <image class="stat-icon stat-icon-3" src="/assets/Group 8935@2x copy.png" mode="aspectFit" />
-      </view>
-    </view>
-
     <!-- 全部模版 标题（非盒子） -->
     <text class="all-templates-link">全部模版</text>
 

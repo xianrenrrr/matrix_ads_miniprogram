@@ -52,18 +52,6 @@ page {
   border: 2rpx solid #e5e7eb;
 }
 
-.stat-number {
-  font-size: 70rpx;
-  font-weight: 700;
-  line-height: 1.2;
-  margin-bottom: 8rpx;
-}
-
-.stat-label {
-  font-size: 24rpx;
-  color: #6b7280;
-}
-
 /* Title indicator next to greeting */
 .title-row {
   display: flex;
@@ -306,66 +294,6 @@ page {
 
 /* Full-bleed card: cancel container side padding to reach phone edges */
 .full-bleed { margin-left: -32rpx; margin-right: -32rpx; }
-
-/* Three-box stats aligned to greeting box edges */
-.stats-layer {
-  display: grid;
-  grid-template-columns: repeat(3, 217rpx);
-  column-gap: 15.38rpx;
-  justify-content: start;
-  width: 100%;
-  margin-top: 19rpx;
-  margin-left: -23rpx;
-}
-
-.mini-stat-card {
-  position: relative;
-  height: 203.85rpx; /* fixed height from design */
-  background: #f5f5f5;
-  border-radius: 15.38rpx;
-  box-shadow: 0 8rpx 24rpx rgba(0,0,0,0.06);
-  border: 2rpx solid #e2e8f0;
-}
-
-/* Number box exact placement and sizing */
-.stat-number-box {
-  position: absolute;
-  top: 30.77rpx;
-  left: 30.77rpx;
-  height: 80.77rpx;
-  line-height: 80.77rpx;
-}
-
-.num-1w { width: 50rpx; }
-.num-2w { width: 82.69rpx; }
-.num-3w { width: 111.54rpx; }
-
-/* Place the stat label without affecting card height */
-.stats-layer .stat-label {
-  position: absolute;
-  left: 30.77rpx;
-  top: 138.46rpx; /* directly under the number box */
-  height: 23.08rpx;
-  line-height: 23.08rpx;
-  font-size: 23.08rpx;
-  right: 16rpx;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin: 0;
-}
-
-/* Stat icons: positioned from right and bottom inside each box */
-.stat-icon {
-  position: absolute;
-  right: 30.77rpx;
-  bottom: 42.31rpx;
-  pointer-events: none;
-}
-
-.stat-icon-1 { width: 14.93rpx; height: 23.08rpx; }
-.stat-icon-2 { width: 26.78rpx; height: 19.23rpx; }
-.stat-icon-3 { width: 22.24rpx; height: 23.08rpx; }
 
 /* 全部模版 标题样式 */
 .all-templates-link {

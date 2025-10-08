@@ -4,15 +4,7 @@ Page({
   data: {
     userInfo: null,
     isLoggedIn: false,
-    stats: {
-      availableTemplates: 0,
-      recordedVideos: 0,
-      publishedVideos: 0
-    },
     allTemplates: [],
-    availableDigitClass: 'num-1w',
-    recordedDigitClass: 'num-1w',
-    publishedDigitClass: 'num-1w',
     recentTemplates: [],
     loading: true
   },
@@ -51,7 +43,6 @@ Page({
     
     if (app.globalData.isLoggedIn && app.globalData.userInfo) {
       this.loadAssignedTemplates()
-      this.loadDashboardStats()
     }
     // Always load all templates for the "全部模版" section
     this.loadAllTemplates()
@@ -60,7 +51,6 @@ Page({
   // 刷新数据
   refreshData() {
     this.loadAssignedTemplates()
-    this.loadDashboardStats()
     this.loadAllTemplates()
   },
 
@@ -95,11 +85,7 @@ Page({
           const templates = responseData
           logger.log('获取到的模板数量:', templates.length)
           
-          // 更新统计数据
-          const av = templates.length || 0
           this.setData({
-            'stats.availableTemplates': av,
-            availableDigitClass: this.computeDigitClass(av),
             recentTemplates: templates.slice(0, 3) // 显示最近3个模板
           })
           
@@ -174,61 +160,7 @@ Page({
   },
 
   // 加载仪表板统计数据
-  loadDashboardStats() {
-    const app = getApp()
-    if (!app.globalData.isLoggedIn || !app.globalData.userInfo) {
-      logger.warn('用户未登录，无法加载统计数据')
-      return
-    }
 
-    const userId = app.globalData.userInfo.id
-
-    wx.request({
-      url: `${app.globalData.apiBaseUrl}/content-creator/users/${userId}/dashboard`,
-      method: 'GET',
-      header: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${wx.getStorageSync('access_token')}`
-      },
-      success: (res) => {
-        logger.log('仪表板统计响应:', res)
-        
-        // Handle new ApiResponse format: {success, message, data, error}
-        const isApiSuccess = res.data && res.data.success === true;
-        const responseData = res.data && res.data.data ? res.data.data : {};
-        
-        if (res.statusCode === 200 && isApiSuccess) {
-          const av = responseData.assignedTemplates || 0
-          const rv = responseData.recordedVideos || 0
-          const pv = responseData.publishedVideos || 0
-          this.setData({
-            stats: {
-              availableTemplates: av,
-              recordedVideos: rv,
-              publishedVideos: pv
-            },
-            availableDigitClass: this.computeDigitClass(av),
-            recordedDigitClass: this.computeDigitClass(rv),
-            publishedDigitClass: this.computeDigitClass(pv)
-          })
-        } else {
-          const errorMessage = res.data && res.data.error ? res.data.error : '获取统计数据失败';
-          logger.warn('获取统计数据失败:', errorMessage)
-      }
-      },
-      fail: (err) => {
-        logger.error('获取统计数据请求失败:', err)
-      }
-    })
-  },
-
-  // 计算数字宽度class
-  computeDigitClass(n) {
-    const len = String(Math.abs(parseInt(n || 0, 10))).length
-    if (len <= 1) return 'num-1w'
-    if (len === 2) return 'num-2w'
-    return 'num-3w'
-  },
 
   // 根据标题长度决定字号（两行内尽量容纳）
   computeTitleClass(title) {
