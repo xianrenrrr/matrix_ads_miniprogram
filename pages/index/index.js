@@ -115,15 +115,22 @@ Page({
   loadAllTemplates() {
     const app = getApp()
     if (!app.globalData.templates || !app.globalData.templates.length) return
+    
+    // New API returns lightweight format with duration, sceneCount, thumbnail already included
     const templates = app.globalData.templates.map(t => ({
       ...t,
-      duration: t.totalVideoLength,
-      sceneCount: (t.scenes && t.scenes.length) || 0,
-      thumbnail: (t.scenes && t.scenes[0] && t.scenes[0].exampleFrame) || '/assets/default-template.jpg',
+      // Use publishStatus from API if available, otherwise fetch it
+      _publishStatus: t.publishStatus || null,
       _titleClass: this.computeTitleClass(t.templateTitle)
     }))
+    
     this.setData({ allTemplates: templates })
-    this.populatePublishStatusForTemplates(templates)
+    
+    // Only fetch publish status for templates that don't have it yet
+    const templatesNeedingStatus = templates.filter(t => !t._publishStatus)
+    if (templatesNeedingStatus.length > 0) {
+      this.populatePublishStatusForTemplates(templates)
+    }
   },
 
   // For each template, query submitted-videos composite id to get publishStatus and compiledVideoUrl
