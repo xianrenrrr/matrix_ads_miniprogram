@@ -37,15 +37,16 @@ Page({
 
     this.setData({
       isLoggedIn: app.globalData.isLoggedIn,
-      userInfo: app.globalData.userInfo,
-      loading: false
+      userInfo: app.globalData.userInfo
     })
     
     if (app.globalData.isLoggedIn && app.globalData.userInfo) {
+      // Load templates first, then display them
       this.loadAssignedTemplates()
+    } else {
+      // Not logged in, stop loading
+      this.setData({ loading: false })
     }
-    // Always load all templates for the "全部模版" section
-    this.loadAllTemplates()
   },
 
   // 刷新数据
@@ -91,6 +92,9 @@ Page({
           
           // 更新全局模板数据
           app.globalData.templates = templates
+          
+          // Now load all templates for display
+          this.loadAllTemplates()
         } else {
           const errorMessage = res.data && res.data.error ? res.data.error : '获取模板失败';
           logger.warn('获取模板失败:', errorMessage)
@@ -107,7 +111,10 @@ Page({
           icon: 'none'
         })
       },
-      complete: () => { this._loadingAssigned = false }
+      complete: () => { 
+        this._loadingAssigned = false
+        this.setData({ loading: false })
+      }
     })
   },
 
@@ -119,6 +126,10 @@ Page({
     // New API returns lightweight format with duration, sceneCount, thumbnail already included
     const templates = app.globalData.templates.map(t => ({
       ...t,
+      // Convert relative thumbnail URL to full URL
+      thumbnail: t.thumbnail && t.thumbnail.startsWith('/') 
+        ? app.globalData.apiBaseUrl + t.thumbnail 
+        : t.thumbnail,
       // Use publishStatus from API if available, otherwise fetch it
       _publishStatus: t.publishStatus || null,
       _titleClass: this.computeTitleClass(t.templateTitle)
@@ -188,8 +199,8 @@ Page({
     const template = templates.find(t => t.id === templateId)
     
     if (template) {
-      // 保存选中的模板
-      app.globalData.currentTemplate = template
+      // Don't set currentTemplate here - let scene-selection fetch full template data
+      // The lightweight template doesn't have scenes array
       
       // 跳转到场景选择页面
       wx.navigateTo({
