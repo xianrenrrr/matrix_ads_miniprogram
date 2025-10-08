@@ -223,13 +223,21 @@ Page({
             if (scene && scene.sceneNumber) {
               // Pre-compute similarity score percentage
               var similarityPercent = null;
+              var isCalculating = false;
               if (scene.similarityScore != null) {
                 var raw = scene.similarityScore;
-                similarityPercent = raw <= 1 ? Math.round(raw * 100) : Math.round(raw);
+                if (raw < 0) {
+                  // -1 means AI is still calculating
+                  isCalculating = true;
+                  similarityPercent = null;
+                } else {
+                  similarityPercent = raw <= 1 ? Math.round(raw * 100) : Math.round(raw);
+                }
               }
 
               // Add computed values to scene object
               scene.similarityPercent = similarityPercent;
+              scene.isCalculating = isCalculating;
               scene.hasScore = similarityPercent != null;
 
               // Normalize status: check status field first
@@ -516,8 +524,13 @@ Page({
     // Show similarity score
     if (submission.similarityScore !== undefined) {
       const raw = submission.similarityScore || 0;
-      const similarity = raw <= 1 ? Math.round(raw * 100) : Math.round(raw);
-      message += t('aiSimilarity') + ': ' + similarity + '%\n\n';
+      if (raw < 0) {
+        // AI is still calculating
+        message += t('aiSimilarity') + ': 正在计算...\n\n';
+      } else {
+        const similarity = raw <= 1 ? Math.round(raw * 100) : Math.round(raw);
+        message += t('aiSimilarity') + ': ' + similarity + '%\n\n';
+      }
     }
 
     // Show AI suggestions

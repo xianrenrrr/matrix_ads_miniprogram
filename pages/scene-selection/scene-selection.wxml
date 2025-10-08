@@ -66,8 +66,9 @@
             <!-- Scene Header -->
             <view class="scene-header">
           <!-- Similarity in header top-right (replaces old mark) -->
-          <view class="status-indicator" wx:if="{{submissions[index + 1] && submissions[index + 1].hasScore}}">
-            <text class="similarity-badge">视频相似度: {{submissions[index + 1].similarityPercent}}%</text>
+          <view class="status-indicator" wx:if="{{submissions[index + 1] && (submissions[index + 1].hasScore || submissions[index + 1].isCalculating)}}">
+            <text class="similarity-badge" wx:if="{{submissions[index + 1].isCalculating}}">视频相似度: 正在计算...</text>
+            <text class="similarity-badge" wx:else>视频相似度: {{submissions[index + 1].similarityPercent}}%</text>
           </view>
           <view class="scene-number-container">
             <view class="scene-number">{{index + 1}}</view>
