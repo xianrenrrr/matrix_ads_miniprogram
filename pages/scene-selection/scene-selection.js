@@ -526,7 +526,7 @@ Page({
       const raw = submission.similarityScore || 0;
       if (raw < 0) {
         // AI is still calculating
-        message += t('aiSimilarity') + ': 正在计算...\n\n';
+        message += t('aiSimilarity') + ': ..\n\n';
       } else {
         const similarity = raw <= 1 ? Math.round(raw * 100) : Math.round(raw);
         message += t('aiSimilarity') + ': ' + similarity + '%\n\n';

@@ -726,7 +726,7 @@ Page({
             console.log('Upload successful, showing AI feedback')
             wx.showModal({
               title: '上传成功',
-              content: '后台正在计算视频相似度，请继续录制下一个场景',
+              content: '正在AI处理，请继续录制下一个场景',
               showCancel: false,
               confirmText: '好的',
               success: () => {
