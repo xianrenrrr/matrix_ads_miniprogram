@@ -32,19 +32,20 @@ Page({
   // 初始化页面
   initPage() {
     const app = getApp()
-    
+
     // 检查登录状态（当前不强制跳转，便于直接查看首页UI）
 
     this.setData({
       isLoggedIn: app.globalData.isLoggedIn,
       userInfo: app.globalData.userInfo
+      // Keep loading: true until templates are loaded
     })
-    
+
     if (app.globalData.isLoggedIn && app.globalData.userInfo) {
-      // Load templates first, then display them
+      // Load templates, then show page
       this.loadAssignedTemplates()
     } else {
-      // Not logged in, stop loading
+      // Not logged in, show page immediately
       this.setData({ loading: false })
     }
   },
@@ -77,22 +78,22 @@ Page({
       },
       success: (res) => {
         logger.log('分配模板响应:', res)
-        
+
         // Handle new ApiResponse format: {success, message, data, error}
         const isApiSuccess = res.data && res.data.success === true;
         const responseData = res.data && res.data.data ? res.data.data : [];
-        
+
         if (res.statusCode === 200 && isApiSuccess) {
           const templates = responseData
           logger.log('获取到的模板数量:', templates.length)
-          
+
           this.setData({
             recentTemplates: templates.slice(0, 3) // 显示最近3个模板
           })
-          
+
           // 更新全局模板数据
           app.globalData.templates = templates
-          
+
           // Now load all templates for display
           this.loadAllTemplates()
         } else {
@@ -111,7 +112,7 @@ Page({
           icon: 'none'
         })
       },
-      complete: () => { 
+      complete: () => {
         this._loadingAssigned = false
         this.setData({ loading: false })
       }
@@ -122,21 +123,21 @@ Page({
   loadAllTemplates() {
     const app = getApp()
     if (!app.globalData.templates || !app.globalData.templates.length) return
-    
+
     // New API returns lightweight format with duration, sceneCount, thumbnail already included
     const templates = app.globalData.templates.map(t => ({
       ...t,
       // Convert relative thumbnail URL to full URL
-      thumbnail: t.thumbnail && t.thumbnail.startsWith('/') 
-        ? app.globalData.apiBaseUrl + t.thumbnail 
+      thumbnail: t.thumbnail && t.thumbnail.startsWith('/')
+        ? app.globalData.apiBaseUrl + t.thumbnail
         : t.thumbnail,
       // Use publishStatus from API if available, otherwise fetch it
       _publishStatus: t.publishStatus || null,
       _titleClass: this.computeTitleClass(t.templateTitle)
     }))
-    
+
     this.setData({ allTemplates: templates })
-    
+
     // Only fetch publish status for templates that don't have it yet
     const templatesNeedingStatus = templates.filter(t => !t._publishStatus)
     if (templatesNeedingStatus.length > 0) {
@@ -193,15 +194,15 @@ Page({
   selectTemplate(e) {
     const templateId = e.currentTarget.dataset.id
     logger.log('选择模板ID:', templateId)
-    
+
     const app = getApp()
     const templates = app.globalData.templates || []
     const template = templates.find(t => t.id === templateId)
-    
+
     if (template) {
       // Don't set currentTemplate here - let scene-selection fetch full template data
       // The lightweight template doesn't have scenes array
-      
+
       // 跳转到场景选择页面
       wx.navigateTo({
         url: `/pages/scene-selection/scene-selection?templateId=${template.id}&userId=${app.globalData.userInfo.id}`
