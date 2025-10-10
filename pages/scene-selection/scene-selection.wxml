@@ -99,7 +99,7 @@
                   catch:tap="viewRecorded">
                 </custom-button>
                 <custom-button
-                  wx:if="{{template && (videoUrl || template.videoUrl)}}"
+                  wx:if="{{template && (videoUrl || template.videoUrl || (templateType === 'manual' && item.videoId))}}"
                   text="案例"
                   type="outline"
                   size="small"

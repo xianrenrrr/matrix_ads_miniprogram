@@ -793,7 +793,7 @@ Page({
   // NEW: Fetch individual scene video URL (for manual templates)
   fetchSceneVideoUrl: function (videoId, callback) {
     var token = wx.getStorageSync('access_token');
-    var streamUrl = config.API_BASE_URL + '/content-creator/videos/' + videoId + '/stream';
+    var streamUrl = config.API_BASE_URL + '/content-manager/videos/' + videoId + '/stream';
 
     console.log('Fetching scene video URL for videoId:', videoId);
 
