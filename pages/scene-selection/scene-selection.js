@@ -19,6 +19,7 @@ Page({
     progress: null,
     loading: true,
     videoUrl: null,
+    templateType: null, // NEW: 'ai' or 'manual'
     // Sanitized template fields for display (avoid leading colons)
     templateDisplay: null,
     // AI Suggestions modal state
@@ -124,19 +125,26 @@ Page({
             return scene;
           });
 
+          // Detect template type
+          const templateType = self.getTemplateType(responseData);
+          console.log('Detected template type:', templateType);
+
           self.setData({
             template: responseData,
             scenes: processedScenes,
             loading: false,
+            templateType: templateType,
             templateDisplay: self.buildTemplateDisplay(responseData)
           });
 
-          // Fetch video URL if template has videoId
-          if (responseData.videoId) {
-            console.log('Fetching video URL for videoId:', responseData.videoId);
+          // Fetch video URL if AI template (has template.videoId)
+          if (templateType === 'ai' && responseData.videoId) {
+            console.log('AI template: Fetching template video URL for videoId:', responseData.videoId);
             self.fetchVideoUrl(responseData.videoId);
+          } else if (templateType === 'manual') {
+            console.log('Manual template: Will fetch per-scene videos on-demand');
           } else {
-            console.warn('Template has no videoId, cannot fetch video URL');
+            console.warn('Unknown template type or missing videoId');
           }
         } else {
           const errorMessage = response.data && response.data.error ? response.data.error : t('templateNotFoundOrNoScenes');
@@ -166,6 +174,26 @@ Page({
   stripLeading: function (str) {
     if (!str || typeof str !== 'string') return str;
     return str.replace(/^[\s:：]+/, '');
+  },
+
+  // NEW: Detect template type (AI vs Manual)
+  getTemplateType: function (template) {
+    if (!template) return 'unknown';
+
+    // AI Template: has template.videoId
+    if (template.videoId) {
+      return 'ai';
+    }
+
+    // Manual Template: scenes have individual videoIds
+    if (template.scenes && template.scenes.length > 0) {
+      const firstScene = template.scenes[0];
+      if (firstScene && firstScene.videoId) {
+        return 'manual';
+      }
+    }
+
+    return 'unknown';
   },
 
   // Build sanitized fields for display card
@@ -747,60 +775,163 @@ Page({
     });
   },
 
+  // NEW: Fetch individual scene video URL (for manual templates)
+  fetchSceneVideoUrl: function (videoId, callback) {
+    var token = wx.getStorageSync('access_token');
+    var streamUrl = config.API_BASE_URL + '/content-creator/videos/' + videoId + '/stream';
+
+    console.log('Fetching scene video URL for videoId:', videoId);
+
+    wx.request({
+      url: streamUrl,
+      method: 'GET',
+      header: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      },
+      success: function (response) {
+        console.log('Scene video stream response:', response);
+
+        // Handle ApiResponse format: {success, message, data, error}
+        const isApiSuccess = response.data && response.data.success === true;
+        const signedUrl = response.data && response.data.data ? response.data.data : null;
+
+        if (response.statusCode === 200 && isApiSuccess && signedUrl) {
+          console.log('Got scene video URL:', signedUrl);
+          callback(signedUrl);
+        } else {
+          console.error('Failed to get scene video URL');
+          callback(null);
+        }
+      },
+      fail: function (error) {
+        console.error('Error fetching scene video URL:', error);
+        callback(null);
+      }
+    });
+  },
+
   // Play scene example video segment
   playSceneExample: function (event) {
+    var self = this;
     var dataset = event.detail.dataset || event.currentTarget.dataset;
     var sceneIndex = parseInt(dataset.index);
     var startTime = parseInt(dataset.startTime) || 0;
     var endTime = parseInt(dataset.endTime) || 3000;
 
-    console.log('[DEBUG 2025-09-02] playSceneExample - sceneIndex:', sceneIndex);
-    console.log('[DEBUG 2025-09-02] playSceneExample - scenes array:', this.data.scenes);
-    console.log('[DEBUG 2025-09-02] playSceneExample - scenes length:', this.data.scenes ? this.data.scenes.length : 'null');
+    console.log('[DEBUG] playSceneExample - sceneIndex:', sceneIndex);
+    console.log('[DEBUG] playSceneExample - templateType:', this.data.templateType);
 
     if (!this.data.scenes || sceneIndex >= this.data.scenes.length || sceneIndex < 0) {
-      console.log('Scene index out of bounds:', sceneIndex, 'scenes length:', this.data.scenes ? this.data.scenes.length : 0);
+      console.log('Scene index out of bounds:', sceneIndex);
       return;
     }
 
     var scene = this.data.scenes[sceneIndex];
-    var template = this.data.template;
-    var videoUrl = this.data.videoUrl || (template && template.videoUrl);
-
-    console.log('Scene object:', scene);
-
     if (!scene) {
       console.log('Scene object is null/undefined for index:', sceneIndex);
       return;
     }
 
-    if (!videoUrl) {
-      wx.showToast({
-        title: '视频链接正在获取中...',
-        icon: 'loading',
-        duration: 1500
+    var templateType = this.data.templateType;
+
+    if (templateType === 'ai') {
+      // AI Template: Use template video with time segments
+      var videoUrl = this.data.videoUrl;
+
+      if (!videoUrl) {
+        wx.showToast({
+          title: '视频加载中...',
+          icon: 'loading',
+          duration: 1500
+        });
+        return;
+      }
+
+      console.log('AI template: Playing segment', startTime, '-', endTime, 'ms');
+
+      this.setData({
+        currentExampleScene: {
+          index: sceneIndex,
+          title: scene.sceneTitle || '场景 ' + (sceneIndex + 1),
+          startTimeMs: startTime,
+          endTimeMs: endTime,
+          videoUrl: videoUrl,
+          type: 'ai'
+        },
+        showExampleModal: true
       });
-      return;
+
+      setTimeout(() => this.playExampleVideo(), 100);
+
+    } else if (templateType === 'manual') {
+      // Manual Template: Fetch and play scene's individual video
+      if (!scene.videoId) {
+        wx.showToast({
+          title: '该场景暂无示例视频',
+          icon: 'none'
+        });
+        return;
+      }
+
+      // Check if we already have this scene's video URL cached
+      var cacheKey = 'sceneVideo_' + scene.videoId;
+      if (this.data[cacheKey]) {
+        // Use cached video URL
+        console.log('Manual template: Using cached video for scene', sceneIndex);
+
+        this.setData({
+          currentExampleScene: {
+            index: sceneIndex,
+            title: scene.sceneTitle || '场景 ' + (sceneIndex + 1),
+            startTimeMs: 0,
+            endTimeMs: 0,  // 0 means play to end
+            videoUrl: this.data[cacheKey],
+            type: 'manual'
+          },
+          showExampleModal: true
+        });
+
+        setTimeout(() => this.playExampleVideo(), 100);
+
+      } else {
+        // Fetch scene video URL
+        console.log('Manual template: Fetching video for scene', sceneIndex, 'videoId:', scene.videoId);
+        wx.showLoading({ title: '加载场景视频...' });
+
+        this.fetchSceneVideoUrl(scene.videoId, function (videoUrl) {
+          wx.hideLoading();
+
+          if (videoUrl) {
+            // Cache the video URL
+            var updateData = {};
+            updateData[cacheKey] = videoUrl;
+            updateData.currentExampleScene = {
+              index: sceneIndex,
+              title: scene.sceneTitle || '场景 ' + (sceneIndex + 1),
+              startTimeMs: 0,
+              endTimeMs: 0,
+              videoUrl: videoUrl,
+              type: 'manual'
+            };
+            updateData.showExampleModal = true;
+
+            self.setData(updateData);
+            setTimeout(() => self.playExampleVideo(), 100);
+          } else {
+            wx.showToast({
+              title: '视频加载失败',
+              icon: 'error'
+            });
+          }
+        });
+      }
+    } else {
+      wx.showToast({
+        title: '模板类型未知',
+        icon: 'none'
+      });
     }
-
-    console.log('Playing scene example with signed URL:', videoUrl);
-
-    // Store current scene info for modal
-    this.setData({
-      currentExampleScene: {
-        index: sceneIndex,
-        title: (scene && scene.sceneTitle) || '场景 ' + (sceneIndex + 1),
-        startTimeMs: startTime,
-        endTimeMs: endTime,
-        videoUrl: videoUrl
-      },
-      showExampleModal: true
-    });
-
-    // Auto-play video after modal shows
-    setTimeout(() => {
-      this.playExampleVideo();
-    }, 100);
   },
 
   // Play the example video from start time
@@ -825,12 +956,15 @@ Page({
   // Handle example video time update (stop at end, no loop)
   onExampleVideoTimeUpdate: function (e) {
     if (!this.data.currentExampleScene) return;
-    const endTime = (this.data.currentExampleScene.endTimeMs || 0) / 1000;
-    // Only enforce stop when an explicit endTime is provided (> 0)
-    if (endTime > 0 && e.detail.currentTime >= endTime) {
-      // 仅暂停，不再自动回到片段开始，避免进度条在起点与终点来回跳动
+
+    const scene = this.data.currentExampleScene;
+    const endTime = (scene.endTimeMs || 0) / 1000;
+
+    // AI template: Stop at scene end time
+    if (scene.type === 'ai' && endTime > 0 && e.detail.currentTime >= endTime) {
       try { wx.createVideoContext('exampleVideo').pause(); } catch (err) { }
     }
+    // Manual template: Let video play to natural end (no stopping)
   },
 
   // Close example modal
