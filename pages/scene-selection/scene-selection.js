@@ -178,21 +178,36 @@ Page({
 
   // NEW: Detect template type (AI vs Manual)
   getTemplateType: function (template) {
-    if (!template) return 'unknown';
+    console.log('=== getTemplateType DEBUG ===');
+    console.log('Template object:', JSON.stringify(template, null, 2));
+
+    if (!template) {
+      console.log('Result: unknown (no template)');
+      return 'unknown';
+    }
+
+    console.log('template.videoId:', template.videoId);
 
     // AI Template: has template.videoId
     if (template.videoId) {
+      console.log('Result: AI (has template.videoId)');
       return 'ai';
     }
 
     // Manual Template: scenes have individual videoIds
     if (template.scenes && template.scenes.length > 0) {
       const firstScene = template.scenes[0];
+      console.log('First scene:', JSON.stringify(firstScene, null, 2));
+      console.log('First scene videoId:', firstScene ? firstScene.videoId : 'N/A');
+
       if (firstScene && firstScene.videoId) {
+        console.log('Result: MANUAL (scene has videoId)');
         return 'manual';
       }
     }
 
+    console.log('Result: unknown (no videoId found)');
+    console.log('===========================');
     return 'unknown';
   },
 
