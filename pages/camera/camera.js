@@ -651,7 +651,13 @@ Page({
     cameraContext.stopRecord({
       success: (res) => {
         console.log('录制完成', res)
-        this.setData({ isRecording: false })
+        this.setData({ 
+          isRecording: false,
+          // Close all overlays when recording stops
+          showOverlay: false,
+          showKtv: false,
+          showHints: false
+        })
         this.stopTimer()
 
         // 保存录制的视频
@@ -659,7 +665,13 @@ Page({
       },
       fail: (err) => {
         console.error('停止录制失败', err)
-        this.setData({ isRecording: false })
+        this.setData({ 
+          isRecording: false,
+          // Close all overlays even on failure
+          showOverlay: false,
+          showKtv: false,
+          showHints: false
+        })
         this.stopTimer()
       }
     })

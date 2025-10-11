@@ -28,6 +28,7 @@ Page({
     currentAISceneIndex: null,
     publishStatus: null,
     compiledVideoUrl: null,
+    hasCalculatingScores: false,  // Track if any scores are being calculated
     initialShowDone: false,
     // Recorded video preview modal
     showRecordedModal: false,
@@ -315,15 +316,28 @@ Page({
             }
           });
 
+          // Check if any scenes are calculating
+          var hasCalculating = Object.values(sceneMap).some(function (scene) {
+            return scene.isCalculating;
+          });
+
           self.setData({
             submissions: sceneMap,
             progress: progress,
             publishStatus: publishStatus,
-            compiledVideoUrl: compiledVideoUrl
+            compiledVideoUrl: compiledVideoUrl,
+            hasCalculatingScores: hasCalculating
           });
 
           // Update button states based on submissions
           self.updateButtonStates();
+
+          // Start polling if any scores are being calculated
+          if (hasCalculating) {
+            self.startScorePolling();
+          } else {
+            self.stopScorePolling();
+          }
         } else if (response.statusCode === 404) {
           logger.log('No submission found for this template - this is normal for new users');
           // Set empty data for new template (no submissions yet)
@@ -1000,5 +1014,36 @@ Page({
       title: '视频加载失败',
       icon: 'none'
     });
+  },
+
+  // Start polling for AI score updates
+  startScorePolling: function () {
+    // Clear any existing timer
+    this.stopScorePolling();
+
+    var self = this;
+    // Poll every 10 seconds
+    this._scorePollingTimer = setInterval(function () {
+      console.log('Polling for AI score updates...');
+      self.loadProgress();
+    }, 10000);
+  },
+
+  // Stop polling
+  stopScorePolling: function () {
+    if (this._scorePollingTimer) {
+      clearInterval(this._scorePollingTimer);
+      this._scorePollingTimer = null;
+    }
+  },
+
+  // Clean up on page unload
+  onUnload: function () {
+    this.stopScorePolling();
+  },
+
+  // Stop polling when page is hidden
+  onHide: function () {
+    this.stopScorePolling();
   }
 });
