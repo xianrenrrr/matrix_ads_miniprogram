@@ -179,7 +179,7 @@ Page({
       backgroundInstructions: strip(currentScene.backgroundInstructions || ''),
       cameraInstructions: strip(currentScene.specificCameraInstructions || ''),
       movementInstructions: strip(currentScene.movementInstructions || ''),
-      deviceOrientationText: strip(currentScene.deviceOrientation || ''),
+      deviceOrientationText: this.getOrientationText(currentScene.sourceAspect || '9:16'),
       audioNotesText: strip(currentScene.audioNotes || ''),
       personPresentText: currentScene.presenceOfPerson ? t('yes') : t('no')
     }
@@ -415,6 +415,22 @@ Page({
       return 'front'
     }
     return 'back'  // 默认后置摄像头
+  },
+
+  // 根据宽高比确定拍摄方向
+  getOrientationText(sourceAspect) {
+    if (!sourceAspect) return '竖拍'
+    
+    const parts = sourceAspect.split(':')
+    if (parts.length !== 2) return '竖拍'
+    
+    const width = parseFloat(parts[0])
+    const height = parseFloat(parts[1])
+    
+    if (isNaN(width) || isNaN(height)) return '竖拍'
+    
+    // 如果宽度 > 高度，横拍；否则竖拍
+    return width > height ? '横拍' : '竖拍'
   },
 
   /**
