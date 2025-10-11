@@ -41,7 +41,8 @@
         bindtap="selectTemplate"
       >
         <view class="tpl-thumb">
-          <image src="{{item.thumbnail || '/assets/default-template.jpg'}}" mode="aspectFill" class="tpl-thumb-img" />
+          <image wx:if="{{item.thumbnail}}" src="{{item.thumbnail}}" mode="aspectFill" class="tpl-thumb-img" />
+          <view wx:else class="tpl-thumb-placeholder"></view>
         </view>
         <view class="tpl-title {{item._titleClass}}">{{item.templateTitle || '未命名模板'}}</view>
         <view class="tpl-meta">

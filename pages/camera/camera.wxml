@@ -79,13 +79,13 @@
       </view>
       <view class="control-btn" bindtap="toggleHints">
         <text class="control-icon">{{showHints ? '>' : '<'}}</text>
-        <text class="control-label">提示词</text>
+        <text class="control-label">指导</text>
       </view>
     </view>
   </camera>
   </view> <!-- end of previewContainer -->
 
-  <!-- 提示词侧边栏 -->
+  <!-- 指导侧边栏 -->
   <view class="hints-sidebar {{showHints ? 'show' : ''}}">
     <view class="hints-content">
       <view class="hints-section">

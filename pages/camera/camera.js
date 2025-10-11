@@ -21,7 +21,7 @@ Page({
     showScriptSidebar: false, // 显示脚本侧边栏
     showRecordingCompleteModal: false, // 显示录制完成弹窗
     showUploadFailureModal: false, // 显示上传失败弹窗
-    showHints: false, // 显示提示词
+    showHints: false, // 显示指导
     uploadErrorMessage: '', // 上传错误信息
     pendingUploadData: null, // 待上传的数据
     // 九宫格网格
@@ -420,15 +420,15 @@ Page({
   // 根据宽高比确定拍摄方向
   getOrientationText(sourceAspect) {
     if (!sourceAspect) return '竖拍'
-    
+
     const parts = sourceAspect.split(':')
     if (parts.length !== 2) return '竖拍'
-    
+
     const width = parseFloat(parts[0])
     const height = parseFloat(parts[1])
-    
+
     if (isNaN(width) || isNaN(height)) return '竖拍'
-    
+
     // 如果宽度 > 高度，横拍；否则竖拍
     return width > height ? '横拍' : '竖拍'
   },
@@ -596,8 +596,21 @@ Page({
           return
         }
 
-        // Permissions ok, start record
+        // Permissions ok, start record with timeout
+        const currentScene = this.data.selectedTemplate && this.data.selectedTemplate.scenes && this.data.selectedTemplate.scenes[this.data.currentScene]
+        const sceneMaxTime = (currentScene && currentScene.sceneDurationInSeconds) || this.data.maxRecordTime
+        
         cameraContext.startRecord({
+          timeout: sceneMaxTime * 1000,  // Set max recording duration in milliseconds
+          timeoutCallback: (res) => {
+            console.log('录制时间到达上限，自动停止', res)
+            this.setData({ isRecording: false })
+            this.stopTimer()
+            // Save the recorded video
+            if (res.tempVideoPath) {
+              this.saveRecordedVideo(res.tempVideoPath)
+            }
+          },
           success: () => {
             console.log('开始录制')
             this.setData({
@@ -866,7 +879,7 @@ Page({
     overlayCtx.draw()
   },
 
-  // 切换提示词显示
+  // 切换指导显示
   toggleHints() {
     this.setData({ showHints: !this.data.showHints })
     console.log('Hints toggled to:', this.data.showHints)
@@ -880,7 +893,10 @@ Page({
   // 顶部按钮：切换KTV脚本显示
   toggleKtv() {
     const next = !this.data.showKtv
-    this.setData({ showKtv: next })
+    this.setData({ 
+      showKtv: next,
+      showHints: next ? false : this.data.showHints  // Auto-close hints when opening script
+    })
     if (next) this.updateKtvProgress()
   },
 
@@ -945,15 +961,17 @@ Page({
 
     this.timer = setInterval(() => {
       const recordTime = this.data.recordTime + 1
-      this.setData({ recordTime })
-      // Update KTV highlight on each tick
-      this.updateKtvProgress()
-
-      // 自动停止录制并显示弹窗（对于大于1秒的场景）
+      
+      // 自动停止录制（对于大于1秒的场景）
       if (recordTime >= sceneMaxTime && sceneMaxTime > 1) {
         console.log(`场景 ${this.data.currentScene + 1} 录制时间到达 ${sceneMaxTime} 秒，自动停止`)
         this.stopRecording()
+        return  // Stop here, don't update time beyond max
       }
+      
+      this.setData({ recordTime })
+      // Update KTV highlight on each tick
+      this.updateKtvProgress()
     }, 1000)
   },
 

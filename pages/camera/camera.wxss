@@ -329,7 +329,7 @@
   color: #9ca3af;
 }
 
-/* 提示词侧边栏 */
+/* 指导侧边栏 */
 .hints-sidebar {
   position: absolute;
   top: 0;
