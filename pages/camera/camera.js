@@ -599,7 +599,7 @@ Page({
         // Permissions ok, start record with timeout
         const currentScene = this.data.selectedTemplate && this.data.selectedTemplate.scenes && this.data.selectedTemplate.scenes[this.data.currentScene]
         const sceneMaxTime = (currentScene && currentScene.sceneDurationInSeconds) || this.data.maxRecordTime
-        
+
         cameraContext.startRecord({
           timeout: sceneMaxTime * 1000,  // Set max recording duration in milliseconds
           timeoutCallback: (res) => {
@@ -893,7 +893,7 @@ Page({
   // 顶部按钮：切换KTV脚本显示
   toggleKtv() {
     const next = !this.data.showKtv
-    this.setData({ 
+    this.setData({
       showKtv: next,
       showHints: next ? false : this.data.showHints  // Auto-close hints when opening script
     })
@@ -961,17 +961,17 @@ Page({
 
     this.timer = setInterval(() => {
       const recordTime = this.data.recordTime + 1
-      
-      // 自动停止录制（对于大于1秒的场景）
-      if (recordTime >= sceneMaxTime && sceneMaxTime > 1) {
-        console.log(`场景 ${this.data.currentScene + 1} 录制时间到达 ${sceneMaxTime} 秒，自动停止`)
-        this.stopRecording()
-        return  // Stop here, don't update time beyond max
-      }
-      
+
+      // Update time first
       this.setData({ recordTime })
       // Update KTV highlight on each tick
       this.updateKtvProgress()
+
+      // 自动停止录制（对于大于1秒的场景）- check AFTER updating time
+      if (recordTime >= sceneMaxTime && sceneMaxTime > 1) {
+        console.log(`场景 ${this.data.currentScene + 1} 录制时间到达 ${sceneMaxTime} 秒，自动停止`)
+        this.stopRecording()
+      }
     }, 1000)
   },
 

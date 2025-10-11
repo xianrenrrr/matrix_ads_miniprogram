@@ -439,7 +439,7 @@ Page({
     });
   },
 
-  // 查看录制：固定用 sceneId 调后端取视频地址，再用“案例”样式弹窗播放
+  // 查看录制：固定用 sceneId 调后端取视频地址，再用“模版”样式弹窗播放
   viewRecorded: function (event) {
     var sceneIndex = parseInt((event.currentTarget.dataset || {}).index);
     var sceneNumber = sceneIndex + 1;

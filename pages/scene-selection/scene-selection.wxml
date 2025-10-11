@@ -87,7 +87,7 @@
 
             <!-- Scene Actions -->
             <view class="scene-actions">
-              <!-- Example column: 查看录制 (top) + 案例 (main) -->
+              <!-- Example column: 查看录制 (top) + 模版 (main) -->
               <view class="btn-wrap example-wrap stacked">
                 <custom-button
                   wx:if="{{submissions[index + 1] && (submissions[index + 1].videoUrl || submissions[index + 1].sceneId)}}"
@@ -100,7 +100,7 @@
                 </custom-button>
                 <custom-button
                   wx:if="{{template && (videoUrl || template.videoUrl || (templateType === 'manual' && item.videoId))}}"
-                  text="案例"
+                  text="模版"
                   type="outline"
                   size="small"
                   ext-class="block-btn"
@@ -166,7 +166,7 @@
     <view class="modal-overlay" bindtap="closeExampleModal"></view>
     <view class="modal-content">
       <view class="modal-header">
-        <text class="modal-title">{{currentExampleScene.title}} - 案例</text>
+        <text class="modal-title">{{currentExampleScene.title}} - 模版</text>
         <view class="close-button" bindtap="closeExampleModal">✕</view>
       </view>
       
