@@ -1,51 +1,63 @@
-# Xpectra AI WeChat Mini Program
+# Matrix Ads Mini Program
 
-## Project Overview
-This is a WeChat Mini Program for video recording functionality within the Xpectra AI platform. Users can record guided videos using templates created by content managers.
+WeChat Mini Program for content creators to record and submit videos.
 
-## Architecture
+## Structure
+
 ```
-matrix_ads_miniprogram/
-├── app.js                    # Mini program entry point
-├── app.json                  # Global configuration
-├── app.wxss                  # Global styles
-├── pages/                    # Page components
-│   ├── index/               # Home page
-│   ├── templates/           # Template selection
-│   ├── camera/              # Camera/recording page
-│   └── profile/             # User profile
-├── components/              # Reusable components
-├── utils/                   # Utility functions
-└── assets/                  # Static resources
+pages/
+├── index/              # Home page with template selection
+├── camera/             # Camera page for recording scenes
+├── scene-selection/    # Scene selection and preview
+├── video-preview/      # Preview recorded video
+├── upload-success/     # Upload confirmation
+├── my-videos/          # User's submitted videos
+├── profile/            # User profile and settings
+└── login/              # Login page
+
+components/             # Reusable components
+utils/                  # Utility functions
+assets/                 # Images and static assets
 ```
 
-## Development Status
-🚧 **Under Development** - Coming September 2024
+## Key Features
 
-## Integration
-- **Backend API**: Connects to `matrix_ads_backend` for template data
-- **Storage**: Uses Firebase Storage for video uploads
-- **Authentication**: Syncs with main platform user accounts
+- **Scene-by-Scene Recording** - Guide users through recording each scene
+- **Real-time Preview** - Preview recorded scenes before submission
+- **AI Scoring** - Get AI similarity scores for submissions
+- **Template Selection** - Browse and select templates to record
 
-## WeChat Mini Program Specific Features
-- **WeChat Camera API**: For video recording
-- **WeChat Storage API**: For local video caching
-- **WeChat Network API**: For backend communication
-- **WeChat User Info**: For authentication integration
+## Development
 
-## Getting Started
-1. Install WeChat Developer Tools
-2. Import this project
-3. Configure API endpoints to match backend
-4. Test in WeChat Developer Tools simulator
-
-## API Endpoints
-- `GET /api/templates` - Fetch available templates
-- `POST /api/videos/upload` - Upload recorded video
-- `GET /api/user/profile` - User authentication data
+1. Install WeChat DevTools
+2. Open this folder in WeChat DevTools
+3. Configure `app.json` with your AppID
+4. Start development
 
 ## Configuration
-Update `utils/config.js` with:
-- Backend API base URL
-- Firebase Storage configuration
-- WeChat Mini Program App ID
+
+Update `app.js` with your backend URL:
+```javascript
+const API_BASE_URL = 'https://your-backend.onrender.com';
+```
+
+## Tech Stack
+
+- **Platform:** WeChat Mini Program
+- **Language:** JavaScript + WXML/WXSS
+- **Features:** Camera API, Video Recording, File Upload
+
+## File Structure
+
+Each page has 3 files:
+- `.js` - Page logic
+- `.wxml` - Page template (HTML-like)
+- `.wxss` - Page styles (CSS-like)
+
+## Known Issues
+
+- No major issues found
+- Well-structured and organized
+- Could benefit from more comments
+
+See `docs/FILE_INVENTORY.md` for complete file listing.
