@@ -5,7 +5,33 @@ Page({
     showAgreementModal: false
   },
 
-  onLoad() {
+  onLoad(options) {
+    console.log('登录页加载，参数:', options)
+    
+    // If there's a scene parameter (QR code scan), ALWAYS redirect to signup
+    // Even existing users need to join the new group via signup flow
+    if (options && options.scene) {
+      console.log('✅ 检测到QR码扫描，重定向到注册页面加入群组:', options.scene)
+      wx.redirectTo({
+        url: `/pages/signup/signup?scene=${options.scene}`
+      })
+      return
+    }
+    
+    // No QR code - check if user is already logged in for normal app launch
+    const token = wx.getStorageSync('access_token')
+    const userInfo = wx.getStorageSync('user_info')
+    
+    if (token && userInfo) {
+      console.log('✅ 用户已登录，重定向到首页')
+      wx.redirectTo({
+        url: '/pages/index/index'
+      })
+      return
+    }
+    
+    console.log('❌ 用户未登录，显示登录页面')
+    
     // Restore agreement state from storage
     const agreed = wx.getStorageSync('terms_agreed') || false
     this.setData({ agreed })

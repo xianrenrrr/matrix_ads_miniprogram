@@ -1,9 +1,9 @@
 {
   "pages": [
+    "pages/login/login",
     "pages/index/index",
     "pages/scene-selection/scene-selection",
     "pages/camera/camera",
-    "pages/login/login",
     "pages/signup/signup",
     "pages/phone-login/phone-login"
   ],
