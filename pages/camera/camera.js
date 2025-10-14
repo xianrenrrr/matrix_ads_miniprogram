@@ -651,7 +651,7 @@ Page({
     cameraContext.stopRecord({
       success: (res) => {
         console.log('录制完成', res)
-        this.setData({ 
+        this.setData({
           isRecording: false,
           // Close all overlays when recording stops
           showOverlay: false,
@@ -665,7 +665,7 @@ Page({
       },
       fail: (err) => {
         console.error('停止录制失败', err)
-        this.setData({ 
+        this.setData({
           isRecording: false,
           // Close all overlays even on failure
           showOverlay: false,
@@ -728,7 +728,7 @@ Page({
 
     console.log('Starting scene upload:', {
       url: config.api.baseUrl + '/content-creator/scenes/upload',
-      templateId: this.data.templateId,
+      assignmentId: this.data.templateId,  // Note: templateId is actually assignment ID
       userId: this.data.userId,
       sceneNumber: recording.sceneNumber,
       filePath: recording.tempPath
@@ -743,7 +743,7 @@ Page({
         'Accept-Language': 'zh-CN,zh;q=0.9'
       },
       formData: {
-        templateId: this.data.templateId,
+        assignmentId: this.data.templateId,  // Note: templateId is actually assignment ID now
         userId: this.data.userId,
         sceneNumber: recording.sceneNumber,
         sceneTitle: recording.sceneTitle || ('Scene ' + recording.sceneNumber)
@@ -974,16 +974,17 @@ Page({
     this.timer = setInterval(() => {
       const recordTime = this.data.recordTime + 1
 
-      // Update time first
+      // 自动停止录制（对于大于1秒的场景）- check BEFORE updating time to prevent overage
+      if (recordTime > sceneMaxTime && sceneMaxTime > 1) {
+        console.log(`场景 ${this.data.currentScene + 1} 录制时间到达 ${sceneMaxTime} 秒，自动停止`)
+        this.stopRecording()
+        return // Exit early to prevent time update
+      }
+
+      // Update time after checking limit
       this.setData({ recordTime })
       // Update KTV highlight on each tick
       this.updateKtvProgress()
-
-      // 自动停止录制（对于大于1秒的场景）- check AFTER updating time
-      if (recordTime >= sceneMaxTime && sceneMaxTime > 1) {
-        console.log(`场景 ${this.data.currentScene + 1} 录制时间到达 ${sceneMaxTime} 秒，自动停止`)
-        this.stopRecording()
-      }
     }, 1000)
   },
 

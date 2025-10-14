@@ -17,21 +17,39 @@ Page({
   onLoad(options) {
     console.log('注册页面加载, 参数:', options)
 
-    // Handle token from QR code scan (direct scan with token)
-    if (options.token) {
-      console.log('通过二维码扫描进入，token:', options.token)
+    // Extract token from scene parameter (WeChat QR code API)
+    let token = null
+    if (options.scene) {
+      console.log('通过scene参数进入，scene:', options.scene)
+      // Parse scene parameter: "token=abc123"
+      const sceneParams = options.scene.split('&')
+      for (const param of sceneParams) {
+        const [key, value] = param.split('=')
+        if (key === 'token') {
+          token = value
+          break
+        }
+      }
+    } else if (options.token) {
+      // Fallback: direct token parameter (for backward compatibility)
+      token = options.token
+    }
+
+    // Handle token from QR code scan
+    if (token) {
+      console.log('通过二维码扫描进入，token:', token)
 
       try {
         // 尝试解析JSON格式的token
-        const inviteData = JSON.parse(decodeURIComponent(options.token))
+        const inviteData = JSON.parse(decodeURIComponent(token))
         this.handleSignupWithInviteData(inviteData)
       } catch (error) {
         console.error('解析token失败:', error)
         // 如果解析失败，当作简单token处理
         this.setData({
           inviteInfo: {
-            token: options.token,
-            inviteToken: options.token,
+            token: token,
+            inviteToken: token,
             groupName: '团队',
             managerName: '管理员',
             isGroupInvite: true

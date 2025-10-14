@@ -47,30 +47,18 @@
         <view class="tpl-title {{item._titleClass}}">{{item.templateTitle || '未命名模板'}}</view>
         <view class="tpl-meta">
           <view class="meta-item"><text class="meta-dot"></text><text>场景{{item.sceneCount || 0}}</text></view>
-          <view class="meta-item"><text class="meta-dot"></text><text>{{item.duration || 0}}秒</text></view>
+          <view class="meta-item"><text class="meta-dot"></text><text>{{item.totalVideoLength || 0}}秒</text></view>
+          <view wx:if="{{item.daysUntilExpiry > 0}}" class="meta-item"><text class="meta-dot"></text><text>剩余{{item.daysUntilExpiry}}天</text></view>
         </view>
         <view class="tpl-actions">
-          <!-- If published: show download; else: start recording -->
-          <block wx:if="{{item._publishStatus === 'published'}}">
           <custom-button
-            text="下载通过视频"
+            text="开始录制"
             type="danger-outline"
             size="default"
             ext-class="block-btn"
-            data-index="{{index}}"
-            catch:tap="downloadPublishedFromCard"
+            data-id="{{item.id}}"
+            catch:tap="selectTemplate"
           />
-          </block>
-          <block wx:else>
-            <custom-button
-              text="开始录制"
-              type="danger-outline"
-              size="default"
-              ext-class="block-btn"
-              data-id="{{item.id}}"
-              catch:tap="selectTemplate"
-            />
-          </block>
         </view>
       </view>
     </view>

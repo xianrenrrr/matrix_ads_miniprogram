@@ -56,7 +56,7 @@ Page({
     this.loadAllTemplates()
   },
 
-  // 加载已分配的模板
+  // 加载已分配的模板（从 assignments）
   loadAssignedTemplates() {
     const app = getApp()
     if (!app.globalData.isLoggedIn || !app.globalData.userInfo) {
@@ -66,11 +66,18 @@ Page({
     if (this._loadingAssigned) return
     this._loadingAssigned = true
 
-    const userId = app.globalData.userInfo.id
-    logger.log('开始加载用户模板，用户ID:', userId)
+    const groupId = app.globalData.userInfo.groupId
+    if (!groupId) {
+      logger.warn('用户没有分组，无法加载模板')
+      this._loadingAssigned = false
+      this.setData({ loading: false })
+      return
+    }
+
+    logger.log('开始加载组模板，组ID:', groupId)
 
     wx.request({
-      url: `${app.globalData.apiBaseUrl}/content-creator/users/${userId}/assigned-templates`,
+      url: `${app.globalData.apiBaseUrl}/content-manager/groups/${groupId}/templates`,
       method: 'GET',
       header: {
         'Content-Type': 'application/json',
@@ -79,16 +86,16 @@ Page({
       success: (res) => {
         logger.log('分配模板响应:', res)
 
-        // Handle new ApiResponse format: {success, message, data, error}
         const isApiSuccess = res.data && res.data.success === true;
         const responseData = res.data && res.data.data ? res.data.data : [];
 
         if (res.statusCode === 200 && isApiSuccess) {
-          const templates = responseData
-          logger.log('获取到的模板数量:', templates.length)
+          // Filter out expired templates
+          const templates = responseData.filter(t => t.status !== 'expired')
+          logger.log('获取到的有效模板数量:', templates.length)
 
           this.setData({
-            recentTemplates: templates.slice(0, 3) // 显示最近3个模板
+            recentTemplates: templates.slice(0, 3)
           })
 
           // 更新全局模板数据
@@ -124,59 +131,22 @@ Page({
     const app = getApp()
     if (!app.globalData.templates || !app.globalData.templates.length) return
 
-    // New API returns lightweight format with duration, sceneCount, thumbnail already included
     const templates = app.globalData.templates.map(t => ({
       ...t,
-      // Convert relative thumbnail URL to full URL
-      thumbnail: t.thumbnail && t.thumbnail.startsWith('/')
-        ? app.globalData.apiBaseUrl + t.thumbnail
-        : t.thumbnail,
-      // Use publishStatus from API if available, otherwise fetch it
+      // Use thumbnailUrl from API and convert to thumbnail for display
+      thumbnail: t.thumbnailUrl && t.thumbnailUrl.startsWith('/')
+        ? app.globalData.apiBaseUrl + t.thumbnailUrl
+        : t.thumbnailUrl,
       _publishStatus: t.publishStatus || null,
       _titleClass: this.computeTitleClass(t.templateTitle)
     }))
 
     this.setData({ allTemplates: templates })
-
-    // Only fetch publish status for templates that don't have it yet
-    const templatesNeedingStatus = templates.filter(t => !t._publishStatus)
-    if (templatesNeedingStatus.length > 0) {
-      this.populatePublishStatusForTemplates(templates)
-    }
   },
 
-  // For each template, query submitted-videos composite id to get publishStatus and compiledVideoUrl
-  populatePublishStatusForTemplates(templates) {
-    const app = getApp()
-    const userId = app.globalData?.userInfo?.id
-    if (!userId || !Array.isArray(templates)) return
-    templates.forEach((tpl, idx) => {
-      const compositeId = `${userId}_${tpl.id}`
-      // If this card already has status, don't refetch; otherwise fetch now
-      if (tpl._publishStatus) return
-      wx.request({
-        url: `${app.globalData.apiBaseUrl}/content-creator/scenes/submitted-videos/${compositeId}`,
-        method: 'GET',
-        header: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${wx.getStorageSync('access_token')}`
-        },
-        success: (res) => {
-          const ok = res.data && res.data.success === true
-          const data = ok && (res.data.data || res.data)
-          if (ok && data) {
-            const publishStatus = data.publishStatus || null
-            const compiledVideoUrl = data.compiledVideoSignedUrl || data.compiledVideoUrl || null
-            const key = `allTemplates[${idx}]`
-            this.setData({
-              [`${key}._publishStatus`]: publishStatus,
-              [`${key}._compiledVideoUrl`]: compiledVideoUrl
-            })
-          }
-        }
-      })
-    })
-  },
+
+
+
 
   // 加载仪表板统计数据
 
@@ -215,53 +185,7 @@ Page({
     }
   },
 
-  // 下载通过视频（从模板卡片）
-  downloadPublishedFromCard(e) {
-    if (this._downloading) return
-    this._downloading = true
-    const idx = e.currentTarget.dataset.index
-    const item = this.data.allTemplates[idx]
-    const url = item && item._compiledVideoUrl
-    if (!url) {
-      wx.showToast({ title: '暂无已发布视频', icon: 'none' })
-      this._downloading = false
-      return
-    }
-    wx.showLoading({ title: '下载中...' })
-    const targetPath = `${wx.env.USER_DATA_PATH}/compiled_${Date.now()}.mp4`
-    wx.downloadFile({
-      url,
-      filePath: targetPath,
-      success: (res) => {
-        const filePath = res.filePath || res.tempFilePath
-        if (res.statusCode !== 200 || !filePath) {
-          wx.hideLoading();
-          wx.showToast({ title: '下载失败', icon: 'none' })
-          this._downloading = false
-          return
-        }
-        wx.saveVideoToPhotosAlbum({
-          filePath,
-          success: () => { wx.hideLoading(); wx.showToast({ title: '保存成功', icon: 'success' }) },
-          fail: (err) => {
-            wx.hideLoading();
-            if (err && /auth/.test(err.errMsg || '')) {
-              wx.showModal({
-                title: '需要相册权限',
-                content: '请在设置中允许保存到相册后重试',
-                success: (r) => { if (r.confirm) wx.openSetting({}) }
-              })
-            } else {
-              wx.showToast({ title: '保存失败', icon: 'none' })
-            }
-            this._downloading = false
-          }
-        })
-      },
-      fail: () => { wx.hideLoading(); wx.showToast({ title: '下载失败', icon: 'none' }); this._downloading = false },
-      complete: () => { this._downloading = false }
-    })
-  },
+
 
   // 登录
   handleLogin() {
