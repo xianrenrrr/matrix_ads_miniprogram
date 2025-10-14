@@ -21,11 +21,17 @@ Page({
     let token = null
     if (options.scene) {
       console.log('通过scene参数进入，scene:', options.scene)
-      // Parse scene parameter: "token=abc123"
+      // Parse scene parameter: "t=shortToken" or "token=fullToken"
       const sceneParams = options.scene.split('&')
       for (const param of sceneParams) {
         const [key, value] = param.split('=')
-        if (key === 'token') {
+        if (key === 't') {
+          // New format: short token, reconstruct full token
+          token = value.startsWith('g') ? value.replace('g', 'group_') : value
+          console.log('从短token重构:', value, '->', token)
+          break
+        } else if (key === 'token') {
+          // Legacy format: full token
           token = value
           break
         }
