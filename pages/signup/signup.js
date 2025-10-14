@@ -17,16 +17,23 @@ Page({
   onLoad(options) {
     console.log('注册页面加载, 参数:', options)
 
-    // Extract token from scene parameter (WeChat QR code API)
+    // Extract group ID from scene parameter (WeChat QR code API)
+    let groupId = null
     let token = null
+    
     if (options.scene) {
       console.log('通过scene参数进入，scene:', options.scene)
-      // Parse scene parameter: "t=shortToken" or "token=fullToken"
+      // Parse scene parameter: "g=groupId"
       const sceneParams = options.scene.split('&')
       for (const param of sceneParams) {
         const [key, value] = param.split('=')
-        if (key === 't') {
-          // New format: short token, reconstruct full token
+        if (key === 'g') {
+          // New format: group ID
+          groupId = value
+          console.log('从scene提取groupId:', value)
+          break
+        } else if (key === 't') {
+          // Legacy format: short token, reconstruct full token
           token = value.startsWith('g') ? value.replace('g', 'group_') : value
           console.log('从短token重构:', value, '->', token)
           break
@@ -36,31 +43,30 @@ Page({
           break
         }
       }
+    } else if (options.groupId) {
+      // Direct group ID parameter
+      groupId = options.groupId
     } else if (options.token) {
       // Fallback: direct token parameter (for backward compatibility)
       token = options.token
     }
 
-    // Handle token from QR code scan
-    if (token) {
+    // Handle group ID or token from QR code scan
+    if (groupId) {
+      console.log('通过二维码扫描进入，groupId:', groupId)
+      // Fetch group info by group ID (new simple method)
+      this.fetchGroupInfoById(groupId)
+    } else if (token) {
       console.log('通过二维码扫描进入，token:', token)
 
       try {
-        // 尝试解析JSON格式的token
+        // 尝试解析JSON格式的token (legacy format)
         const inviteData = JSON.parse(decodeURIComponent(token))
         this.handleSignupWithInviteData(inviteData)
       } catch (error) {
-        console.error('解析token失败:', error)
-        // 如果解析失败，当作简单token处理
-        this.setData({
-          inviteInfo: {
-            token: token,
-            inviteToken: token,
-            groupName: '团队',
-            managerName: '管理员',
-            isGroupInvite: true
-          }
-        })
+        console.error('解析token失败，尝试从API获取群组信息:', error)
+        // 如果解析失败，从API获取群组信息
+        this.fetchGroupInfoByToken(token)
       }
     } else if (options.inviteData) {
       // Legacy invite data format
@@ -259,6 +265,146 @@ Page({
       },
       complete: () => {
         this.setData({ loading: false })
+      }
+    })
+  },
+
+  // 通过group ID从API获取群组信息 (新方法，更简单)
+  fetchGroupInfoById(groupId) {
+    wx.showLoading({
+      title: '获取群组信息...',
+      mask: true
+    })
+
+    const app = getApp()
+
+    wx.request({
+      url: `${app.globalData.apiBaseUrl}/content-manager/groups/${groupId}`,
+      method: 'GET',
+      header: {
+        'Content-Type': 'application/json',
+        'Accept-Language': (require('../../utils/translations').getLanguage() === 'zh') ? 'zh-CN,zh;q=0.9' : 'en-US,en;q=0.9'
+      },
+      success: (res) => {
+        wx.hideLoading()
+        console.log('获取群组信息响应:', res)
+
+        if (res.statusCode === 200 && res.data && res.data.success === true) {
+          const groupInfo = res.data.data || {}
+
+          // 设置邀请信息
+          this.setData({
+            inviteInfo: {
+              type: 'group_join',
+              token: groupInfo.token,
+              inviteToken: groupInfo.token,
+              groupName: groupInfo.groupName || '团队',
+              managerName: groupInfo.managerName || '管理员',
+              groupId: groupInfo.id || groupId,
+              description: groupInfo.description,
+              memberCount: groupInfo.memberCount,
+              isGroupInvite: true
+            }
+          })
+
+          console.log('群组信息设置成功:', this.data.inviteInfo)
+        } else {
+          // 获取群组信息失败，使用默认值
+          console.error('获取群组信息失败:', res.data)
+          this.setData({
+            inviteInfo: {
+              groupId: groupId,
+              groupName: '团队',
+              managerName: '管理员',
+              isGroupInvite: true
+            }
+          })
+        }
+      },
+      fail: (err) => {
+        wx.hideLoading()
+        console.error('获取群组信息失败:', err)
+
+        // 网络错误，使用默认值
+        this.setData({
+          inviteInfo: {
+            groupId: groupId,
+            groupName: '团队',
+            managerName: '管理员',
+            isGroupInvite: true
+          }
+        })
+      }
+    })
+  },
+
+  // 通过token从API获取群组信息
+  fetchGroupInfoByToken(token) {
+    wx.showLoading({
+      title: '获取群组信息...',
+      mask: true
+    })
+
+    const app = getApp()
+
+    wx.request({
+      url: `${app.globalData.apiBaseUrl}/content-manager/groups/token/${token}`,
+      method: 'GET',
+      header: {
+        'Content-Type': 'application/json',
+        'Accept-Language': (require('../../utils/translations').getLanguage() === 'zh') ? 'zh-CN,zh;q=0.9' : 'en-US,en;q=0.9'
+      },
+      success: (res) => {
+        wx.hideLoading()
+        console.log('获取群组信息响应:', res)
+
+        if (res.statusCode === 200 && res.data && res.data.success === true) {
+          const groupInfo = res.data.data || {}
+
+          // 设置邀请信息
+          this.setData({
+            inviteInfo: {
+              type: groupInfo.type || 'group_join',
+              token: groupInfo.token || token,
+              inviteToken: groupInfo.token || token,
+              groupName: groupInfo.groupName || '团队',
+              managerName: groupInfo.managerName || '管理员',
+              groupId: groupInfo.groupId,
+              description: groupInfo.description,
+              memberCount: groupInfo.memberCount,
+              isGroupInvite: true
+            }
+          })
+
+          console.log('群组信息设置成功:', this.data.inviteInfo)
+        } else {
+          // 获取群组信息失败，使用默认值
+          console.error('获取群组信息失败:', res.data)
+          this.setData({
+            inviteInfo: {
+              token: token,
+              inviteToken: token,
+              groupName: '团队',
+              managerName: '管理员',
+              isGroupInvite: true
+            }
+          })
+        }
+      },
+      fail: (err) => {
+        wx.hideLoading()
+        console.error('获取群组信息失败:', err)
+
+        // 网络错误，使用默认值
+        this.setData({
+          inviteInfo: {
+            token: token,
+            inviteToken: token,
+            groupName: '团队',
+            managerName: '管理员',
+            isGroupInvite: true
+          }
+        })
       }
     })
   },
