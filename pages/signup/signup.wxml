@@ -1,6 +1,11 @@
 <!-- pages/signup/signup.wxml -->
 <view class="signup-container">
 
+  <!-- Debug Info (visible on page) -->
+  <view class="debug-box">
+    <text class="debug-text">{{debugText}}</text>
+  </view>
+
   <!-- 头部标题 -->
   <view class="header-section">
     <view class="back-btn" bindtap="goBack">
