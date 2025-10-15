@@ -20,11 +20,13 @@ Page({
     // Extract group ID from scene parameter (WeChat QR code API)
     let groupId = null
     let token = null
-    
+
     if (options.scene) {
       console.log('通过scene参数进入，scene:', options.scene)
+      // URL decode the scene parameter first
+      const decodedScene = decodeURIComponent(options.scene)
       // Parse scene parameter: "g=groupId"
-      const sceneParams = options.scene.split('&')
+      const sceneParams = decodedScene.split('&')
       for (const param of sceneParams) {
         const [key, value] = param.split('=')
         if (key === 'g') {
@@ -117,17 +119,17 @@ Page({
   // 验证表单
   validateForm() {
     const { username, phone, password, confirmPassword, city } = this.data.formData
-    
+
     if (!username.trim()) {
       wx.showToast({ title: '请输入用户名', icon: 'none' })
       return false
     }
-    
+
     if (username.trim().length < 2) {
       wx.showToast({ title: '用户名至少2个字符', icon: 'none' })
       return false
     }
-    
+
     // 手机号校验（中国大陆）
     if (!phone.trim()) {
       wx.showToast({ title: '请输入手机号码', icon: 'none' })
@@ -137,27 +139,27 @@ Page({
       wx.showToast({ title: '请输入有效的手机号码', icon: 'none' })
       return false
     }
-    
+
     if (!city.trim()) {
       wx.showToast({ title: '请输入城市', icon: 'none' })
       return false
     }
-    
+
     if (!password.trim()) {
       wx.showToast({ title: '请设置密码', icon: 'none' })
       return false
     }
-    
+
     if (password.length < 6) {
       wx.showToast({ title: '密码至少6个字符', icon: 'none' })
       return false
     }
-    
+
     if (password !== confirmPassword) {
       wx.showToast({ title: '两次输入的密码不一致', icon: 'none' })
       return false
     }
-    
+
     return true
   },
 
@@ -166,12 +168,12 @@ Page({
     if (!this.validateForm()) {
       return
     }
-    
+
     this.setData({ loading: true })
-    
+
     const app = getApp()
     const { inviteInfo, formData } = this.data
-    
+
     // 准备注册数据
     const signupData = {
       inviteToken: inviteInfo.inviteToken || inviteInfo.token,
@@ -182,9 +184,9 @@ Page({
       password: formData.password,
       role: 'content_creator'
     }
-    
+
     console.log('发送注册请求:', signupData)
-    
+
     wx.request({
       url: `${app.globalData.apiBaseUrl}/auth/invite-signup`,
       method: 'POST',
@@ -195,15 +197,15 @@ Page({
       data: signupData,
       success: (res) => {
         console.log('注册响应:', res)
-        
+
         // Handle new ApiResponse format: {success, message, data, error}
         const isApiSuccess = res.data && res.data.success === true;
         const responseData = res.data && res.data.data ? res.data.data : {};
-        
+
         if (res.statusCode === 200 && isApiSuccess) {
           // 注册成功
           wx.showToast({ title: '注册成功', icon: 'success' })
-          
+
           // 显示成功信息并引导用户登录
           setTimeout(() => {
             // Use group info from response if available, otherwise fallback to invite info
@@ -211,7 +213,7 @@ Page({
             const managerName = responseData.managerName || inviteInfo.managerName || '管理员';
             const role = responseData.role || 'content_creator';
             const roleZh = role === 'content_manager' ? '内容管理员' : '内容创作者';
-            
+
             wx.showModal({
               title: '恭喜！',
               content: `你已成为${roleZh}，加入「${groupName}」。\n管理员：${managerName}\n\n请使用刚才设置的账号和密码登录。`,
@@ -223,7 +225,7 @@ Page({
               }
             })
           }, 1500)
-          
+
         } else {
           // 注册失败 - Handle ApiResponse error format
           let errorMessage = '注册过程中出现错误，请稍后重试';
