@@ -84,7 +84,10 @@ Page({
           content: '邀请信息解析失败，请重新扫描二维码',
           showCancel: false,
           success: () => {
-            wx.navigateBack()
+            // Use reLaunch to ensure proper navigation
+            wx.reLaunch({
+              url: '/pages/login/login'
+            })
           }
         })
       }
@@ -220,8 +223,10 @@ Page({
               confirmText: '去登录',
               showCancel: false,
               success: () => {
-                // 返回登录页面
-                wx.navigateBack()
+                // 重定向到登录页面（确保正确跳转）
+                wx.reLaunch({
+                  url: '/pages/login/login'
+                })
               }
             })
           }, 1500)
@@ -242,8 +247,16 @@ Page({
               const lower = errorMessage.toLowerCase();
               if (lower.includes('username already exists')) {
                 errorMessage = '用户名已存在';
-              } else if (lower.includes('phone number already exists')) {
+              } else if (lower.includes('phone') && (lower.includes('already') || lower.includes('exist'))) {
                 errorMessage = '手机号已存在';
+              } else if (lower.includes('email already exists')) {
+                errorMessage = '邮箱已存在';
+              } else if (lower.includes('invalid email')) {
+                errorMessage = '邮箱格式不正确';
+              } else if (lower.includes('password too short')) {
+                errorMessage = '密码太短';
+              } else if (lower.includes('bad request')) {
+                errorMessage = '请求参数错误';
               }
             }
           } catch (e) {
@@ -597,7 +610,10 @@ Page({
               confirmText: '去登录',
               showCancel: false,
               success: () => {
-                wx.navigateBack()
+                // 重定向到登录页面（确保正确跳转）
+                wx.reLaunch({
+                  url: '/pages/login/login'
+                })
               }
             })
           }, 1500)
@@ -617,8 +633,16 @@ Page({
               const lower = errorMessage.toLowerCase();
               if (lower.includes('username already exists')) {
                 errorMessage = '用户名已存在';
-              } else if (lower.includes('phone number already exists')) {
+              } else if (lower.includes('phone') && (lower.includes('already') || lower.includes('exist'))) {
                 errorMessage = '手机号已存在';
+              } else if (lower.includes('email already exists')) {
+                errorMessage = '邮箱已存在';
+              } else if (lower.includes('invalid email')) {
+                errorMessage = '邮箱格式不正确';
+              } else if (lower.includes('password too short')) {
+                errorMessage = '密码太短';
+              } else if (lower.includes('bad request')) {
+                errorMessage = '请求参数错误';
               }
             }
           } catch (e) {

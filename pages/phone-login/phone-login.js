@@ -109,6 +109,23 @@ Page({
             if (res.data) {
               errorMessage = res.data.error || res.data.message || errorMessage
             }
+
+            // Translate common English error messages to Chinese
+            if (typeof errorMessage === 'string') {
+              const lower = errorMessage.toLowerCase();
+              if (lower.includes('invalid credentials')) {
+                errorMessage = '用户名或密码错误';
+              } else if (lower.includes('user not found')) {
+                errorMessage = '用户不存在';
+              } else if (lower.includes('password incorrect')) {
+                errorMessage = '密码错误';
+              } else if (lower.includes('account locked')) {
+                errorMessage = '账户已被锁定';
+              } else if (lower.includes('bad request')) {
+                errorMessage = '请求参数错误';
+              }
+            }
+
             wx.showModal({
               title: '登录失败',
               content: errorMessage,
@@ -147,6 +164,9 @@ Page({
 
   // 返回上一页
   goBack() {
-    wx.navigateBack()
+    // Use reLaunch to ensure proper navigation
+    wx.reLaunch({
+      url: '/pages/login/login'
+    })
   }
 });
