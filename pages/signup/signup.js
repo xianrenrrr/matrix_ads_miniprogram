@@ -195,7 +195,8 @@ Page({
       method: 'POST',
       header: {
         'Content-Type': 'application/json',
-        'Accept-Language': (require('../../utils/translations').getLanguage() === 'zh') ? 'zh-CN,zh;q=0.9' : 'en-US,en;q=0.9'
+        'Accept-Language': (require('../../utils/translations').getLanguage() === 'zh') ? 'zh-CN,zh;q=0.9' : 'en-US,en;q=0.9',
+        'User-Agent': 'miniprogram'
       },
       data: signupData,
       success: (res) => {
@@ -236,31 +237,8 @@ Page({
           let errorMessage = '注册过程中出现错误，请稍后重试';
 
           if (res.data) {
-            // 优先显示本地化 message，其次显示后端 error 详情
-            errorMessage = res.data.message || res.data.error || errorMessage;
-          }
-
-          // 当后端未按语言返回时，本地兜底中英映射
-          try {
-            const lang = require('../../utils/translations').getLanguage();
-            if (lang === 'zh' && typeof errorMessage === 'string') {
-              const lower = errorMessage.toLowerCase();
-              if (lower.includes('username already exists')) {
-                errorMessage = '用户名已存在';
-              } else if (lower.includes('phone') && (lower.includes('already') || lower.includes('exist'))) {
-                errorMessage = '手机号已存在';
-              } else if (lower.includes('email already exists')) {
-                errorMessage = '邮箱已存在';
-              } else if (lower.includes('invalid email')) {
-                errorMessage = '邮箱格式不正确';
-              } else if (lower.includes('password too short')) {
-                errorMessage = '密码太短';
-              } else if (lower.includes('bad request')) {
-                errorMessage = '请求参数错误';
-              }
-            }
-          } catch (e) {
-            // ignore mapping errors
+            // Backend now handles proper i18n, so just use the returned error message
+            errorMessage = res.data.error || res.data.message || errorMessage;
           }
 
           wx.showModal({
@@ -623,30 +601,8 @@ Page({
           let errorMessage = '注册过程中出现错误，请稍后重试';
 
           if (res.data) {
-            errorMessage = res.data.message || res.data.error || errorMessage;
-          }
-
-          // 当后端未按语言返回时，本地兜底中英映射
-          try {
-            const lang = require('../../utils/translations').getLanguage();
-            if (lang === 'zh' && typeof errorMessage === 'string') {
-              const lower = errorMessage.toLowerCase();
-              if (lower.includes('username already exists')) {
-                errorMessage = '用户名已存在';
-              } else if (lower.includes('phone') && (lower.includes('already') || lower.includes('exist'))) {
-                errorMessage = '手机号已存在';
-              } else if (lower.includes('email already exists')) {
-                errorMessage = '邮箱已存在';
-              } else if (lower.includes('invalid email')) {
-                errorMessage = '邮箱格式不正确';
-              } else if (lower.includes('password too short')) {
-                errorMessage = '密码太短';
-              } else if (lower.includes('bad request')) {
-                errorMessage = '请求参数错误';
-              }
-            }
-          } catch (e) {
-            // ignore mapping errors
+            // Backend now handles proper i18n, so just use the returned error message
+            errorMessage = res.data.error || res.data.message || errorMessage;
           }
 
           wx.showModal({

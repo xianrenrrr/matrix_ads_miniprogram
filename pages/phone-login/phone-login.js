@@ -59,7 +59,8 @@ Page({
       url: `${app.globalData.apiBaseUrl}/auth/login`,
       method: 'POST',
       header: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'User-Agent': 'miniprogram'
       },
       data: {
         phone: phone.trim(),
@@ -107,23 +108,8 @@ Page({
           } else {
             let errorMessage = '登录验证失败'
             if (res.data) {
+              // Backend now handles proper i18n, so just use the returned error message
               errorMessage = res.data.error || res.data.message || errorMessage
-            }
-
-            // Translate common English error messages to Chinese
-            if (typeof errorMessage === 'string') {
-              const lower = errorMessage.toLowerCase();
-              if (lower.includes('invalid credentials')) {
-                errorMessage = '用户名或密码错误';
-              } else if (lower.includes('user not found')) {
-                errorMessage = '用户不存在';
-              } else if (lower.includes('password incorrect')) {
-                errorMessage = '密码错误';
-              } else if (lower.includes('account locked')) {
-                errorMessage = '账户已被锁定';
-              } else if (lower.includes('bad request')) {
-                errorMessage = '请求参数错误';
-              }
             }
 
             wx.showModal({
