@@ -104,7 +104,7 @@ Page({
           // Now load all templates for display
           this.loadAllTemplates()
         } else {
-          const errorMessage = res.data && res.data.error ? res.data.error : '获取模板失败';
+          const errorMessage = (res.data && res.data.message) || (res.data && res.data.error) || '获取模板失败';
           logger.warn('获取模板失败:', errorMessage)
           wx.showToast({
             title: errorMessage,

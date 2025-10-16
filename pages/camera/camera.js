@@ -125,7 +125,7 @@ Page({
         if (res.statusCode === 200 && isApiSuccess) {
           this.setupTemplate(responseData)
         } else {
-          const errorMessage = res.data && res.data.error ? res.data.error : t('templateNotFound');
+          const errorMessage = (res.data && res.data.message) || (res.data && res.data.error) || t('templateNotFound');
           wx.showToast({
             title: errorMessage,
             icon: 'none'

@@ -195,8 +195,7 @@ Page({
       method: 'POST',
       header: {
         'Content-Type': 'application/json',
-        'Accept-Language': (require('../../utils/translations').getLanguage() === 'zh') ? 'zh-CN,zh;q=0.9' : 'en-US,en;q=0.9',
-        'User-Agent': 'miniprogram'
+        'Accept-Language': (require('../../utils/translations').getLanguage() === 'zh') ? 'zh-CN,zh;q=0.9' : 'en-US,en;q=0.9'
       },
       data: signupData,
       success: (res) => {
@@ -238,7 +237,7 @@ Page({
 
           if (res.data) {
             // Backend now handles proper i18n, so just use the returned error message
-            errorMessage = res.data.error || res.data.message || errorMessage;
+            errorMessage = res.data.message || res.data.error || errorMessage;
           }
 
           wx.showModal({
@@ -602,7 +601,7 @@ Page({
 
           if (res.data) {
             // Backend now handles proper i18n, so just use the returned error message
-            errorMessage = res.data.error || res.data.message || errorMessage;
+            errorMessage = res.data.message || res.data.error || errorMessage;
           }
 
           wx.showModal({

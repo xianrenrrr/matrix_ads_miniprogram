@@ -59,8 +59,7 @@ Page({
       url: `${app.globalData.apiBaseUrl}/auth/login`,
       method: 'POST',
       header: {
-        'Content-Type': 'application/json',
-        'User-Agent': 'miniprogram'
+        'Content-Type': 'application/json'
       },
       data: {
         phone: phone.trim(),
@@ -109,7 +108,7 @@ Page({
             let errorMessage = '登录验证失败'
             if (res.data) {
               // Backend now handles proper i18n, so just use the returned error message
-              errorMessage = res.data.error || res.data.message || errorMessage
+              errorMessage = res.data.message || res.data.error || errorMessage
             }
 
             wx.showModal({
