@@ -18,7 +18,7 @@ Page({
     showOverlay: true,
     currentScript: '',
     sceneProgress: 0,
-    showScriptSidebar: false, // 显示脚本侧边栏
+    showScriptSidebar: false, // 显示提词器侧边栏
     showRecordingCompleteModal: false, // 显示录制完成弹窗
     showUploadFailureModal: false, // 显示上传失败弹窗
     showHints: false, // 显示指导
@@ -897,12 +897,12 @@ Page({
     console.log('Hints toggled to:', this.data.showHints)
   },
 
-  // 切换脚本侧边栏显示
+  // 切换提词器侧边栏显示
   toggleScriptSidebar() {
     this.setData({ showScriptSidebar: !this.data.showScriptSidebar })
   },
 
-  // 顶部按钮：切换KTV脚本显示
+  // 顶部按钮：切换KTV提词器显示
   toggleKtv() {
     const next = !this.data.showKtv
     this.setData({

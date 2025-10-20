@@ -75,7 +75,7 @@
       </view>
       <view class="control-btn" bindtap="toggleKtv">
         <text class="control-icon">♪</text>
-        <text class="control-label">脚本</text>
+        <text class="control-label">提词器</text>
       </view>
       <view class="control-btn" bindtap="toggleHints">
         <text class="control-icon">{{showHints ? '>' : '<'}}</text>
@@ -128,7 +128,7 @@
     </block>
   </view>
 
-  <!-- KTV脚本覆盖层：底部显示逐字高亮 -->
+  <!-- KTV提词器覆盖层：底部显示逐字高亮 -->
   <view wx:if="{{showKtv && currentScript}}" class="ktv-overlay">
     <text class="ktv-text">
       <text class="ktv-highlight">{{ktvHighlighted}}</text><text class="ktv-rest">{{ktvRest}}</text>

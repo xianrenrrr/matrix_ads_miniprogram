@@ -20,7 +20,7 @@ const translations = {
     unspecified: '未指定',
     noSpecialRequirements: '无特殊要求',
     followTemplate: '按模板拍摄',
-    scriptLabel: '脚本',
+    scriptLabel: '提词器',
     personPresent: '是否有人出现',
     deviceOrientation: '设备方向',
     backgroundInstructions: '背景说明',

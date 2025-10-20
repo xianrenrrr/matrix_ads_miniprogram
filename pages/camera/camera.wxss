@@ -395,7 +395,7 @@
   border-left: 3rpx solid #10b981;
 }
 
-/* 脚本侧边栏 */
+/* 提词器侧边栏 */
 .script-sidebar {
   position: absolute;
   top: 0;
@@ -641,7 +641,7 @@
   font-weight: 500;
 }
 
-/* 脚本提示器样式 */
+/* 提词器提示器样式 */
 .script-teleprompter {
   cursor: pointer;
 }
@@ -654,7 +654,7 @@
   margin-top: 8rpx;
 }
 
-/* 脚本模态框 */
+/* 提词器模态框 */
 .script-overlay {
   position: fixed;
   top: 0;
