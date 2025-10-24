@@ -118,15 +118,7 @@
     </view>
   </view>
   
-  <!-- 图例 (MVP: Right side legend) -->
-  <view wx:if="{{legend && legend.length && showOverlay && (overlayType === 'objects' || overlayType === 'polygons')}}" class="legend">
-    <block wx:for="{{legend}}" wx:key="index">
-      <view class="legend-item">
-        <view class="dot" style="background-color: {{item.colorHex}}"></view>
-        <text class="legend-text">{{item.labelZh || item.labelLocalized || toZh(item.label) || item.label}}（{{item.confidencePercent || 0}}%）</text>
-      </view>
-    </block>
-  </view>
+
 
   <!-- KTV提词器覆盖层：底部显示逐字高亮 -->
   <view wx:if="{{showKtv && currentScript}}" class="ktv-overlay">

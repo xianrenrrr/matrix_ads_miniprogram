@@ -33,7 +33,6 @@ Page({
     polygonOverlay: [], // 多边形覆盖数据
     polygonOverlayPixels: [], // 多边形覆盖像素坐标
     overlayRectsPixels: [], // MVP: [{left, top, width, height, colorHex, label, labelLocalized, confidence}]
-    legend: [], // 图例数据 from backend scene.legend, or derived from overlayObjects order
     sourceAspect: '9:16', // 源视频比例
     // 指导信息
     backgroundInstructions: '',
@@ -172,7 +171,6 @@ Page({
       sceneProgress: scenes.length > 0 ? (sceneIndex + 1) / scenes.length : 0,
       overlayType: overlayType,
       sourceAspect: currentScene.sourceAspect || '9:16',
-      legend: currentScene.legend || [],
       // 相机设置
       cameraPosition: this.getCameraPosition(currentScene.personPosition),
       // 指导信息
@@ -195,12 +193,6 @@ Page({
       // MVP: 使用对象覆盖模式
       console.log('MVP: 使用对象覆盖模式，对象数量:', currentScene.overlayObjects.length)
       updateData.objectOverlay = this.processOverlayObjects(currentScene.overlayObjects)
-      // Process legend to add confidencePercent
-      const legend = currentScene.legend || []
-      updateData.legend = legend.map(item => ({
-        ...item,
-        confidencePercent: Math.round((item.confidence || 0) * 100)
-      }))
       updateData.polygonOverlay = []
       updateData.gridOverlay = []
       updateData.gridLabels = []
@@ -212,7 +204,6 @@ Page({
       updateData.gridLabels = currentScene.screenGridOverlayLabels || []
       updateData.objectOverlay = []
       updateData.polygonOverlay = []
-      updateData.legend = [] // Clear legend for grid mode
       updateData.overlayRectsPixels = [] // Clear rect pixels for grid mode
     }
 
@@ -283,8 +274,7 @@ Page({
         if (that.data.overlayType === 'objects' && that.data.objectOverlay.length > 0) {
           const scene = {
             overlayObjects: that.data.objectOverlay,
-            sourceAspect: sourceAspect,
-            legend: that.data.legend
+            sourceAspect: sourceAspect
           }
           that.updateOverlayPixelsForScene(scene, containerW, containerH, offsetX, offsetY, drawnW, drawnH, colors)
         }
@@ -304,7 +294,7 @@ Page({
       const top = offsetY + (o.y || 0) * drawnH
       const width = (o.width || o.w || 0) * drawnW
       const height = (o.height || o.h || 0) * drawnH
-      const color = (scene.legend && scene.legend[i]) ? scene.legend[i].colorHex : colors[i % colors.length]
+      const color = colors[i % colors.length]
       const labelZh = o.labelZh || o.labelLocalized || toZh(o.label) || o.label || '未知'
 
       overlayRectsPixels.push({
