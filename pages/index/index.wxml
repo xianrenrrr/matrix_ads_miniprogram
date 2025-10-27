@@ -20,6 +20,7 @@
             <image class="greeting-pin" src="/assets/Frame@2x.png" mode="aspectFit" />
             <view class="title-texts">
               <view class="card-title home-title">您好！{{userInfo.username || '用户'}}</view>
+              <view wx:if="{{managerName}}" class="manager-name">管理员：{{managerName}}</view>
               <view class="card-subtitle home-subtitle">开始今天的创作吧!</view>
               <image class="greeting-illustration" src="/assets/Mask group@3x.png" mode="aspectFit" />
             </view>

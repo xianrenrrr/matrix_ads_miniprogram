@@ -6,7 +6,8 @@ Page({
     isLoggedIn: false,
     allTemplates: [],
     recentTemplates: [],
-    loading: true
+    loading: true,
+    managerName: null
   },
 
   onLoad() {
@@ -42,7 +43,8 @@ Page({
     })
 
     if (app.globalData.isLoggedIn && app.globalData.userInfo) {
-      // Load templates, then show page
+      // Load manager name and templates
+      this.loadManagerName()
       this.loadAssignedTemplates()
     } else {
       // Not logged in, show page immediately
@@ -52,8 +54,45 @@ Page({
 
   // 刷新数据
   refreshData() {
+    this.loadManagerName()
     this.loadAssignedTemplates()
     this.loadAllTemplates()
+  },
+
+  // 加载管理员名称
+  loadManagerName() {
+    const app = getApp()
+    if (!app.globalData.isLoggedIn || !app.globalData.userInfo) {
+      return
+    }
+
+    const groupId = app.globalData.userInfo.groupId
+    if (!groupId) {
+      return
+    }
+
+    wx.request({
+      url: `${app.globalData.apiBaseUrl}/content-manager/groups/${groupId}`,
+      method: 'GET',
+      header: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${wx.getStorageSync('access_token')}`
+      },
+      success: (res) => {
+        const isApiSuccess = res.data && res.data.success === true
+        const responseData = res.data && res.data.data ? res.data.data : null
+
+        if (res.statusCode === 200 && isApiSuccess && responseData) {
+          this.setData({
+            managerName: responseData.managerName || responseData.managerUsername
+          })
+          logger.log('管理员名称:', responseData.managerName || responseData.managerUsername)
+        }
+      },
+      fail: (err) => {
+        logger.error('获取管理员名称失败:', err)
+      }
+    })
   },
 
   // 加载已分配的模板（从 assignments）

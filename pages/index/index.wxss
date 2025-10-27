@@ -63,6 +63,16 @@ page {
 .title-texts { }
 
 .home-title { position: absolute; left: 75rpx; top: 46.15rpx; width: 359.62rpx; z-index: 2; }
+.manager-name { 
+  position: absolute; 
+  left: 75rpx; 
+  top: 105rpx; 
+  width: 359.62rpx; 
+  z-index: 2;
+  font-size: 28rpx;
+  color: #6b7280;
+  font-weight: 400;
+}
 .home-subtitle { position: absolute; left: 75rpx; bottom: 46.15rpx; width: 359.62rpx; z-index: 2; }
 
 /* Home title tweaks to match design */

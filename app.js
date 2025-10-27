@@ -47,7 +47,9 @@ App({
   },
 
   onHide() {
-    logger.log('Xpectra AI Mini Program Hide')
+    logger.log('Xpectra AI Mini Program Hide - Logging out user')
+    // Force logout when app is hidden/closed to clear cache
+    this.logout()
   },
 
   onError(msg) {
