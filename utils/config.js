@@ -2,7 +2,7 @@
 const config = {
   // API配置
   api: {
-    baseUrl: 'https://matrix-backend.onrender.com', // Updated to matrix-backend
+    baseUrl: 'https://matrix-ads-backend.onrender.com', // Correct backend URL
     timeout: 60000,
 
     // API端点
