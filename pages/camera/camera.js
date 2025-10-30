@@ -672,12 +672,19 @@ Page({
     const sceneIndex = this.data.sceneIndex || 0
     const sceneNumber = this.data.sceneNumber || 1
     const template = this.data.selectedTemplate
+    
+    // Auto-extend duration to minimum 2 seconds if less than 1 second
+    let recordDuration = this.data.recordTime
+    if (recordDuration < 1) {
+      console.log(`录制时长 ${recordDuration}秒 < 1秒，自动延长至2秒`)
+      recordDuration = 2
+    }
 
     const videoData = {
       sceneNumber: sceneNumber,
       sceneTitle: template.scenes[sceneIndex].sceneTitle,
       tempPath: tempPath,
-      duration: this.data.recordTime,
+      duration: recordDuration,  // Use adjusted duration
       timestamp: Date.now()
     }
 
