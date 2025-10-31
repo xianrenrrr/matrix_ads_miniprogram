@@ -2,7 +2,7 @@
 const config = {
   // API配置
   api: {
-    baseUrl: 'https://matrix-ads-backend.onrender.com', // Correct backend URL
+    baseUrl: 'https://xpectra-ai-backend.onrender.com', // Correct backend URL
     timeout: 60000,
 
     // API端点
