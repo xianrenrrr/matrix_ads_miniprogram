@@ -172,7 +172,7 @@ Page({
       overlayType: overlayType,
       sourceAspect: currentScene.sourceAspect || '9:16',
       // 相机设置
-      cameraPosition: this.getCameraPosition(currentScene.personPosition),
+      cameraPosition: 'back', // 默认使用后置摄像头
       // 指导信息
       backgroundInstructions: strip(currentScene.backgroundInstructions || ''),
       cameraInstructions: strip(currentScene.specificCameraInstructions || ''),
@@ -395,16 +395,6 @@ Page({
     })
 
     ctx.draw()
-  },
-
-  // 根据人物位置确定相机方向
-  getCameraPosition(personPosition) {
-    // 默认使用后置摄像头（拍摄其他人或物品）
-    // 只有在特殊情况下才使用前置摄像头（比如自拍场景）
-    if (personPosition && personPosition.includes('自拍') || personPosition === 'Selfie') {
-      return 'front'
-    }
-    return 'back'  // 默认后置摄像头
   },
 
   // 根据宽高比确定拍摄方向

@@ -114,7 +114,6 @@ const translations = {
     gridOverlayOff: '📐',
     scriptToggle: '<',
     scriptToggleExpand: '>',
-    personPosition: 'Person Position',
     movementInstructions: 'Movement Instructions',
     cameraInstructions: 'Camera Instructions',
     unspecified: 'Unspecified',
