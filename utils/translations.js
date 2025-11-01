@@ -14,7 +14,6 @@ const translations = {
     gridOverlayOff: '📐',
     scriptToggle: '<',
     scriptToggleExpand: '>',
-    personPosition: '人物位置',
     movementInstructions: '动作指导',
     cameraInstructions: '摄像要求',
     unspecified: '未指定',
