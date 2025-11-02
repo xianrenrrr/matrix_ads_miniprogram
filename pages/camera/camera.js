@@ -922,10 +922,19 @@ Page({
         
         // Debug log (only on first call)
         if (!this._ktvDebugLogged) {
+          console.log('[KTV] ========================================')
           console.log('[KTV] Using subtitleSegments for accurate timing')
-          console.log('[KTV] Scene start:', sceneStartMs, 'ms')
-          console.log('[KTV] Segments:', segments.length)
-          console.log('[KTV] First segment:', segments[0])
+          console.log('[KTV] Scene #' + (this.data.currentScene + 1))
+          console.log('[KTV] Scene absolute start:', sceneStartMs, 'ms')
+          console.log('[KTV] Scene duration:', currentScene.sceneDurationInSeconds, 's')
+          console.log('[KTV] Subtitle segments:', segments.length)
+          console.log('[KTV] Segments timing (absolute → relative):')
+          segments.forEach((seg, idx) => {
+            const relativeMs = seg.startTimeMs - sceneStartMs
+            console.log(`[KTV]   ${idx + 1}. "${seg.text}"`)
+            console.log(`[KTV]      Absolute: ${seg.startTimeMs}ms → Relative: ${relativeMs}ms (${(relativeMs/1000).toFixed(2)}s)`)
+          })
+          console.log('[KTV] ========================================')
           this._ktvDebugLogged = true
         }
         
@@ -936,8 +945,17 @@ Page({
         
         for (let i = 0; i < segments.length; i++) {
           const segment = segments[i]
-          // Calculate relative time within the scene
+          
+          // IMPORTANT: Convert absolute timing to scene-relative timing
+          // subtitleSegments.startTimeMs is absolute (relative to entire video)
+          // We need to subtract scene.startTimeMs to get timing relative to scene start
           const segmentRelativeStartMs = segment.startTimeMs - sceneStartMs
+          
+          // Handle edge case: segment might be from previous scene (negative relative time)
+          if (segmentRelativeStartMs < 0) {
+            console.warn('[KTV] Segment has negative relative time, skipping:', segment.text)
+            continue
+          }
           
           if (elapsedMs >= segmentRelativeStartMs) {
             // This segment should be highlighted
