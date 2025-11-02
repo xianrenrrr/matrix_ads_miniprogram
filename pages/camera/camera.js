@@ -546,6 +546,11 @@ Page({
   // 开始录制
   startRecording() {
     console.log('[UI] startRecording tapped')
+    
+    // Reset KTV debug flags for new recording
+    this._ktvDebugLogged = false
+    this._ktvFallbackLogged = false
+    
     if (!this.data.selectedTemplate) {
       wx.showToast({
         title: t('selectTemplate'),
@@ -900,39 +905,82 @@ Page({
   },
 
   // 根据当前进度更新KTV高亮
-  // TODO: Enhance to use subtitleSegments for word-by-word timing
-  // 
-  // Current: Simple character-by-character highlighting based on linear progress
-  // Needed: Segment-based highlighting using actual subtitle timing
-  // 
-  // Implementation steps:
-  // 1. Get currentScene.subtitleSegments (array of {text, startTimeMs, endTimeMs})
-  // 2. For each segment, check if elapsed >= segment.startTimeMs/1000
-  // 3. Highlight all segments that have started
-  // 4. Join highlighted segments with spaces
-  // 
-  // Benefits:
-  // - More natural reading rhythm (matches actual speech/text timing)
-  // - Better user experience for creators
-  // - Accurate word-by-word or phrase-by-phrase highlighting
-  // 
-  // Example:
-  // segments = [{text: "泉州想贴车衣的", startTimeMs: 0}, {text: "直接来", startTimeMs: 1000}]
-  // If elapsed = 1.5s, highlight both segments: "泉州想贴车衣的 直接来"
+  // Uses subtitleSegments for accurate word-by-word/phrase-by-phrase timing
   updateKtvProgress() {
     try {
       const script = (this.data.currentScript || '').trim()
       if (!this.data.showKtv || !script) return
-      const total = script.length || 1
+      
       const currentScene = this.data.selectedTemplate && this.data.selectedTemplate.scenes && this.data.selectedTemplate.scenes[this.data.currentScene]
-      const sceneMaxTime = (currentScene && currentScene.sceneDurationInSeconds) || this.data.maxRecordTime || 30
       const elapsed = this.data.recordTime || 0
-      const progress = Math.max(0, Math.min(1, elapsed / sceneMaxTime))
-      const highlightCount = Math.floor(total * progress)
-      const highlighted = script.substring(0, highlightCount)
-      const rest = script.substring(highlightCount)
-      this.setData({ ktvHighlighted: highlighted, ktvRest: rest, ktvTotalLen: total })
-    } catch (e) { /* no-op */ }
+      const elapsedMs = elapsed * 1000
+      
+      // Try to use subtitleSegments for accurate timing
+      if (currentScene && currentScene.subtitleSegments && currentScene.subtitleSegments.length > 0) {
+        const segments = currentScene.subtitleSegments
+        const sceneStartMs = currentScene.startTimeMs || 0
+        
+        // Debug log (only on first call)
+        if (!this._ktvDebugLogged) {
+          console.log('[KTV] Using subtitleSegments for accurate timing')
+          console.log('[KTV] Scene start:', sceneStartMs, 'ms')
+          console.log('[KTV] Segments:', segments.length)
+          console.log('[KTV] First segment:', segments[0])
+          this._ktvDebugLogged = true
+        }
+        
+        // Find which segments should be highlighted based on elapsed time
+        let highlighted = ''
+        let rest = ''
+        let foundCurrent = false
+        
+        for (let i = 0; i < segments.length; i++) {
+          const segment = segments[i]
+          // Calculate relative time within the scene
+          const segmentRelativeStartMs = segment.startTimeMs - sceneStartMs
+          
+          if (elapsedMs >= segmentRelativeStartMs) {
+            // This segment should be highlighted
+            if (highlighted.length > 0) highlighted += ' '
+            highlighted += segment.text
+          } else {
+            // This and remaining segments are not yet highlighted
+            if (!foundCurrent) {
+              foundCurrent = true
+            }
+            if (rest.length > 0) rest += ' '
+            rest += segment.text
+          }
+        }
+        
+        // If no segments matched, show all as rest
+        if (highlighted.length === 0 && rest.length === 0) {
+          rest = script
+        }
+        
+        this.setData({ 
+          ktvHighlighted: highlighted, 
+          ktvRest: rest, 
+          ktvTotalLen: script.length 
+        })
+      } else {
+        // Debug log for fallback
+        if (!this._ktvFallbackLogged) {
+          console.log('[KTV] No subtitleSegments, using linear fallback')
+          this._ktvFallbackLogged = true
+        }
+        // Fallback: Simple linear progress (old behavior)
+        const total = script.length || 1
+        const sceneMaxTime = (currentScene && currentScene.sceneDurationInSeconds) || this.data.maxRecordTime || 30
+        const progress = Math.max(0, Math.min(1, elapsed / sceneMaxTime))
+        const highlightCount = Math.floor(total * progress)
+        const highlighted = script.substring(0, highlightCount)
+        const rest = script.substring(highlightCount)
+        this.setData({ ktvHighlighted: highlighted, ktvRest: rest, ktvTotalLen: total })
+      }
+    } catch (e) { 
+      console.error('KTV progress update error:', e)
+    }
   },
 
   // 重录当前场景（从模态框调用）
