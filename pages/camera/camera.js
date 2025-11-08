@@ -286,14 +286,27 @@ Page({
   updateOverlayPixelsForScene(scene, containerW, containerH, offsetX, offsetY, drawnW, drawnH, colors) {
     const objs = scene.overlayObjects || []
 
+    // Scale factor: 0.7 to make boxes 30% smaller
+    const SCALE_FACTOR = 0.7
+
     // Compute pixel rectangles  
     const overlayRectsPixels = []
     for (let i = 0; i < objs.length; i++) {
       const o = objs[i]
-      const left = offsetX + (o.x || 0) * drawnW
-      const top = offsetY + (o.y || 0) * drawnH
-      const width = (o.width || o.w || 0) * drawnW
-      const height = (o.height || o.h || 0) * drawnH
+      // Original dimensions
+      const origWidth = (o.width || o.w || 0) * drawnW
+      const origHeight = (o.height || o.h || 0) * drawnH
+      const origLeft = offsetX + (o.x || 0) * drawnW
+      const origTop = offsetY + (o.y || 0) * drawnH
+      
+      // Scaled dimensions (30% smaller)
+      const width = origWidth * SCALE_FACTOR
+      const height = origHeight * SCALE_FACTOR
+      
+      // Center the scaled box within the original position
+      const left = origLeft + (origWidth - width) / 2
+      const top = origTop + (origHeight - height) / 2
+      
       const color = colors[i % colors.length]
       const labelZh = o.labelZh || o.labelLocalized || toZh(o.label) || o.label || '未知'
 
