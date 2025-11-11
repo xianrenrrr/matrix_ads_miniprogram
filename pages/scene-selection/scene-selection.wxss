@@ -689,3 +689,28 @@ page {
 }
 .recording-action-btn::after { border: none; }
 .recording-action-btn.submit-btn { background-color: #4A90E2; color: #fff; }
+
+/* Published Video Section */
+.published-section {
+  margin: 30rpx;
+}
+
+.published-banner {
+  background: transparent;
+  border: 2rpx solid #10b981;
+  border-radius: 16rpx;
+  padding: 24rpx 30rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.published-text {
+  font-size: 28rpx;
+  color: #059669;
+  font-weight: 500;
+}
+
+.download-btn {
+  flex-shrink: 0;
+}

@@ -53,7 +53,7 @@
         </view>
         <view class="tpl-actions">
           <custom-button
-            text="开始录制"
+            text="录制/下载 视频"
             type="danger-outline"
             size="default"
             ext-class="block-btn"
