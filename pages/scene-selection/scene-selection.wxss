@@ -692,17 +692,19 @@ page {
 
 /* Published Video Section */
 .published-section {
-  margin: 30rpx;
+  padding: 0 20px;
+  margin-bottom: 20px;
 }
 
 .published-banner {
   background: transparent;
   border: 2rpx solid #10b981;
-  border-radius: 16rpx;
-  padding: 24rpx 30rpx;
+  border-radius: 15.38rpx;
+  padding: 24rpx;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.06);
 }
 
 .published-text {
