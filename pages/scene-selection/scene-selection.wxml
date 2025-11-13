@@ -51,26 +51,11 @@
     </view>
   </view>
 
-  <!-- Published Video Download Section -->
-  <view class="published-section" wx:if="{{!loading && publishStatus === 'published' && compiledVideoUrl}}">
-    <view class="published-banner">
-      <text class="published-text">您上传的视频已通过</text>
-      <custom-button
-        text="下载视频"
-        type="success"
-        size="small"
-        ext-class="download-btn"
-        catch:tap="downloadPublishedVideo">
-      </custom-button>
-    </view>
-  </view>
-
   <!-- Scenes List -->
   <view class="scenes-container" wx:if="{{!loading}}">
     <view class="scenes-header">
       <text class="scenes-title">场景</text>
-      <text class="scenes-subtitle" wx:if="{{publishStatus !== 'published'}}">点击"录制"开始拍摄每个场景</text>
-      <text class="scenes-subtitle" wx:else>所有场景已完成</text>
+      <text class="scenes-subtitle">点击"录制"开始拍摄每个场景</text>
     </view>
 
     <view class="scenes-list">
@@ -126,8 +111,8 @@
                 </custom-button>
               </view>
 
-              <!-- Record column: AI建议 (top) + 录制 (main) - Hide when published -->
-              <view class="btn-wrap record-wrap stacked" wx:if="{{publishStatus !== 'published'}}">
+              <!-- Record column: AI建议 (top) + 开始录制 (main) -->
+              <view class="btn-wrap record-wrap stacked">
                 <custom-button
                   wx:if="{{submissions[index + 1] && submissions[index + 1].aiSuggestions && submissions[index + 1].aiSuggestions.length > 0}}"
                   text="AI建议"
@@ -138,7 +123,7 @@
                   catch:tap="openAISuggestions">
                 </custom-button>
                 <custom-button
-                  text="录制"
+                  text="开始录制"
                   type="danger-outline"
                   size="default"
                   ext-class="block-btn"
