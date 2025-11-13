@@ -99,7 +99,7 @@ Page({
     })
   },
 
-  // 加载已分配的模板（从 assignments）
+  // 加载已分配的模板（从 assignments）- 待录制
   loadAssignedTemplates() {
     const app = getApp()
     if (!app.globalData.isLoggedIn || !app.globalData.userInfo) {
@@ -109,43 +109,40 @@ Page({
     if (this._loadingAssigned) return
     this._loadingAssigned = true
 
-    const groupId = app.globalData.userInfo.groupId
-    if (!groupId) {
-      logger.warn('用户没有分组，无法加载模板')
-      this._loadingAssigned = false
-      this.setData({ loading: false })
-      return
-    }
-
-    logger.log('开始加载组模板，组ID:', groupId)
+    const userId = app.globalData.userInfo.id
+    logger.log('开始加载待录制模板，用户ID:', userId)
 
     wx.request({
-      url: `${app.globalData.apiBaseUrl}/content-manager/groups/${groupId}/templates`,
+      url: `${app.globalData.apiBaseUrl}/content-creator/users/${userId}/assignments`,
       method: 'GET',
       header: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${wx.getStorageSync('access_token')}`
       },
       success: (res) => {
-        logger.log('分配模板响应:', res)
+        logger.log('待录制模板响应:', res)
 
         const isApiSuccess = res.data && res.data.success === true;
         const responseData = res.data && res.data.data ? res.data.data : [];
 
         if (res.statusCode === 200 && isApiSuccess) {
-          // Filter out expired templates
-          const templates = responseData.filter(t => t.status !== 'expired')
-          logger.log('获取到的有效模板数量:', templates.length)
+          const templates = responseData.map(t => ({
+            ...t,
+            thumbnail: t.thumbnailUrl && t.thumbnailUrl.startsWith('/')
+              ? app.globalData.apiBaseUrl + t.thumbnailUrl
+              : t.thumbnailUrl,
+            _titleClass: this.computeTitleClass(t.templateTitle)
+          }))
+          
+          logger.log('获取到的待录制模板数量:', templates.length)
 
           this.setData({
+            pendingTemplates: templates,
             recentTemplates: templates.slice(0, 3)
           })
 
-          // 更新全局模板数据
+          // 更新全局模板数据（兼容旧代码）
           app.globalData.templates = templates
-
-          // Now load all templates for display
-          this.loadAllTemplates()
         } else {
           const errorMessage = (res.data && res.data.message) || (res.data && res.data.error) || '获取模板失败';
           logger.warn('获取模板失败:', errorMessage)
@@ -246,66 +243,110 @@ Page({
     const tab = e.currentTarget.dataset.tab
     this.setData({ activeTab: tab })
     
-    // Load data for the selected tab if not loaded yet
-    if (tab === 'toDownload' && this.data.toDownloadVideos.length === 0) {
+    // Load data for the selected tab
+    if (tab === 'pending') {
+      if (this.data.pendingTemplates.length === 0) {
+        this.loadAssignedTemplates()
+      }
+    } else if (tab === 'toDownload') {
       this.loadPublishedVideos()
-    } else if (tab === 'downloaded' && this.data.downloadedVideos.length === 0) {
+    } else if (tab === 'downloaded') {
       this.loadDownloadedVideos()
     }
   },
 
-  // Categorize templates into pending (not fully recorded)
-  categorizeTemplates() {
-    const allTemplates = this.data.allTemplates
-    const pendingTemplates = allTemplates
-    
-    this.setData({ pendingTemplates })
-  },
-
   // Load published videos (待下载)
   loadPublishedVideos() {
+    const app = getApp()
     const userId = this.data.userInfo?.id || wx.getStorageSync('userId')
     if (!userId) return
     
-    const { API_BASE_URL } = require('../../utils/config.js')
+    logger.log('Loading to-download videos for user:', userId)
     
     wx.request({
-      url: `${API_BASE_URL}/content-creator/submissions/user/${userId}`,
+      url: `${app.globalData.apiBaseUrl}/content-creator/users/${userId}/to-download`,
       method: 'GET',
+      header: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${wx.getStorageSync('access_token')}`
+      },
       success: (res) => {
+        logger.log('To-download videos response:', res)
+        
         if (res.statusCode === 200 && res.data.success) {
-          const submissions = res.data.data || []
+          const videos = res.data.data || []
           
-          // Filter published videos
-          const toDownloadVideos = submissions
-            .filter(sub => sub.publishStatus === 'published' && sub.compiledVideoUrl)
-            .map(sub => ({
-              id: sub.id,
-              templateTitle: sub.templateTitle,
-              thumbnailUrl: sub.thumbnailUrl,
-              compiledVideoUrl: sub.compiledVideoSignedUrl || sub.compiledVideoUrl,
-              sceneCount: sub.scenes ? Object.keys(sub.scenes).length : 0,
-              totalDuration: sub.totalDuration || 0,
-              _titleClass: sub.templateTitle && sub.templateTitle.length > 10 ? 'tpl-title-small' : ''
-            }))
+          // Map to display format
+          const toDownloadVideos = videos.map(video => ({
+            id: video.id,
+            videoId: video.videoId,  // submittedVideo ID for status update
+            templateTitle: video.templateTitle || '未命名模板',
+            thumbnailUrl: video.thumbnailUrl,
+            compiledVideoUrl: video.signedUrl || video.videoUrl,
+            sceneCount: video.sceneCount || 0,
+            totalDuration: video.duration || 0,
+            _titleClass: this.computeTitleClass(video.templateTitle)
+          }))
           
+          logger.log('Mapped to-download videos:', toDownloadVideos.length)
           this.setData({ toDownloadVideos })
+        } else {
+          logger.warn('Failed to load to-download videos:', res.data)
         }
       },
       fail: (err) => {
-        console.error('Load published videos failed:', err)
+        logger.error('Load to-download videos failed:', err)
+        wx.showToast({
+          title: '加载失败',
+          icon: 'none'
+        })
       }
     })
   },
 
-  // Load downloaded videos (已下载) - stored locally
+  // Load downloaded videos (已下载) - from backend
   loadDownloadedVideos() {
-    try {
-      const downloaded = wx.getStorageSync('downloadedVideos') || []
-      this.setData({ downloadedVideos: downloaded })
-    } catch (e) {
-      console.error('Load downloaded videos failed:', e)
-    }
+    const app = getApp()
+    const userId = this.data.userInfo?.id || wx.getStorageSync('userId')
+    if (!userId) return
+    
+    logger.log('Loading downloaded videos for user:', userId)
+    
+    wx.request({
+      url: `${app.globalData.apiBaseUrl}/content-creator/users/${userId}/downloaded`,
+      method: 'GET',
+      header: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${wx.getStorageSync('access_token')}`
+      },
+      success: (res) => {
+        logger.log('Downloaded videos response:', res)
+        
+        if (res.statusCode === 200 && res.data.success) {
+          const videos = res.data.data || []
+          
+          // Map to display format
+          const downloadedVideos = videos.map(video => ({
+            id: video.id,
+            videoId: video.videoId,
+            templateTitle: video.templateTitle || '未命名模板',
+            thumbnailUrl: video.thumbnailUrl,
+            sceneCount: video.sceneCount || 0,
+            totalDuration: video.duration || 0,
+            downloadedAt: video.downloadedAt,
+            _titleClass: this.computeTitleClass(video.templateTitle)
+          }))
+          
+          logger.log('Mapped downloaded videos:', downloadedVideos.length)
+          this.setData({ downloadedVideos })
+        } else {
+          logger.warn('Failed to load downloaded videos:', res.data)
+        }
+      },
+      fail: (err) => {
+        logger.error('Load downloaded videos failed:', err)
+      }
+    })
   },
 
   // Download video
@@ -318,6 +359,7 @@ Page({
       return
     }
     
+    logger.log('Starting download:', { url, videoId })
     wx.showLoading({ title: '下载中...' })
     
     wx.downloadFile({
@@ -325,6 +367,7 @@ Page({
       success: (res) => {
         if (res.statusCode !== 200) {
           wx.hideLoading()
+          logger.error('Download failed with status:', res.statusCode)
           wx.showModal({
             title: '下载失败',
             content: '服务器返回错误，请稍后重试',
@@ -334,19 +377,21 @@ Page({
         }
         
         const filePath = res.tempFilePath
+        logger.log('Download completed, saving to album:', filePath)
         
         wx.saveVideoToPhotosAlbum({
           filePath: filePath,
           success: () => {
             wx.hideLoading()
+            logger.log('Video saved to album successfully')
             wx.showToast({ title: '已保存到相册', icon: 'success', duration: 2000 })
             
-            // Mark as downloaded
+            // Mark as downloaded in backend and local storage
             this.markAsDownloaded(videoId)
           },
           fail: (err) => {
             wx.hideLoading()
-            console.error('Save to album failed:', err)
+            logger.error('Save to album failed:', err)
             
             if (err.errMsg.includes('auth')) {
               wx.showModal({
@@ -371,7 +416,7 @@ Page({
       },
       fail: (err) => {
         wx.hideLoading()
-        console.error('Download failed:', err)
+        logger.error('Download failed:', err)
         
         if (err.errMsg && err.errMsg.includes('domain')) {
           wx.showModal({
@@ -393,8 +438,42 @@ Page({
   // Mark video as downloaded
   markAsDownloaded(videoId) {
     const video = this.data.toDownloadVideos.find(v => v.id === videoId)
-    if (!video) return
+    if (!video) {
+      logger.warn('Video not found in toDownloadVideos:', videoId)
+      return
+    }
     
+    const app = getApp()
+    const userId = this.data.userInfo?.id || wx.getStorageSync('userId')
+    
+    logger.log('Marking video as downloaded:', { videoId: video.videoId, userId })
+    
+    // Update backend status
+    wx.request({
+      url: `${app.globalData.apiBaseUrl}/content-creator/submitted-videos/${video.videoId}/mark-downloaded`,
+      method: 'POST',
+      header: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${wx.getStorageSync('access_token')}`
+      },
+      data: {
+        userId: userId
+      },
+      success: (res) => {
+        logger.log('Mark downloaded response:', res)
+        
+        if (res.statusCode === 200 && res.data.success) {
+          logger.log('✅ Backend updated successfully')
+        } else {
+          logger.warn('⚠️ Backend update failed:', res.data)
+        }
+      },
+      fail: (err) => {
+        logger.error('❌ Mark downloaded API failed:', err)
+      }
+    })
+    
+    // Update local storage
     try {
       let downloaded = wx.getStorageSync('downloadedVideos') || []
       
@@ -405,18 +484,20 @@ Page({
           downloadedAt: new Date().toISOString()
         })
         wx.setStorageSync('downloadedVideos', downloaded)
+        logger.log('✅ Local storage updated')
       }
       
       // Remove from toDownload list
       const toDownloadVideos = this.data.toDownloadVideos.filter(v => v.id !== videoId)
       this.setData({ toDownloadVideos })
+      logger.log('✅ UI updated, remaining videos:', toDownloadVideos.length)
       
       // Reload downloaded tab if active
       if (this.data.activeTab === 'downloaded') {
         this.loadDownloadedVideos()
       }
     } catch (e) {
-      console.error('Mark as downloaded failed:', e)
+      logger.error('❌ Local storage update failed:', e)
     }
   },
 
