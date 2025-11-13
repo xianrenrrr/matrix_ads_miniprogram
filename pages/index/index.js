@@ -5,9 +5,13 @@ Page({
     userInfo: null,
     isLoggedIn: false,
     allTemplates: [],
+    pendingTemplates: [],
+    toDownloadVideos: [],
+    downloadedVideos: [],
     recentTemplates: [],
     loading: true,
-    managerName: null
+    managerName: null,
+    activeTab: 'pending'
   },
 
   onLoad() {
@@ -180,7 +184,9 @@ Page({
       _titleClass: this.computeTitleClass(t.templateTitle)
     }))
 
-    this.setData({ allTemplates: templates })
+    this.setData({ allTemplates: templates }, () => {
+      this.categorizeTemplates()
+    })
   },
 
 
@@ -234,6 +240,185 @@ Page({
 
 
   // 已移除与模板页面相关的导航
+
+  // Switch tabs
+  switchTab(e) {
+    const tab = e.currentTarget.dataset.tab
+    this.setData({ activeTab: tab })
+    
+    // Load data for the selected tab if not loaded yet
+    if (tab === 'toDownload' && this.data.toDownloadVideos.length === 0) {
+      this.loadPublishedVideos()
+    } else if (tab === 'downloaded' && this.data.downloadedVideos.length === 0) {
+      this.loadDownloadedVideos()
+    }
+  },
+
+  // Categorize templates into pending (not fully recorded)
+  categorizeTemplates() {
+    const allTemplates = this.data.allTemplates
+    const pendingTemplates = allTemplates
+    
+    this.setData({ pendingTemplates })
+  },
+
+  // Load published videos (待下载)
+  loadPublishedVideos() {
+    const userId = this.data.userInfo?.id || wx.getStorageSync('userId')
+    if (!userId) return
+    
+    const { API_BASE_URL } = require('../../utils/config.js')
+    
+    wx.request({
+      url: `${API_BASE_URL}/content-creator/submissions/user/${userId}`,
+      method: 'GET',
+      success: (res) => {
+        if (res.statusCode === 200 && res.data.success) {
+          const submissions = res.data.data || []
+          
+          // Filter published videos
+          const toDownloadVideos = submissions
+            .filter(sub => sub.publishStatus === 'published' && sub.compiledVideoUrl)
+            .map(sub => ({
+              id: sub.id,
+              templateTitle: sub.templateTitle,
+              thumbnailUrl: sub.thumbnailUrl,
+              compiledVideoUrl: sub.compiledVideoSignedUrl || sub.compiledVideoUrl,
+              sceneCount: sub.scenes ? Object.keys(sub.scenes).length : 0,
+              totalDuration: sub.totalDuration || 0,
+              _titleClass: sub.templateTitle && sub.templateTitle.length > 10 ? 'tpl-title-small' : ''
+            }))
+          
+          this.setData({ toDownloadVideos })
+        }
+      },
+      fail: (err) => {
+        console.error('Load published videos failed:', err)
+      }
+    })
+  },
+
+  // Load downloaded videos (已下载) - stored locally
+  loadDownloadedVideos() {
+    try {
+      const downloaded = wx.getStorageSync('downloadedVideos') || []
+      this.setData({ downloadedVideos: downloaded })
+    } catch (e) {
+      console.error('Load downloaded videos failed:', e)
+    }
+  },
+
+  // Download video
+  downloadVideo(e) {
+    const url = e.currentTarget.dataset.url
+    const videoId = e.currentTarget.dataset.id
+    
+    if (!url) {
+      wx.showToast({ title: '视频地址无效', icon: 'none' })
+      return
+    }
+    
+    wx.showLoading({ title: '下载中...' })
+    
+    wx.downloadFile({
+      url: url,
+      success: (res) => {
+        if (res.statusCode !== 200) {
+          wx.hideLoading()
+          wx.showModal({
+            title: '下载失败',
+            content: '服务器返回错误，请稍后重试',
+            showCancel: false
+          })
+          return
+        }
+        
+        const filePath = res.tempFilePath
+        
+        wx.saveVideoToPhotosAlbum({
+          filePath: filePath,
+          success: () => {
+            wx.hideLoading()
+            wx.showToast({ title: '已保存到相册', icon: 'success', duration: 2000 })
+            
+            // Mark as downloaded
+            this.markAsDownloaded(videoId)
+          },
+          fail: (err) => {
+            wx.hideLoading()
+            console.error('Save to album failed:', err)
+            
+            if (err.errMsg.includes('auth')) {
+              wx.showModal({
+                title: '需要相册权限',
+                content: '请在设置中允许访问相册',
+                confirmText: '去设置',
+                success: (modalRes) => {
+                  if (modalRes.confirm) {
+                    wx.openSetting()
+                  }
+                }
+              })
+            } else {
+              wx.showModal({
+                title: '保存失败',
+                content: '无法保存到相册，请检查权限设置',
+                showCancel: false
+              })
+            }
+          }
+        })
+      },
+      fail: (err) => {
+        wx.hideLoading()
+        console.error('Download failed:', err)
+        
+        if (err.errMsg && err.errMsg.includes('domain')) {
+          wx.showModal({
+            title: '下载失败',
+            content: '下载域名未配置，请联系管理员',
+            showCancel: false
+          })
+        } else {
+          wx.showModal({
+            title: '下载失败',
+            content: '网络错误或文件不可用，请稍后重试',
+            showCancel: false
+          })
+        }
+      }
+    })
+  },
+
+  // Mark video as downloaded
+  markAsDownloaded(videoId) {
+    const video = this.data.toDownloadVideos.find(v => v.id === videoId)
+    if (!video) return
+    
+    try {
+      let downloaded = wx.getStorageSync('downloadedVideos') || []
+      
+      // Add to downloaded list if not already there
+      if (!downloaded.find(v => v.id === videoId)) {
+        downloaded.push({
+          ...video,
+          downloadedAt: new Date().toISOString()
+        })
+        wx.setStorageSync('downloadedVideos', downloaded)
+      }
+      
+      // Remove from toDownload list
+      const toDownloadVideos = this.data.toDownloadVideos.filter(v => v.id !== videoId)
+      this.setData({ toDownloadVideos })
+      
+      // Reload downloaded tab if active
+      if (this.data.activeTab === 'downloaded') {
+        this.loadDownloadedVideos()
+      }
+    } catch (e) {
+      console.error('Mark as downloaded failed:', e)
+    }
+  },
 
   // 退出登录
   handleLogout() {

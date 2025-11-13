@@ -29,13 +29,23 @@
       </view>
     </view>
 
-    <!-- 全部模版 标题（非盒子） -->
-    <text class="all-templates-link">全部模版</text>
+    <!-- Tabs -->
+    <view class="tabs-container">
+      <view class="tab {{activeTab === 'pending' ? 'tab-active' : ''}}" bindtap="switchTab" data-tab="pending">
+        <text>待录制</text>
+      </view>
+      <view class="tab {{activeTab === 'toDownload' ? 'tab-active' : ''}}" bindtap="switchTab" data-tab="toDownload">
+        <text>待下载</text>
+      </view>
+      <view class="tab {{activeTab === 'downloaded' ? 'tab-active' : ''}}" bindtap="switchTab" data-tab="downloaded">
+        <text>已下载</text>
+      </view>
+    </view>
 
-    <!-- 全部模版 列表 -->
-    <view wx:if="{{allTemplates.length}}" class="tpl-grid full-bleed">
+    <!-- 待录制 列表 -->
+    <view wx:if="{{activeTab === 'pending' && pendingTemplates.length > 0}}" class="tpl-grid full-bleed">
       <view
-        wx:for="{{allTemplates}}"
+        wx:for="{{pendingTemplates}}"
         wx:key="id"
         class="tpl-card"
         data-id="{{item.id}}"
@@ -62,6 +72,69 @@
           />
         </view>
       </view>
+    </view>
+
+    <!-- 待下载 列表 -->
+    <view wx:if="{{activeTab === 'toDownload' && toDownloadVideos.length > 0}}" class="tpl-grid full-bleed">
+      <view
+        wx:for="{{toDownloadVideos}}"
+        wx:key="id"
+        class="tpl-card"
+      >
+        <view class="tpl-thumb">
+          <image wx:if="{{item.thumbnailUrl}}" src="{{item.thumbnailUrl}}" mode="aspectFill" class="tpl-thumb-img" />
+          <view wx:else class="tpl-thumb-placeholder"></view>
+        </view>
+        <view class="tpl-title {{item._titleClass}}">{{item.templateTitle || '未命名模板'}}</view>
+        <view class="tpl-meta">
+          <view class="meta-item"><text class="meta-dot"></text><text>场景{{item.sceneCount || 0}}</text></view>
+          <view class="meta-item"><text class="meta-dot"></text><text>{{item.totalDuration || 0}}秒</text></view>
+        </view>
+        <view class="tpl-actions">
+          <custom-button
+            text="下载视频"
+            type="success"
+            size="default"
+            ext-class="block-btn"
+            data-url="{{item.compiledVideoUrl}}"
+            data-id="{{item.id}}"
+            catch:tap="downloadVideo"
+          />
+        </view>
+      </view>
+    </view>
+
+    <!-- 已下载 列表 -->
+    <view wx:if="{{activeTab === 'downloaded' && downloadedVideos.length > 0}}" class="tpl-grid full-bleed">
+      <view
+        wx:for="{{downloadedVideos}}"
+        wx:key="id"
+        class="tpl-card"
+      >
+        <view class="tpl-thumb">
+          <image wx:if="{{item.thumbnailUrl}}" src="{{item.thumbnailUrl}}" mode="aspectFill" class="tpl-thumb-img" />
+          <view wx:else class="tpl-thumb-placeholder"></view>
+        </view>
+        <view class="tpl-title {{item._titleClass}}">{{item.templateTitle || '未命名模板'}}</view>
+        <view class="tpl-meta">
+          <view class="meta-item"><text class="meta-dot"></text><text>场景{{item.sceneCount || 0}}</text></view>
+          <view class="meta-item"><text class="meta-dot"></text><text>{{item.totalDuration || 0}}秒</text></view>
+        </view>
+        <view class="tpl-meta">
+          <text class="downloaded-badge">✓ 已下载</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- Empty States -->
+    <view wx:if="{{activeTab === 'pending' && pendingTemplates.length === 0}}" class="empty-state">
+      <text class="empty-text">暂无待录制模板</text>
+    </view>
+    <view wx:if="{{activeTab === 'toDownload' && toDownloadVideos.length === 0}}" class="empty-state">
+      <text class="empty-text">暂无待下载视频</text>
+    </view>
+    <view wx:if="{{activeTab === 'downloaded' && downloadedVideos.length === 0}}" class="empty-state">
+      <text class="empty-text">暂无已下载视频</text>
     </view>
 
     <!-- 退出登录 CTA -->

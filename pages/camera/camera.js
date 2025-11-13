@@ -24,15 +24,9 @@ Page({
     showHints: false, // 显示指导
     uploadErrorMessage: '', // 上传错误信息
     pendingUploadData: null, // 待上传的数据
-    // 九宫格网格
-    gridOverlay: [], // 选中的网格块编号 [1,2,3,4,5,6,7,8,9]
-    gridLabels: [], // 每个网格块的标签
-    // 对象覆盖层
-    overlayType: 'grid', // 'grid' | 'objects' | 'polygons'
-    objectOverlay: [], // 对象覆盖数据 {label, confidence, x, y, w, h}
-    polygonOverlay: [], // 多边形覆盖数据
-    polygonOverlayPixels: [], // 多边形覆盖像素坐标
-    overlayRectsPixels: [], // MVP: [{left, top, width, height, colorHex, label, labelLocalized, confidence}]
+    // 关键要素覆盖层 (unified system)
+    keyElements: [], // 关键要素数据 [{name, box: [x,y,w,h] or null, confidence}]
+    overlayRectsPixels: [], // 像素坐标矩形 [{left, top, width, height, colorHex, name, confidence}]
     sourceAspect: '9:16', // 源视频比例
     // 指导信息
     backgroundInstructions: '',
@@ -152,12 +146,10 @@ Page({
     const sceneIndex = this.data.sceneIndex || 0
     const currentScene = scenes[sceneIndex] || {}
 
-    // 检查当前场景的覆盖类型
-    const overlayType = currentScene.overlayType || 'grid'
-    const isPolygonOverlay = overlayType === 'polygons'
-    const isObjectOverlay = overlayType === 'objects'
+    // 检查当前场景是否有关键要素
+    const hasKeyElements = currentScene.keyElementsWithBoxes && currentScene.keyElementsWithBoxes.length > 0
 
-    logger.log(`场景 ${sceneIndex + 1} 覆盖类型:`, overlayType)
+    logger.log(`场景 ${sceneIndex + 1} 关键要素数量:`, hasKeyElements ? currentScene.keyElementsWithBoxes.length : 0)
 
     // Helper: strip leading full/half width colons and spaces
     const strip = (v) => (typeof v === 'string' ? v.replace(/^[\s:：]+/, '') : v);
@@ -169,7 +161,6 @@ Page({
       maxRecordTime: currentScene.sceneDurationInSeconds || 30,
       currentScript: strip(currentScene.scriptLine || ''),
       sceneProgress: scenes.length > 0 ? (sceneIndex + 1) / scenes.length : 0,
-      overlayType: overlayType,
       sourceAspect: currentScene.sourceAspect || '9:16',
       // 相机设置
       cameraPosition: 'back', // 默认使用后置摄像头
@@ -182,29 +173,14 @@ Page({
       personPresentText: currentScene.presenceOfPerson ? t('yes') : t('no')
     }
 
-    if (isPolygonOverlay && currentScene.overlayPolygons && currentScene.overlayPolygons.length > 0) {
-      // 使用多边形覆盖模式
-      console.log('使用多边形覆盖模式，多边形数量:', currentScene.overlayPolygons.length)
-      updateData.polygonOverlay = currentScene.overlayPolygons
-      updateData.objectOverlay = []
-      updateData.gridOverlay = []
-      updateData.gridLabels = []
-    } else if (isObjectOverlay && currentScene.overlayObjects && currentScene.overlayObjects.length > 0) {
-      // MVP: 使用对象覆盖模式
-      console.log('MVP: 使用对象覆盖模式，对象数量:', currentScene.overlayObjects.length)
-      updateData.objectOverlay = this.processOverlayObjects(currentScene.overlayObjects)
-      updateData.polygonOverlay = []
-      updateData.gridOverlay = []
-      updateData.gridLabels = []
+    // 使用统一的关键要素系统
+    if (hasKeyElements) {
+      console.log('使用关键要素覆盖，数量:', currentScene.keyElementsWithBoxes.length)
+      updateData.keyElements = this.processKeyElements(currentScene.keyElementsWithBoxes)
     } else {
-      // 使用网格覆盖模式（默认或回退）
-      console.log('使用网格覆盖模式')
-      updateData.overlayType = 'grid'
-      updateData.gridOverlay = currentScene.screenGridOverlay || []
-      updateData.gridLabels = currentScene.screenGridOverlayLabels || []
-      updateData.objectOverlay = []
-      updateData.polygonOverlay = []
-      updateData.overlayRectsPixels = [] // Clear rect pixels for grid mode
+      console.log('无关键要素数据')
+      updateData.keyElements = []
+      updateData.overlayRectsPixels = []
     }
 
     // Initialize KTV view state
@@ -265,39 +241,38 @@ Page({
 
         const colors = that.getColorPalette()
 
-        // 处理多边形覆盖
-        if (that.data.overlayType === 'polygons' && that.data.polygonOverlay.length > 0) {
-          that.drawPolygonCanvas(containerW, containerH, that.data.polygonOverlay)
-        }
-
-        // MVP: 处理对象覆盖 (Canvas based)
-        if (that.data.overlayType === 'objects' && that.data.objectOverlay.length > 0) {
-          const scene = {
-            overlayObjects: that.data.objectOverlay,
-            sourceAspect: sourceAspect
-          }
-          that.updateOverlayPixelsForScene(scene, containerW, containerH, offsetX, offsetY, drawnW, drawnH, colors)
+        // 处理关键要素覆盖 (只显示有边界框的要素)
+        if (that.data.keyElements && that.data.keyElements.length > 0) {
+          that.updateKeyElementsPixels(containerW, containerH, offsetX, offsetY, drawnW, drawnH, colors)
         }
       })
       .exec()
   },
 
-  // MVP: Update overlay pixels for scene
-  updateOverlayPixelsForScene(scene, containerW, containerH, offsetX, offsetY, drawnW, drawnH, colors) {
-    const objs = scene.overlayObjects || []
+  // 更新关键要素像素坐标
+  updateKeyElementsPixels(containerW, containerH, offsetX, offsetY, drawnW, drawnH, colors) {
+    const elements = this.data.keyElements || []
 
     // Scale factor: 0.7 to make boxes 30% smaller
     const SCALE_FACTOR = 0.7
 
-    // Compute pixel rectangles  
+    // Compute pixel rectangles (only for elements with boxes)
     const overlayRectsPixels = []
-    for (let i = 0; i < objs.length; i++) {
-      const o = objs[i]
+    for (let i = 0; i < elements.length; i++) {
+      const element = elements[i]
+      
+      // Skip elements without bounding boxes (text-only elements)
+      if (!element.box) {
+        console.log(`KeyElement "${element.name}" has no box, skipping visual overlay`)
+        continue
+      }
+      
+      const box = element.box
       // Original dimensions
-      const origWidth = (o.width || o.w || 0) * drawnW
-      const origHeight = (o.height || o.h || 0) * drawnH
-      const origLeft = offsetX + (o.x || 0) * drawnW
-      const origTop = offsetY + (o.y || 0) * drawnH
+      const origWidth = box.width * drawnW
+      const origHeight = box.height * drawnH
+      const origLeft = offsetX + box.x * drawnW
+      const origTop = offsetY + box.y * drawnH
       
       // Scaled dimensions (30% smaller)
       const width = origWidth * SCALE_FACTOR
@@ -308,15 +283,12 @@ Page({
       const top = origTop + (origHeight - height) / 2
       
       const color = colors[i % colors.length]
-      const labelZh = o.labelZh || o.labelLocalized || toZh(o.label) || o.label || '未知'
 
       overlayRectsPixels.push({
         left, top, width, height,
         colorHex: color,
-        label: o.label,
-        labelZh: labelZh,
-        labelLocalized: o.labelLocalized || labelZh,
-        confidence: o.confidence
+        name: element.name,
+        confidence: element.confidence
       })
     }
 
@@ -326,7 +298,7 @@ Page({
     this.drawOverlayCanvas(containerW, containerH, overlayRectsPixels)
   },
 
-  // MVP: Draw overlay canvas with rectangles
+  // 绘制关键要素覆盖层
   drawOverlayCanvas(containerW, containerH, rects) {
     const ctx = wx.createCanvasContext('overlayCanvas', this)
     ctx.clearRect(0, 0, containerW, containerH)
@@ -335,7 +307,7 @@ Page({
     ctx.setCanvasSize ? ctx.setCanvasSize(containerW, containerH) : null
 
     rects.forEach((rect, index) => {
-      const { left, top, width, height, colorHex, labelLocalized, label } = rect
+      const { left, top, width, height, colorHex, name } = rect
 
       // Draw dashed rectangle (stroke only)
       ctx.setStrokeStyle(colorHex)
@@ -345,9 +317,8 @@ Page({
       ctx.rect(left, top, width, height)
       ctx.stroke()
 
-      // Draw Chinese label chip at top-left
-      const labelText = rect.labelZh || labelLocalized || toZh(label) || label || '未知'
-      if (labelText) {
+      // Draw name chip at top-left
+      if (name) {
         const chipX = left + 4
         const chipY = top + 4
         const chipWidth = 80
@@ -357,58 +328,17 @@ Page({
         ctx.setFillStyle(colorHex)
         ctx.fillRect(chipX, chipY, chipWidth, chipHeight)
 
-        // Label text
+        // Name text
         ctx.setFillStyle('#FFFFFF')
         ctx.setFontSize(12)
-        ctx.fillText(labelText, chipX + 4, chipY + 14)
+        ctx.fillText(name, chipX + 4, chipY + 14)
       }
     })
 
     ctx.draw()
   },
 
-  // 绘制多边形
-  drawPolygons(offsetX, offsetY, drawnW, drawnH, colors) {
-    const ctx = wx.createCanvasContext('polygonCanvas')
-    const polygons = this.data.polygonOverlay
 
-    polygons.forEach((polygon, index) => {
-      const color = colors[index % colors.length]
-      ctx.setStrokeStyle(color)
-      ctx.setLineWidth(2)
-      ctx.setLineDash([5, 5])
-
-      // 绘制多边形
-      if (polygon.points && polygon.points.length > 0) {
-        ctx.beginPath()
-        polygon.points.forEach((point, i) => {
-          const px = offsetX + point.x * drawnW
-          const py = offsetY + point.y * drawnH
-          if (i === 0) {
-            ctx.moveTo(px, py)
-          } else {
-            ctx.lineTo(px, py)
-          }
-        })
-        ctx.closePath()
-        ctx.stroke()
-
-        // 绘制标签
-        const labelX = offsetX + polygon.points[0].x * drawnW + 10
-        const labelY = offsetY + polygon.points[0].y * drawnH + 20
-
-        ctx.setFillStyle(color)
-        ctx.fillRect(labelX - 2, labelY - 14, 80, 20)
-
-        ctx.setFillStyle('#FFFFFF')
-        ctx.setFontSize(12)
-        const labelText = polygon.labelLocalized || toZh(polygon.label) || polygon.label || ''
-        ctx.fillText(labelText, labelX, labelY)
-      }
-    })
-
-    ctx.draw()
-  },
 
   // 根据宽高比确定拍摄方向
   getOrientationText(sourceAspect) {
@@ -427,120 +357,63 @@ Page({
   },
 
   /**
-   * 处理覆盖对象数组，规范化字段名称并验证数据
-   * @param {Array} overlayObjects - 原始覆盖对象数组
-   * @returns {Array} 处理后的覆盖对象数组
+   * 处理关键要素数组，规范化字段名称并验证数据
+   * @param {Array} keyElements - 关键要素数组 [{name, box: [x,y,w,h] or null, confidence}]
+   * @returns {Array} 处理后的关键要素数组
    */
-  processOverlayObjects(overlayObjects) {
-    if (!Array.isArray(overlayObjects)) {
-      console.warn('overlayObjects is not an array:', overlayObjects)
+  processKeyElements(keyElements) {
+    if (!Array.isArray(keyElements)) {
+      console.warn('keyElements is not an array:', keyElements)
       return []
     }
 
-    return overlayObjects.map((obj, index) => {
-      // 规范化字段名称（向后兼容）
-      const confidence = Math.max(0, Math.min(1, obj.confidence || 0))
+    return keyElements.map((element, index) => {
+      const confidence = Math.max(0, Math.min(1, element.confidence || 0))
       const processed = {
-        label: obj.label || '',
+        name: element.name || '',
         confidence: confidence,
         confidencePercent: Math.round(confidence * 100),
-        x: Math.max(0, Math.min(1, obj.x || 0)),
-        y: Math.max(0, Math.min(1, obj.y || 0)),
-        // 优先使用新字段名，后备到旧字段名
-        width: Math.max(0, Math.min(1, obj.width || obj.w || 0)),
-        height: Math.max(0, Math.min(1, obj.height || obj.h || 0))
+        box: null // Will be set below if box exists
       }
 
-      // 验证边界框完整性
-      if (processed.x + processed.width > 1) {
-        console.warn(`Object ${index}: x + width exceeds bounds, clamping`)
-        processed.width = 1 - processed.x
-      }
+      // 处理边界框（如果存在）
+      if (element.box && Array.isArray(element.box) && element.box.length === 4) {
+        const [x, y, width, height] = element.box
+        
+        // 验证并规范化坐标
+        processed.box = {
+          x: Math.max(0, Math.min(1, x)),
+          y: Math.max(0, Math.min(1, y)),
+          width: Math.max(0, Math.min(1, width)),
+          height: Math.max(0, Math.min(1, height))
+        }
 
-      if (processed.y + processed.height > 1) {
-        console.warn(`Object ${index}: y + height exceeds bounds, clamping`)
-        processed.height = 1 - processed.y
-      }
+        // 验证边界框完整性
+        if (processed.box.x + processed.box.width > 1) {
+          console.warn(`KeyElement ${index} (${processed.name}): x + width exceeds bounds, clamping`)
+          processed.box.width = 1 - processed.box.x
+        }
 
-      // 保留旧字段名用于向后兼容
-      processed.w = processed.width
-      processed.h = processed.height
+        if (processed.box.y + processed.box.height > 1) {
+          console.warn(`KeyElement ${index} (${processed.name}): y + height exceeds bounds, clamping`)
+          processed.box.height = 1 - processed.box.y
+        }
+
+        // 过滤掉无效的边界框
+        if (processed.box.width <= 0 || processed.box.height <= 0) {
+          console.warn(`KeyElement ${index} (${processed.name}): invalid box dimensions, treating as text-only`)
+          processed.box = null
+        }
+      }
 
       return processed
-    }).filter(obj => {
-      // 过滤掉无效对象
-      return obj.width > 0 && obj.height > 0 && obj.label.length > 0
+    }).filter(element => {
+      // 保留所有有名称的要素（无论是否有边界框）
+      return element.name.length > 0
     })
   },
 
-  /**
-   * 将归一化边界框转换为像素矩形
-   * @param {Object} normalizedBox - 归一化边界框 {x, y, width, height} 范围 [0,1]
-   * @param {number} containerWidth - 预览容器宽度 (px)
-   * @param {number} containerHeight - 预览容器高度 (px) 
-   * @param {string} objectFit - 对象适应模式 ('cover' | 'contain' | 'fill')
-   * @returns {Object} 像素矩形 {left, top, width, height}
-   */
-  convertNormalizedToPixelRect(normalizedBox, containerWidth, containerHeight, objectFit = 'cover') {
-    const { x, y, width, height } = normalizedBox
 
-    // 验证输入参数
-    if (typeof x !== 'number' || typeof y !== 'number' ||
-      typeof width !== 'number' || typeof height !== 'number' ||
-      x < 0 || y < 0 || width <= 0 || height <= 0 ||
-      x + width > 1 || y + height > 1) {
-      console.warn('Invalid normalized box coordinates:', normalizedBox)
-      return { left: 0, top: 0, width: 0, height: 0 }
-    }
-
-    if (containerWidth <= 0 || containerHeight <= 0) {
-      console.warn('Invalid container dimensions:', { containerWidth, containerHeight })
-      return { left: 0, top: 0, width: 0, height: 0 }
-    }
-
-    let scaleX, scaleY, offsetX = 0, offsetY = 0
-
-    switch (objectFit) {
-      case 'contain':
-        // 保持宽高比，全部内容可见，可能有黑边
-        const containScale = Math.min(containerWidth, containerHeight)
-        scaleX = scaleY = containScale
-        offsetX = (containerWidth - containScale) / 2
-        offsetY = (containerHeight - containScale) / 2
-        break
-
-      case 'fill':
-        // 拉伸填满容器，可能变形
-        scaleX = containerWidth
-        scaleY = containerHeight
-        break
-
-      case 'cover':
-      default:
-        // 保持宽高比，填满容器，可能裁剪
-        const coverScale = Math.max(containerWidth, containerHeight)
-        scaleX = scaleY = coverScale
-        offsetX = (containerWidth - coverScale) / 2
-        offsetY = (containerHeight - coverScale) / 2
-        break
-    }
-
-    // 转换坐标
-    const pixelRect = {
-      left: Math.round(x * scaleX + offsetX),
-      top: Math.round(y * scaleY + offsetY),
-      width: Math.round(width * scaleX),
-      height: Math.round(height * scaleY)
-    }
-
-    // 确保像素坐标在容器范围内
-    pixelRect.left = Math.max(0, Math.min(containerWidth - pixelRect.width, pixelRect.left))
-    pixelRect.top = Math.max(0, Math.min(containerHeight - pixelRect.height, pixelRect.top))
-    pixelRect.width = Math.min(containerWidth - pixelRect.left, pixelRect.width)
-    pixelRect.height = Math.min(containerHeight - pixelRect.top, pixelRect.height)
-
-    return pixelRect
-  },
 
   // 显示模板选择器
   showTemplateSelector() {
@@ -885,12 +758,7 @@ Page({
 
   // 清除所有覆盖层
   clearAllOverlays() {
-    // 清除多边形canvas
-    const polygonCtx = wx.createCanvasContext('polygonCanvas', this)
-    polygonCtx.clearRect(0, 0, 1000, 1000)
-    polygonCtx.draw()
-
-    // 清除对象覆盖canvas
+    // 清除关键要素覆盖canvas
     const overlayCtx = wx.createCanvasContext('overlayCanvas', this)
     overlayCtx.clearRect(0, 0, 1000, 1000)
     overlayCtx.draw()
@@ -1102,76 +970,7 @@ Page({
     this.stopTimer()
   },
 
-  // Draw polygon overlay on canvas
-  drawPolygonCanvas(containerW, containerH, polygons) {
-    const ctx = wx.createCanvasContext('polygonCanvas', this)
-    ctx.clearRect(0, 0, containerW, containerH)
 
-    // Calculate aspect ratio mapping (cover)
-    const sourceAspect = this.data.sourceAspect || '9:16'
-    const [sourceW, sourceH] = sourceAspect.split(':').map(Number)
-    const sourceRatio = sourceH / sourceW
-    const containerRatio = containerH / containerW
-
-    let drawnW, drawnH, offsetX = 0, offsetY = 0
-
-    if (containerRatio > sourceRatio) {
-      drawnW = containerW
-      drawnH = containerW * sourceRatio
-      offsetY = (containerH - drawnH) / 2
-    } else {
-      drawnH = containerH
-      drawnW = containerH / sourceRatio
-      offsetX = (containerW - drawnW) / 2
-    }
-
-    const colors = this.getColorPalette()
-
-    // Draw each polygon
-    polygons.forEach((polygon, index) => {
-      const color = colors[index % colors.length]
-
-      // Draw dashed polygon stroke
-      ctx.setStrokeStyle(color)
-      ctx.setLineWidth(2)
-      ctx.setLineDash([5, 5])
-
-      ctx.beginPath()
-      if (polygon.points && polygon.points.length > 0) {
-        polygon.points.forEach((point, i) => {
-          const x = offsetX + point.x * drawnW
-          const y = offsetY + point.y * drawnH
-
-          if (i === 0) {
-            ctx.moveTo(x, y)
-          } else {
-            ctx.lineTo(x, y)
-          }
-        })
-        ctx.closePath()
-      }
-      ctx.stroke()
-
-      // Draw Chinese label chip near first vertex
-      if (polygon.points && polygon.points.length > 0) {
-        const labelX = offsetX + polygon.points[0].x * drawnW
-        const labelY = offsetY + polygon.points[0].y * drawnH + 20
-
-        const labelText = polygon.labelZh || polygon.labelLocalized || toZh(polygon.label) || polygon.label || '未知'
-
-        // Label background
-        ctx.setFillStyle(color)
-        ctx.fillRect(labelX - 2, labelY - 14, 80, 20)
-
-        // Label text
-        ctx.setFillStyle('#FFFFFF')
-        ctx.setFontSize(12)
-        ctx.fillText(labelText, labelX, labelY)
-      }
-    })
-
-    ctx.draw()
-  },
 
   // Color palette (RED first)
   getColorPalette() {

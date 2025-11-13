@@ -311,15 +311,54 @@ page {
 /* Full-bleed card: cancel container side padding to reach phone edges */
 .full-bleed { margin-left: -32rpx; margin-right: -32rpx; }
 
-/* 全部模版 标题样式 */
-.all-templates-link {
-  display: block;
-  /* Align 38.46rpx from phone left: container has 32rpx padding, so add 6.46rpx */
-  margin-left: -20rpx;
-  margin-top: 30rpx;
-  font-size: 40rpx;    /* same as 您好 */
-  font-weight: 700;
-  color: #1f2a44;      /* match home title color */
+/* Tabs */
+.tabs-container {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin: 30rpx -20rpx 30rpx -20rpx;
+  padding: 8rpx;
+  background: #f5f5f5;
+  border-radius: 12rpx;
+}
+
+.tab {
+  flex: 1;
+  text-align: center;
+  padding: 16rpx 24rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #6b7280;
+  border-radius: 8rpx;
+  transition: all 0.3s;
+}
+
+.tab-active {
+  background: #ffffff;
+  color: #1f2a44;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 120rpx 40rpx;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #9ca3af;
+}
+
+/* Downloaded Badge */
+.downloaded-badge {
+  display: inline-block;
+  padding: 4rpx 12rpx;
+  background: #10b981;
+  color: #ffffff;
+  font-size: 22rpx;
+  border-radius: 12rpx;
+  font-weight: 600;
 }
 
 
