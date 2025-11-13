@@ -120,8 +120,16 @@
           <view class="meta-item"><text class="meta-dot"></text><text>场景{{item.sceneCount || 0}}</text></view>
           <view class="meta-item"><text class="meta-dot"></text><text>{{item.totalDuration || 0}}秒</text></view>
         </view>
-        <view class="tpl-meta">
-          <text class="downloaded-badge">✓ 已下载</text>
+        <view class="tpl-actions">
+          <custom-button
+            text="下载视频"
+            type="success"
+            size="default"
+            ext-class="block-btn"
+            data-url="{{item.compiledVideoUrl}}"
+            data-id="{{item.id}}"
+            catch:tap="downloadVideo"
+          />
         </view>
       </view>
     </view>
