@@ -88,6 +88,17 @@
   border: 2rpx solid #ef4444; /* darker red outline */
 }
 
+/* Green outline variant: white background, green text + border */
+.success-outline {
+  background: #ffffff;
+  color: #059669;
+  border: 2rpx solid #059669;
+}
+
+.success-outline:active {
+  background: #f0fdf4;
+}
+
 /* Sizes */
 .mini {
   padding: 10rpx 22rpx;

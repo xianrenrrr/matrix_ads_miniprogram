@@ -93,7 +93,7 @@
         <view class="tpl-actions">
           <custom-button
             text="下载视频"
-            type="success"
+            type="success-outline"
             size="default"
             ext-class="block-btn"
             data-url="{{item.compiledVideoUrl}}"
@@ -123,7 +123,7 @@
         <view class="tpl-actions">
           <custom-button
             text="下载视频"
-            type="success"
+            type="success-outline"
             size="default"
             ext-class="block-btn"
             data-url="{{item.compiledVideoUrl}}"
