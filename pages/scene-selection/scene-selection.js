@@ -42,75 +42,27 @@ Page({
       wx.showToast({ title: '暂无已发布视频', icon: 'none' });
       return;
     }
-    
     wx.showLoading({ title: '下载中...' });
-    
     wx.downloadFile({
       url: url,
       success: (res) => {
-        if (res.statusCode !== 200) {
-          wx.hideLoading();
-          wx.showModal({
-            title: '下载失败',
-            content: '服务器返回错误，请稍后重试',
-            showCancel: false
-          });
-          return;
-        }
-        
         const filePath = res.tempFilePath;
-        
-        // Try to save to photo album
         wx.saveVideoToPhotosAlbum({
           filePath: filePath,
           success: () => {
             wx.hideLoading();
-            wx.showToast({ title: '已保存到相册', icon: 'success', duration: 2000 });
+            wx.showToast({ title: '保存成功', icon: 'success' });
           },
-          fail: (err) => {
+          fail: () => {
             wx.hideLoading();
-            console.error('Save to album failed:', err);
-            
-            // Check if permission denied
-            if (err.errMsg.includes('auth')) {
-              wx.showModal({
-                title: '需要相册权限',
-                content: '请在设置中允许访问相册',
-                confirmText: '去设置',
-                success: (modalRes) => {
-                  if (modalRes.confirm) {
-                    wx.openSetting();
-                  }
-                }
-              });
-            } else {
-              wx.showModal({
-                title: '保存失败',
-                content: '无法保存到相册，请检查权限设置',
-                showCancel: false
-              });
-            }
+            // If cannot save to album, fallback to open the file
+            wx.openDocument({ filePath, showMenu: true });
           }
         });
       },
-      fail: (err) => {
+      fail: () => {
         wx.hideLoading();
-        console.error('Download failed:', err);
-        
-        // Check if it's a domain whitelist issue
-        if (err.errMsg && err.errMsg.includes('domain')) {
-          wx.showModal({
-            title: '下载失败',
-            content: '下载域名未配置，请联系管理员在小程序后台添加 xpectra.oss-cn-shanghai.aliyuncs.com 到下载域名白名单',
-            showCancel: false
-          });
-        } else {
-          wx.showModal({
-            title: '下载失败',
-            content: '网络错误或文件不可用，请稍后重试',
-            showCancel: false
-          });
-        }
+        wx.showToast({ title: '下载失败', icon: 'none' });
       }
     });
   },
