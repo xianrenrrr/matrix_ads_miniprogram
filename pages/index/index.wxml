@@ -36,6 +36,7 @@
       </view>
       <view class="tab {{activeTab === 'toDownload' ? 'tab-active' : ''}}" bindtap="switchTab" data-tab="toDownload">
         <text>待下载</text>
+        <view wx:if="{{toDownloadCount > 0}}" class="tab-badge">{{toDownloadCount}}</view>
       </view>
       <view class="tab {{activeTab === 'downloaded' ? 'tab-active' : ''}}" bindtap="switchTab" data-tab="downloaded">
         <text>已下载</text>

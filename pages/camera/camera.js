@@ -983,5 +983,62 @@ Page({
       '#32ADE6', // Light Blue
       '#FF375F'  // Pink
     ]
+  },
+
+  // Process keyElementsWithBoxes from template
+  processKeyElements(keyElementsWithBoxes) {
+    if (!keyElementsWithBoxes || keyElementsWithBoxes.length === 0) {
+      return []
+    }
+    
+    // Filter out elements without boxes (abstract concepts)
+    return keyElementsWithBoxes.filter(el => el.box && el.box.length === 4)
+  },
+
+  // Update overlay rectangles in pixel coordinates
+  updateOverlayPixels() {
+    const { keyElements, sourceAspect } = this.data
+    
+    if (!keyElements || keyElements.length === 0) {
+      this.setData({ overlayRectsPixels: [] })
+      return
+    }
+
+    // Get system info for screen dimensions
+    const systemInfo = wx.getSystemInfoSync()
+    const screenWidth = systemInfo.windowWidth
+    const screenHeight = systemInfo.windowHeight
+
+    // Calculate camera view dimensions based on aspect ratio
+    let viewWidth, viewHeight
+    if (sourceAspect === '16:9') {
+      // Landscape
+      viewWidth = screenWidth
+      viewHeight = screenWidth * 9 / 16
+    } else {
+      // Portrait 9:16
+      viewWidth = screenWidth
+      viewHeight = screenWidth * 16 / 9
+    }
+
+    const colors = this.getColorPalette()
+    
+    // Convert normalized boxes to pixel coordinates
+    const overlayRectsPixels = keyElements.map((el, index) => {
+      const [x, y, w, h] = el.box
+      
+      return {
+        left: x * viewWidth,
+        top: y * viewHeight,
+        width: w * viewWidth,
+        height: h * viewHeight,
+        colorHex: colors[index % colors.length],
+        name: el.name,
+        confidence: el.confidence
+      }
+    })
+
+    this.setData({ overlayRectsPixels })
+    console.log('Updated overlay pixels:', overlayRectsPixels)
   }
 })

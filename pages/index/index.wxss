@@ -331,12 +331,31 @@ page {
   color: #6b7280;
   border-radius: 8rpx;
   transition: all 0.3s;
+  position: relative;
 }
 
 .tab-active {
   background: #ffffff;
   color: #1f2a44;
   box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
+}
+
+.tab-badge {
+  position: absolute;
+  top: 8rpx;
+  right: 12rpx;
+  min-width: 32rpx;
+  height: 32rpx;
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 20rpx;
+  font-weight: 700;
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8rpx;
+  box-shadow: 0 2rpx 8rpx rgba(239, 68, 68, 0.4);
 }
 
 /* Empty State */

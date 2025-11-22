@@ -11,7 +11,8 @@ Page({
     recentTemplates: [],
     loading: true,
     managerName: null,
-    activeTab: 'pending'
+    activeTab: 'pending',
+    toDownloadCount: 0  // Badge count for 待下载 tab
   },
 
   onLoad() {
@@ -50,6 +51,8 @@ Page({
       // Load manager name and templates
       this.loadManagerName()
       this.loadAssignedTemplates()
+      // Load to-download count for badge
+      this.loadToDownloadCount()
     } else {
       // Not logged in, show page immediately
       this.setData({ loading: false })
@@ -61,6 +64,7 @@ Page({
     this.loadManagerName()
     this.loadAssignedTemplates()
     this.loadAllTemplates()
+    this.loadToDownloadCount()
   },
 
   // 加载管理员名称
@@ -255,6 +259,32 @@ Page({
     }
   },
 
+  // Load to-download count for badge (called on page load)
+  loadToDownloadCount() {
+    const app = getApp()
+    const userId = this.data.userInfo?.id || wx.getStorageSync('userId')
+    if (!userId) return
+    
+    wx.request({
+      url: `${app.globalData.apiBaseUrl}/content-creator/users/${userId}/to-download`,
+      method: 'GET',
+      header: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${wx.getStorageSync('access_token')}`
+      },
+      success: (res) => {
+        if (res.statusCode === 200 && res.data.success) {
+          const videos = res.data.data || []
+          this.setData({ toDownloadCount: videos.length })
+          logger.log('To-download badge count:', videos.length)
+        }
+      },
+      fail: (err) => {
+        logger.error('Load to-download count failed:', err)
+      }
+    })
+  },
+
   // Load published videos (待下载)
   loadPublishedVideos() {
     const app = getApp()
@@ -289,7 +319,10 @@ Page({
           }))
           
           logger.log('Mapped to-download videos:', toDownloadVideos.length)
-          this.setData({ toDownloadVideos })
+          this.setData({ 
+            toDownloadVideos,
+            toDownloadCount: toDownloadVideos.length  // Update badge count
+          })
         } else {
           logger.warn('Failed to load to-download videos:', res.data)
         }
@@ -489,7 +522,10 @@ Page({
       
       // Remove from toDownload list
       const toDownloadVideos = this.data.toDownloadVideos.filter(v => v.id !== videoId)
-      this.setData({ toDownloadVideos })
+      this.setData({ 
+        toDownloadVideos,
+        toDownloadCount: toDownloadVideos.length  // Update badge count
+      })
       logger.log('✅ UI updated, remaining videos:', toDownloadVideos.length)
       
       // Reload downloaded tab if active
