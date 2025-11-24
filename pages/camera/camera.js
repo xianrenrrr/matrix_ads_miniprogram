@@ -28,6 +28,7 @@ Page({
     keyElements: [], // 关键要素数据 [{name, box: [x,y,w,h] or null, confidence}]
     overlayRectsPixels: [], // 像素坐标矩形 [{left, top, width, height, colorHex, name, confidence}]
     sourceAspect: '9:16', // 源视频比例
+    isLandscape: false, // 是否横屏拍摄 (16:9)
     // 指导信息
     backgroundInstructions: '',
     cameraInstructions: '',
@@ -155,20 +156,24 @@ Page({
     const strip = (v) => (typeof v === 'string' ? v.replace(/^[\s:：]+/, '') : v);
 
     // 设置基础数据
+    const sourceAspect = currentScene.sourceAspect || '9:16'
+    const isLandscape = this.checkIfLandscape(sourceAspect)
+    
     let updateData = {
       selectedTemplate: template,
       currentScene: sceneIndex,
       maxRecordTime: currentScene.sceneDurationInSeconds || 30,
       currentScript: strip(currentScene.scriptLine || ''),
       sceneProgress: scenes.length > 0 ? (sceneIndex + 1) / scenes.length : 0,
-      sourceAspect: currentScene.sourceAspect || '9:16',
+      sourceAspect: sourceAspect,
+      isLandscape: isLandscape,
       // 相机设置
       cameraPosition: 'back', // 默认使用后置摄像头
       // 指导信息
       backgroundInstructions: strip(currentScene.backgroundInstructions || ''),
       cameraInstructions: strip(currentScene.specificCameraInstructions || ''),
       movementInstructions: strip(currentScene.movementInstructions || ''),
-      deviceOrientationText: this.getOrientationText(currentScene.sourceAspect || '9:16'),
+      deviceOrientationText: this.getOrientationText(sourceAspect),
       audioNotesText: strip(currentScene.audioNotes || ''),
       personPresentText: currentScene.presenceOfPerson ? t('yes') : t('no')
     }
@@ -199,7 +204,7 @@ Page({
     this.updateOverlayPixels()
 
     console.log('模板设置完成，当前场景:', currentScene)
-    console.log('覆盖模式:', updateData.overlayType, '对象数量:', updateData.objectOverlay.length)
+    console.log('isLandscape:', isLandscape, 'sourceAspect:', sourceAspect)
   },
 
   // 颜色调色板 - 第一个是红色
@@ -225,9 +230,17 @@ Page({
       .boundingClientRect(rect => {
         if (!rect) return
 
-        const containerW = rect.width
-        const containerH = rect.height
+        let containerW = rect.width
+        let containerH = rect.height
         const sourceAspect = that.data.sourceAspect || '9:16'
+        const isLandscape = that.data.isLandscape
+
+        // For landscape, swap dimensions because camera will be rotated
+        if (isLandscape) {
+          const temp = containerW
+          containerW = containerH
+          containerH = temp
+        }
 
         // 解析比例
         const [vw, vh] = sourceAspect.split(':').map(Number)
@@ -340,6 +353,17 @@ Page({
 
 
 
+  // 检查是否横屏拍摄
+  checkIfLandscape(sourceAspect) {
+    if (!sourceAspect) return false
+    const parts = sourceAspect.split(':')
+    if (parts.length !== 2) return false
+    const width = parseFloat(parts[0])
+    const height = parseFloat(parts[1])
+    if (isNaN(width) || isNaN(height)) return false
+    return width > height
+  },
+
   // 根据宽高比确定拍摄方向
   getOrientationText(sourceAspect) {
     if (!sourceAspect) return '竖拍'
@@ -353,7 +377,7 @@ Page({
     if (isNaN(width) || isNaN(height)) return '竖拍'
 
     // 如果宽度 > 高度，横拍；否则竖拍
-    return width > height ? '横拍' : '竖拍'
+    return width > height ? '横拍 (手机竖握，画面横向)' : '竖拍'
   },
 
   /**
@@ -985,60 +1009,4 @@ Page({
     ]
   },
 
-  // Process keyElementsWithBoxes from template
-  processKeyElements(keyElementsWithBoxes) {
-    if (!keyElementsWithBoxes || keyElementsWithBoxes.length === 0) {
-      return []
-    }
-    
-    // Filter out elements without boxes (abstract concepts)
-    return keyElementsWithBoxes.filter(el => el.box && el.box.length === 4)
-  },
-
-  // Update overlay rectangles in pixel coordinates
-  updateOverlayPixels() {
-    const { keyElements, sourceAspect } = this.data
-    
-    if (!keyElements || keyElements.length === 0) {
-      this.setData({ overlayRectsPixels: [] })
-      return
-    }
-
-    // Get system info for screen dimensions
-    const systemInfo = wx.getSystemInfoSync()
-    const screenWidth = systemInfo.windowWidth
-    const screenHeight = systemInfo.windowHeight
-
-    // Calculate camera view dimensions based on aspect ratio
-    let viewWidth, viewHeight
-    if (sourceAspect === '16:9') {
-      // Landscape
-      viewWidth = screenWidth
-      viewHeight = screenWidth * 9 / 16
-    } else {
-      // Portrait 9:16
-      viewWidth = screenWidth
-      viewHeight = screenWidth * 16 / 9
-    }
-
-    const colors = this.getColorPalette()
-    
-    // Convert normalized boxes to pixel coordinates
-    const overlayRectsPixels = keyElements.map((el, index) => {
-      const [x, y, w, h] = el.box
-      
-      return {
-        left: x * viewWidth,
-        top: y * viewHeight,
-        width: w * viewWidth,
-        height: h * viewHeight,
-        colorHex: colors[index % colors.length],
-        name: el.name,
-        confidence: el.confidence
-      }
-    })
-
-    this.setData({ overlayRectsPixels })
-    console.log('Updated overlay pixels:', overlayRectsPixels)
-  }
 })

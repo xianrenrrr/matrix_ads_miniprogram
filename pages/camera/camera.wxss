@@ -38,6 +38,19 @@
   position: relative;
 }
 
+/* Rotate entire camera for landscape (16:9) */
+camera.landscape {
+  transform: rotate(90deg);
+  transform-origin: center center;
+  width: 100vh !important;
+  height: 100vw !important;
+  position: absolute !important;
+  left: 50% !important;
+  top: 50% !important;
+  margin-left: -50vh !important;
+  margin-top: -50vw !important;
+}
+
 /* 网格覆盖 */
 .grid-overlay {
   position: absolute;
@@ -143,7 +156,7 @@
   50% { opacity: 0.5; }
 }
 
-/* 录制时间显示 */
+/* 录制时间显示 (outside camera - for portrait mode) */
 .recording-timer {
   text-align: center;
   margin-bottom: 32rpx;
@@ -151,6 +164,28 @@
   background-color: rgba(0, 0, 0, 0.7);
   border-radius: 24rpx;
   display: inline-block;
+}
+
+/* 录制时间显示 (inside camera - rotates with camera) */
+.recording-timer-in-camera {
+  position: absolute;
+  bottom: 32rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  padding: 16rpx 24rpx;
+  background-color: rgba(0, 0, 0, 0.7);
+  border-radius: 24rpx;
+  z-index: 8;
+}
+
+/* For landscape: position timer right beside the back button */
+camera.landscape .recording-timer-in-camera {
+  top: auto;
+  bottom: 32rpx;
+  left: 160rpx;
+  right: auto;
+  transform: none;
 }
 
 .timer-text {
@@ -201,6 +236,13 @@
   align-items: center;
 }
 
+/* For landscape: move back button to top-left (bottom-left when sideways) */
+camera.landscape .top-controls {
+  top: auto;
+  bottom: 32rpx;
+  left: 60rpx;
+}
+
 /* 右侧控制栏 */
 .right-controls {
   position: absolute;
@@ -219,6 +261,15 @@
 
 .right-controls.shifted-left {
   right: 310rpx;
+}
+
+/* For landscape mode: position along the short side (right edge), moved up slightly */
+camera.landscape .right-controls {
+  top: 50%;
+  bottom: auto;
+  right: 280rpx;
+  left: auto;
+  transform: translateY(-50%);
 }
 
 .control-btn {
