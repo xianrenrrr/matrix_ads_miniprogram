@@ -137,13 +137,13 @@
 
     <!-- Empty States -->
     <view wx:if="{{activeTab === 'pending' && pendingTemplates.length === 0}}" class="empty-state">
-      <text class="empty-text">暂无待录制模板</text>
+      <text class="empty-text">{{loadingPending ? '加载中...' : '暂无待录制模板'}}</text>
     </view>
     <view wx:if="{{activeTab === 'toDownload' && toDownloadVideos.length === 0}}" class="empty-state">
-      <text class="empty-text">暂无待下载视频</text>
+      <text class="empty-text">{{loadingToDownload ? '加载中...' : '暂无待下载视频'}}</text>
     </view>
     <view wx:if="{{activeTab === 'downloaded' && downloadedVideos.length === 0}}" class="empty-state">
-      <text class="empty-text">暂无已下载视频</text>
+      <text class="empty-text">{{loadingDownloaded ? '加载中...' : '暂无已下载视频'}}</text>
     </view>
 
     <!-- 退出登录 CTA -->

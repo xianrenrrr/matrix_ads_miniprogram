@@ -12,7 +12,10 @@ Page({
     loading: true,
     managerName: null,
     activeTab: 'pending',
-    toDownloadCount: 0  // Badge count for 待下载 tab
+    toDownloadCount: 0,  // Badge count for 待下载 tab
+    loadingPending: false,
+    loadingToDownload: false,
+    loadingDownloaded: false
   },
 
   onLoad() {
@@ -112,6 +115,7 @@ Page({
     }
     if (this._loadingAssigned) return
     this._loadingAssigned = true
+    this.setData({ loadingPending: true })
 
     const userId = app.globalData.userInfo.id
     logger.log('开始加载待录制模板，用户ID:', userId)
@@ -165,7 +169,7 @@ Page({
       },
       complete: () => {
         this._loadingAssigned = false
-        this.setData({ loading: false })
+        this.setData({ loading: false, loadingPending: false })
       }
     })
   },
@@ -249,13 +253,17 @@ Page({
     
     // Load data for the selected tab
     if (tab === 'pending') {
-      if (this.data.pendingTemplates.length === 0) {
+      if (this.data.pendingTemplates.length === 0 && !this.data.loadingPending) {
         this.loadAssignedTemplates()
       }
     } else if (tab === 'toDownload') {
-      this.loadPublishedVideos()
+      if (!this.data.loadingToDownload) {
+        this.loadPublishedVideos()
+      }
     } else if (tab === 'downloaded') {
-      this.loadDownloadedVideos()
+      if (!this.data.loadingDownloaded) {
+        this.loadDownloadedVideos()
+      }
     }
   },
 
@@ -291,6 +299,7 @@ Page({
     const userId = this.data.userInfo?.id || wx.getStorageSync('userId')
     if (!userId) return
     
+    this.setData({ loadingToDownload: true })
     logger.log('Loading to-download videos for user:', userId)
     
     wx.request({
@@ -321,14 +330,17 @@ Page({
           logger.log('Mapped to-download videos:', toDownloadVideos.length)
           this.setData({ 
             toDownloadVideos,
-            toDownloadCount: toDownloadVideos.length  // Update badge count
+            toDownloadCount: toDownloadVideos.length,  // Update badge count
+            loadingToDownload: false
           })
         } else {
           logger.warn('Failed to load to-download videos:', res.data)
+          this.setData({ loadingToDownload: false })
         }
       },
       fail: (err) => {
         logger.error('Load to-download videos failed:', err)
+        this.setData({ loadingToDownload: false })
         wx.showToast({
           title: '加载失败',
           icon: 'none'
@@ -343,6 +355,7 @@ Page({
     const userId = this.data.userInfo?.id || wx.getStorageSync('userId')
     if (!userId) return
     
+    this.setData({ loadingDownloaded: true })
     logger.log('Loading downloaded videos for user:', userId)
     
     wx.request({
@@ -364,6 +377,7 @@ Page({
             videoId: video.videoId,
             templateTitle: video.templateTitle || '未命名模板',
             thumbnailUrl: video.thumbnailUrl,
+            compiledVideoUrl: video.signedUrl || video.compiledVideoUrl || video.videoUrl,
             sceneCount: video.sceneCount || 0,
             totalDuration: video.duration || 0,
             downloadedAt: video.downloadedAt,
@@ -371,28 +385,43 @@ Page({
           }))
           
           logger.log('Mapped downloaded videos:', downloadedVideos.length)
-          this.setData({ downloadedVideos })
+          this.setData({ downloadedVideos, loadingDownloaded: false })
         } else {
           logger.warn('Failed to load downloaded videos:', res.data)
+          this.setData({ loadingDownloaded: false })
         }
       },
       fail: (err) => {
         logger.error('Load downloaded videos failed:', err)
+        this.setData({ loadingDownloaded: false })
       }
     })
   },
 
   // Download video
   downloadVideo(e) {
-    const url = e.currentTarget.dataset.url
-    const videoId = e.currentTarget.dataset.id
+    const compositeVideoId = e.currentTarget.dataset.id
     
-    if (!url) {
-      wx.showToast({ title: '视频地址无效', icon: 'none' })
+    if (!compositeVideoId) {
+      wx.showToast({ title: '视频ID无效', icon: 'none' })
       return
     }
     
-    logger.log('Starting download:', { url, videoId })
+    // Find the video in either toDownload or downloaded list
+    const video = this.data.toDownloadVideos.find(v => v.id === compositeVideoId) 
+                  || this.data.downloadedVideos.find(v => v.id === compositeVideoId)
+    if (!video) {
+      wx.showToast({ title: '视频不存在', icon: 'none' })
+      return
+    }
+    
+    const url = video.compiledVideoUrl
+    if (!url) {
+      wx.showToast({ title: '视频链接无效', icon: 'none' })
+      return
+    }
+    
+    logger.log('Starting download for:', compositeVideoId)
     wx.showLoading({ title: '下载中...' })
     
     wx.downloadFile({
@@ -419,8 +448,10 @@ Page({
             logger.log('Video saved to album successfully')
             wx.showToast({ title: '已保存到相册', icon: 'success', duration: 2000 })
             
-            // Mark as downloaded in backend and local storage
-            this.markAsDownloaded(videoId)
+            // Mark as downloaded in backend and local storage (only for toDownload videos)
+            if (this.data.toDownloadVideos.find(v => v.id === compositeVideoId)) {
+              this.markAsDownloaded(compositeVideoId, video.videoId)
+            }
           },
           fail: (err) => {
             wx.hideLoading()
@@ -469,21 +500,21 @@ Page({
   },
 
   // Mark video as downloaded
-  markAsDownloaded(videoId) {
-    const video = this.data.toDownloadVideos.find(v => v.id === videoId)
+  markAsDownloaded(compositeVideoId, submittedVideoId) {
+    const video = this.data.toDownloadVideos.find(v => v.id === compositeVideoId)
     if (!video) {
-      logger.warn('Video not found in toDownloadVideos:', videoId)
+      logger.warn('Video not found in toDownloadVideos:', compositeVideoId)
       return
     }
     
     const app = getApp()
     const userId = this.data.userInfo?.id || wx.getStorageSync('userId')
     
-    logger.log('Marking video as downloaded:', { videoId: video.videoId, userId })
+    logger.log('Marking video as downloaded:', { compositeVideoId, submittedVideoId, userId })
     
     // Update backend status
     wx.request({
-      url: `${app.globalData.apiBaseUrl}/content-creator/submitted-videos/${video.videoId}/mark-downloaded`,
+      url: `${app.globalData.apiBaseUrl}/content-creator/submitted-videos/${submittedVideoId}/mark-downloaded`,
       method: 'POST',
       header: {
         'Content-Type': 'application/json',
@@ -511,7 +542,7 @@ Page({
       let downloaded = wx.getStorageSync('downloadedVideos') || []
       
       // Add to downloaded list if not already there
-      if (!downloaded.find(v => v.id === videoId)) {
+      if (!downloaded.find(v => v.id === compositeVideoId)) {
         downloaded.push({
           ...video,
           downloadedAt: new Date().toISOString()
@@ -521,7 +552,7 @@ Page({
       }
       
       // Remove from toDownload list
-      const toDownloadVideos = this.data.toDownloadVideos.filter(v => v.id !== videoId)
+      const toDownloadVideos = this.data.toDownloadVideos.filter(v => v.id !== compositeVideoId)
       this.setData({ 
         toDownloadVideos,
         toDownloadCount: toDownloadVideos.length  // Update badge count
