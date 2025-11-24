@@ -4,7 +4,7 @@
   <view id="previewContainer" class="preview-container">
     <!-- 相机预览 -->
     <camera 
-      class="camera-preview"
+      class="camera-preview {{isLandscape ? 'landscape' : ''}}"
       device-position="{{cameraPosition}}"
       flash="{{flashMode}}"
       binderror="onCameraError"
@@ -62,7 +62,11 @@
       <text class="recording-text">{{t('recording')}}</text>
     </view>
 
-
+    <!-- 录制时间显示 (inside camera for rotation, only show in landscape) -->
+    <view wx:if="{{selectedTemplate && isLandscape}}" class="recording-timer-in-camera">
+      <text class="timer-text">{{recordTime}}秒 / {{maxRecordTime}}秒</text>
+      <text wx:if="{{isRecording}}" class="remaining-text">剩余 {{maxRecordTime - recordTime}}秒</text>
+    </view>
 
     <!-- 顶部控制栏 -->
     <view class="top-controls">
@@ -144,8 +148,8 @@
 
   <!-- 底部控制栏 -->
   <view class="bottom-controls">
-    <!-- 录制时间显示 -->
-    <view wx:if="{{selectedTemplate}}" class="recording-timer">
+    <!-- 录制时间显示 (hide in landscape mode) -->
+    <view wx:if="{{selectedTemplate && !isLandscape}}" class="recording-timer">
       <text class="timer-text">{{recordTime}}秒 / {{maxRecordTime}}秒</text>
       <text wx:if="{{isRecording}}" class="remaining-text">剩余 {{maxRecordTime - recordTime}}秒</text>
     </view>
