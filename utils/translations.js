@@ -55,8 +55,8 @@ const translations = {
     templateInfoDefault: '请按照具体说明录制每个场景',
     scenes: '场景',
     scenesSubtitle: '点击"录制"开始拍摄每个场景',
-    aiSimilarity: 'AI相似度',
-    aiSuggestions: 'AI建议',
+    aiSimilarity: '相似度',
+    aiSuggestions: '建议',
     record: '录制',
     reRecordApproved: '重新录制',
     reRecordPending: '重新录制', 
@@ -75,7 +75,7 @@ const translations = {
     // AI feedback
     sceneUploadSuccess: '场景上传成功！',
     similarityScore: '相似度分数',
-    aiAnalysisResults: 'AI分析结果',
+    aiAnalysisResults: '分析结果',
     continueButton: '继续',
     reRecordButton: '重新录制',
     
@@ -155,8 +155,8 @@ const translations = {
     templateInfoDefault: 'Please record each scene according to specific instructions',
     scenes: 'Scenes',
     scenesSubtitle: 'Click "Record" to start filming each scene',
-    aiSimilarity: 'AI Similarity',
-    aiSuggestions: 'AI Suggestions',
+    aiSimilarity: 'Similarity',
+    aiSuggestions: 'Suggestions',
     record: 'Record',
     reRecordApproved: 'Re-record',
     reRecordPending: 'Re-record',
@@ -175,7 +175,7 @@ const translations = {
     // AI feedback
     sceneUploadSuccess: 'Scene uploaded successfully!',
     similarityScore: 'Similarity Score',
-    aiAnalysisResults: 'AI Analysis Results',
+    aiAnalysisResults: 'Analysis Results',
     continueButton: 'Continue',
     reRecordButton: 'Re-record',
     

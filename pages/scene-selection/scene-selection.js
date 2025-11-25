@@ -22,7 +22,7 @@ Page({
     templateType: null, // NEW: 'ai' or 'manual'
     // Sanitized template fields for display (avoid leading colons)
     templateDisplay: null,
-    // AI Suggestions modal state
+    // Suggestions modal state
     showSuggestionsModal: false,
     currentAISuggestions: null,
     currentAISceneIndex: null,
@@ -425,7 +425,7 @@ Page({
     });
   },
 
-  // Open AI suggestions modal for a scene
+  // Open suggestions modal for a scene
   openAISuggestions: function (event) {
     var dataset = event.detail?.dataset || event.currentTarget.dataset;
     var sceneIndex = parseInt(dataset.index);
@@ -505,7 +505,7 @@ Page({
     this.setData({ showRecordedModal: false, currentRecordedScene: null });
   },
 
-  // Close AI suggestions modal
+  // Close suggestions modal
   closeAISuggestions: function () {
     this.setData({
       showSuggestionsModal: false,
@@ -538,7 +538,7 @@ Page({
     }
   },
 
-  // Fetch full scene details with AI suggestions
+  // Fetch full scene details with suggestions
   fetchSceneDetails: function (sceneId, sceneNumber) {
     var self = this;
     wx.showLoading({ title: t('loadingSceneDetails') });
@@ -590,7 +590,7 @@ Page({
       }
     }
 
-    // Show AI suggestions
+    // Show suggestions
     if (submission.aiSuggestions && submission.aiSuggestions.length > 0) {
       message += t('aiSuggestions') + ':\n';
       for (var i = 0; i < submission.aiSuggestions.length; i++) {

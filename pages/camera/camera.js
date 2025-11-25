@@ -705,7 +705,7 @@ Page({
     })
   },
 
-  // 显示AI反馈
+  // 显示反馈
   showAIFeedback(submissionData) {
     const similarity = Math.round((submissionData.similarityScore || 0) * 100)
     const suggestions = submissionData.aiSuggestions || []

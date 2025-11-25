@@ -221,23 +221,11 @@ page {
 /* Match scene detail button dimensions via ext-class */
 .block-btn { width: 100% !important; padding: 0 !important; height: 76rpx; font-size: 26rpx; }
 
-/* AI Disclaimer */
-.ai-disclaimer {
-  text-align: center;
-  padding: 40rpx 32rpx 20rpx;
-}
-
-.disclaimer-text {
-  font-size: 24rpx;
-  color: #9ca3af;
-  line-height: 1.5;
-}
-
 /* Logout CTA button sizing and placement */
 .logout-cta {
   width: 488.46rpx;
   height: 69.23rpx;
-  margin: 30rpx auto 24rpx; /* reduced top margin since disclaimer is above */
+  margin: 50rpx auto 24rpx;
   background: #f5f5f5;
   border: 2rpx solid #e2e8f0;
   border-radius: 15.38rpx;
