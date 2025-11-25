@@ -38,17 +38,29 @@
   position: relative;
 }
 
-/* Rotate entire camera for landscape (16:9) */
-camera.landscape {
+/* Rotate ONLY the UI wrapper for landscape mode, NOT the camera */
+.camera-ui-landscape {
   transform: rotate(90deg);
   transform-origin: center center;
-  width: 100vh !important;
-  height: 100vw !important;
-  position: absolute !important;
-  left: 50% !important;
-  top: 50% !important;
-  margin-left: -50vh !important;
-  margin-top: -50vw !important;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 100vh;
+  height: 100vw;
+  margin-left: -50vh;
+  margin-top: -50vw;
+}
+
+/* Ensure overlays inside wrapper are positioned correctly */
+.camera-ui-landscape .overlay-layer,
+.camera-ui-landscape .grid-overlay,
+.camera-ui-landscape .polygon-overlay,
+.camera-ui-landscape .keyelements-overlay,
+.camera-ui-landscape .top-controls,
+.camera-ui-landscape .right-controls,
+.camera-ui-landscape .recording-timer-in-camera,
+.camera-ui-landscape .recording-indicator {
+  position: absolute;
 }
 
 /* 网格覆盖 */
@@ -180,10 +192,10 @@ camera.landscape {
 }
 
 /* For landscape: position timer right beside the back button */
-camera.landscape .recording-timer-in-camera {
+.camera-ui-landscape .recording-timer-in-camera {
   top: auto;
   bottom: 32rpx;
-  left: 160rpx;
+  left: 250rpx;
   right: auto;
   transform: none;
 }
@@ -237,10 +249,10 @@ camera.landscape .recording-timer-in-camera {
 }
 
 /* For landscape: move back button to top-left (bottom-left when sideways) */
-camera.landscape .top-controls {
+.camera-ui-landscape .top-controls {
   top: auto;
   bottom: 32rpx;
-  left: 60rpx;
+  left: 150rpx;
 }
 
 /* 右侧控制栏 */
@@ -264,7 +276,7 @@ camera.landscape .top-controls {
 }
 
 /* For landscape mode: position along the short side (right edge), moved up slightly */
-camera.landscape .right-controls {
+.camera-ui-landscape .right-controls {
   top: 50%;
   bottom: auto;
   right: 280rpx;
@@ -322,18 +334,30 @@ camera.landscape .right-controls {
   font-weight: bold;
 }
 
-/* KTV overlay styles */
+/* KTV overlay styles - bottom middle */
 .ktv-overlay {
   position: absolute;
-  /* Keep above camera preview; avoid scene-info and bottom controls */
+  left: 50%;
   bottom: 360rpx;
-  left: 40rpx;
-  right: 40rpx;
+  transform: translateX(-50%);
+  width: 600rpx;
+  max-width: calc(100% - 80rpx);
+  max-height: 400rpx;
+  overflow-y: auto;
   background: rgba(0, 0, 0, 0.6);
   border-radius: 12rpx;
   padding: 16rpx 20rpx;
   z-index: 7;
   pointer-events: none; /* Do not block taps on buttons */
+}
+
+/* For landscape mode: position on same line as back button and timer, centered */
+.camera-ui-landscape .ktv-overlay {
+  left: 50%;
+  bottom: 32rpx;
+  transform: translateX(-50%);
+  width: auto;
+  max-width: 500rpx;
 }
 .ktv-text {
   font-size: 32rpx;

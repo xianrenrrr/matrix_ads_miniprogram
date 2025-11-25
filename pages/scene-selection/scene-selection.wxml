@@ -111,11 +111,11 @@
                 </custom-button>
               </view>
 
-              <!-- Record column: AI建议 (top) + 开始录制 (main) -->
+              <!-- Record column: 建议 (top) + 开始录制 (main) -->
               <view class="btn-wrap record-wrap stacked">
                 <custom-button
                   wx:if="{{submissions[index + 1] && submissions[index + 1].aiSuggestions && submissions[index + 1].aiSuggestions.length > 0}}"
-                  text="AI建议"
+                  text="建议"
                   type="outline"
                   size="small"
                   ext-class="block-btn top-btn"
@@ -202,7 +202,7 @@
   <view class="recording-complete-overlay" wx:if="{{showSuggestionsModal}}" catchtouchmove="true">
     <view class="recording-complete-modal">
       <view class="recording-complete-header">
-        <text class="recording-complete-title">AI建议</text>
+        <text class="recording-complete-title">建议</text>
       </view>
       <view class="recording-complete-body">
         <block wx:if="{{currentAISuggestions && currentAISuggestions.length > 0}}">

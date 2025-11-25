@@ -4,11 +4,13 @@
   <view id="previewContainer" class="preview-container">
     <!-- 相机预览 -->
     <camera 
-      class="camera-preview {{isLandscape ? 'landscape' : ''}}"
+      class="camera-preview"
       device-position="{{cameraPosition}}"
       flash="{{flashMode}}"
       binderror="onCameraError"
     >
+    <!-- UI Wrapper - rotates for landscape, camera feed stays normal -->
+    <view class="{{isLandscape ? 'camera-ui-landscape' : ''}}">
     <!-- 网格覆盖 -->
     <view wx:if="{{showOverlay && selectedTemplate && overlayType === 'grid'}}" class="grid-overlay" style="pointer-events: none;">
       <view class="grid-line grid-line-v1"></view>
@@ -98,6 +100,15 @@
         <text class="control-label">指导</text>
       </view>
     </view>
+
+    <!-- KTV提词器覆盖层：底部显示逐字高亮 -->
+    <view wx:if="{{showKtv && currentScript}}" class="ktv-overlay">
+      <text class="ktv-text">
+        <text class="ktv-highlight">{{ktvHighlighted}}</text><text class="ktv-rest">{{ktvRest}}</text>
+      </text>
+    </view>
+
+    </view> <!-- end camera-ui-landscape wrapper -->
   </camera>
   </view> <!-- end of previewContainer -->
 
@@ -134,16 +145,6 @@
     </view>
   </view>
   
-
-
-  <!-- KTV提词器覆盖层：底部显示逐字高亮 -->
-  <view wx:if="{{showKtv && currentScript}}" class="ktv-overlay">
-    <text class="ktv-text">
-      <text class="ktv-highlight">{{ktvHighlighted}}</text><text class="ktv-rest">{{ktvRest}}</text>
-    </text>
-  </view>
-
-
 
 
   <!-- 底部控制栏 -->
