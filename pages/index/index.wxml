@@ -146,6 +146,11 @@
       <text class="empty-text">{{loadingDownloaded ? '加载中...' : '暂无已下载视频'}}</text>
     </view>
 
+    <!-- AI 说明 -->
+    <view class="ai-disclaimer">
+      <text class="disclaimer-text">视频分数，以及建议由AI提供</text>
+    </view>
+
     <!-- 退出登录 CTA -->
     <view class="logout-cta" bindtap="handleLogout">退出登录</view>
   </view>
