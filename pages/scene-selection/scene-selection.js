@@ -999,18 +999,66 @@ Page({
 
   // Play the example video from start time
   playExampleVideo: function () {
+    const self = this;
     if (!this.data.currentExampleScene) return;
-    console.log('[PlayVideo] Playing:', this.data.currentExampleScene.videoUrl);
+    const videoUrl = this.data.currentExampleScene.videoUrl;
+    console.log('[PlayVideo] URL:', videoUrl);
+    console.log('[PlayVideo] URL length:', videoUrl ? videoUrl.length : 0);
     console.log('[PlayVideo] Platform:', this.data.platform, 'isAndroid:', this.data.isAndroid);
-    // 依赖 <video initial-time> 起始位置，避免强制 seek 导致进度条跳动
-    try { wx.createVideoContext('exampleVideo').play(); } catch (e) { 
+    console.log('[PlayVideo] URL starts with https:', videoUrl ? videoUrl.startsWith('https') : false);
+    
+    // Android/HarmonyOS: Pre-download video for better compatibility
+    // Skip if already a local file (tempFilePath)
+    if (this.data.isAndroid && videoUrl && !videoUrl.startsWith('wxfile://') && !videoUrl.startsWith('http://tmp')) {
+      console.log('[PlayVideo] Android: Pre-downloading video for compatibility...');
+      wx.showLoading({ title: '加载视频...' });
+      
+      wx.downloadFile({
+        url: videoUrl,
+        success: function(res) {
+          wx.hideLoading();
+          if (res.statusCode === 200 && res.tempFilePath) {
+            console.log('[PlayVideo] Android: Downloaded to:', res.tempFilePath);
+            // Update video URL to local file
+            self.setData({
+              'currentExampleScene.videoUrl': res.tempFilePath
+            });
+            // Now play the local file
+            setTimeout(() => {
+              try { 
+                wx.createVideoContext('exampleVideo').play(); 
+              } catch (e) { 
+                console.error('[PlayVideo] Error playing local file:', e);
+              }
+            }, 100);
+          } else {
+            console.error('[PlayVideo] Android: Download failed, status:', res.statusCode);
+            // Try playing remote URL anyway
+            try { wx.createVideoContext('exampleVideo').play(); } catch (e) { }
+          }
+        },
+        fail: function(err) {
+          wx.hideLoading();
+          console.error('[PlayVideo] Android: Download error:', err);
+          // Try playing remote URL anyway
+          try { wx.createVideoContext('exampleVideo').play(); } catch (e) { }
+        }
+      });
+      return;
+    }
+    
+    // iOS/DevTools: Play directly
+    try { 
+      wx.createVideoContext('exampleVideo').play(); 
+    } catch (e) { 
       console.error('[PlayVideo] Error:', e);
     }
   },
 
   // Ensure position is correct as soon as metadata is loaded
-  onExampleVideoLoaded: function () {
+  onExampleVideoLoaded: function (e) {
     if (!this.data.currentExampleScene) return;
+    console.log('[VideoLoaded] Success! Duration:', e.detail.duration, 'Width:', e.detail.width, 'Height:', e.detail.height);
     // 不再在元数据加载时强制 seek，避免与进度条冲突
   },
 
@@ -1038,6 +1086,17 @@ Page({
   closeExampleModal: function () {
     const videoContext = wx.createVideoContext('exampleVideo');
     videoContext.pause();
+
+    // Clean up downloaded temp file on Android/HarmonyOS
+    const videoUrl = this.data.currentExampleScene?.videoUrl;
+    if (videoUrl && videoUrl.startsWith('wxfile://')) {
+      // Remove temp file to free up storage
+      wx.getFileSystemManager().unlink({
+        filePath: videoUrl,
+        success: () => console.log('[Cleanup] Deleted temp video file'),
+        fail: (err) => console.log('[Cleanup] Could not delete temp file:', err.errMsg)
+      });
+    }
 
     this.setData({
       showExampleModal: false,
@@ -1128,10 +1187,23 @@ Page({
   // Clean up on page unload
   onUnload: function () {
     this.stopScorePolling();
+    this.cleanupTempVideoFile();
   },
 
   // Stop polling when page is hidden
   onHide: function () {
     this.stopScorePolling();
+  },
+
+  // Clean up downloaded temp video file
+  cleanupTempVideoFile: function () {
+    const videoUrl = this.data.currentExampleScene?.videoUrl;
+    if (videoUrl && videoUrl.startsWith('wxfile://')) {
+      wx.getFileSystemManager().unlink({
+        filePath: videoUrl,
+        success: () => console.log('[Cleanup] Deleted temp video file on unload'),
+        fail: () => {} // Ignore errors on unload
+      });
+    }
   }
 });

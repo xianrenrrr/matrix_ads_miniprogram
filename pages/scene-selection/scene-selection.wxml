@@ -184,6 +184,8 @@
           object-fit="contain"
           enable-play-gesture="{{true}}"
           enable-progress-gesture="{{true}}"
+          referrer-policy="origin"
+          custom-cache="{{true}}"
           bindloadedmetadata="onExampleVideoLoaded"
           bindplay="onExampleVideoPlay"
           bindtimeupdate="onExampleVideoTimeUpdate"
@@ -240,6 +242,8 @@
           object-fit="contain"
           enable-play-gesture="{{true}}"
           enable-progress-gesture="{{true}}"
+          referrer-policy="origin"
+          custom-cache="{{true}}"
           binderror="onVideoError"
         >
         </video>
