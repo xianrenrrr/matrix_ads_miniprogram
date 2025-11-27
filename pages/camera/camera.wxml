@@ -54,7 +54,7 @@
         class="box-overlay"
         style="position: absolute; left: {{item.left}}px; top: {{item.top}}px; width: {{item.width}}px; height: {{item.height}}px; border: 3px solid {{item.colorHex}}; border-radius: 4px;"
       >
-        <text class="box-label" style="position: absolute; top: -25px; left: 0; background: {{item.colorHex}}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px; white-space: nowrap;">{{item.name}}</text>
+        <text class="box-label" style="position: absolute; top: 2px; left: 2px; background: {{item.colorHex}}; color: white; padding: 2px 6px; border-radius: 3px; font-size: 11px; white-space: nowrap; max-width: calc(100% - 8px); overflow: hidden; text-overflow: ellipsis;">{{item.name}}</text>
       </view>
     </view>
 
