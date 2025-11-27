@@ -32,7 +32,10 @@ Page({
     initialShowDone: false,
     // Recorded video preview modal
     showRecordedModal: false,
-    currentRecordedScene: null
+    currentRecordedScene: null,
+    // Platform detection for Android workarounds
+    isAndroid: false,
+    platform: ''
   },
 
   // Download compiled published video
@@ -79,6 +82,30 @@ Page({
         icon: 'error'
       });
       return;
+    }
+
+    // Detect platform for Android/HarmonyOS-specific workarounds
+    try {
+      const systemInfo = wx.getSystemInfoSync();
+      const platform = systemInfo.platform || '';
+      const system = systemInfo.system || '';
+      const lowerPlatform = platform.toLowerCase();
+      const lowerSystem = system.toLowerCase();
+      
+      // Android or HarmonyOS (鸿蒙) - both need the same video workarounds
+      // HarmonyOS may report as 'android' or 'harmonyos' depending on version
+      const isAndroid = lowerPlatform === 'android' || 
+                        lowerPlatform.includes('harmony') ||
+                        lowerSystem.includes('harmony') ||
+                        lowerSystem.includes('鸿蒙');
+      
+      console.log('[Platform] Detected:', platform, 'system:', system, 'isAndroid/HarmonyOS:', isAndroid);
+      this.setData({
+        platform: platform,
+        isAndroid: isAndroid
+      });
+    } catch (e) {
+      console.error('[Platform] Detection failed:', e);
     }
 
     this.setData({
@@ -481,6 +508,7 @@ Page({
           return;
         }
         // Reuse Example modal for consistent UX
+        self._androidRetried = false; // Reset Android retry flag
         self.setData({
           showExampleModal: true,
           currentExampleScene: {
@@ -891,6 +919,8 @@ Page({
         showExampleModal: true
       });
 
+      // Reset Android retry flag for new video
+      this._androidRetried = false;
       setTimeout(() => this.playExampleVideo(), 100);
 
     } else if (templateType === 'manual') {
@@ -921,6 +951,8 @@ Page({
           showExampleModal: true
         });
 
+        // Reset Android retry flag for new video
+        this._androidRetried = false;
         setTimeout(() => this.playExampleVideo(), 100);
 
       } else {
@@ -945,6 +977,8 @@ Page({
             };
             updateData.showExampleModal = true;
 
+            // Reset Android retry flag for new video
+            self._androidRetried = false;
             self.setData(updateData);
             setTimeout(() => self.playExampleVideo(), 100);
           } else {
@@ -966,8 +1000,12 @@ Page({
   // Play the example video from start time
   playExampleVideo: function () {
     if (!this.data.currentExampleScene) return;
+    console.log('[PlayVideo] Playing:', this.data.currentExampleScene.videoUrl);
+    console.log('[PlayVideo] Platform:', this.data.platform, 'isAndroid:', this.data.isAndroid);
     // 依赖 <video initial-time> 起始位置，避免强制 seek 导致进度条跳动
-    try { wx.createVideoContext('exampleVideo').play(); } catch (e) { }
+    try { wx.createVideoContext('exampleVideo').play(); } catch (e) { 
+      console.error('[PlayVideo] Error:', e);
+    }
   },
 
   // Ensure position is correct as soon as metadata is loaded
@@ -1009,10 +1047,60 @@ Page({
 
   // Handle video error
   onVideoError: function (e) {
-    console.error('Video error:', e.detail);
+    const self = this;
+    console.error('[VideoError] Error details:', e.detail);
+    const errMsg = e.detail.errMsg || '';
+    const errCode = e.detail.errCode || '';
+    const videoUrl = this.data.currentExampleScene?.videoUrl || '';
+    console.error('[VideoError] URL:', videoUrl);
+    console.error('[VideoError] Platform:', this.data.platform, 'isAndroid:', this.data.isAndroid);
+    
+    // Show more detailed error for debugging
+    let errorText = '视频加载失败';
+    if (errMsg.includes('10001') || errCode === 10001) {
+      errorText = '视频格式不支持';
+    } else if (errMsg.includes('10002') || errCode === 10002) {
+      errorText = '视频解码失败';
+    } else if (errMsg.includes('10003') || errCode === 10003) {
+      errorText = '网络错误';
+    }
+    
+    // Android workaround: Try downloading video first then play local file
+    if (this.data.isAndroid && videoUrl && !this._androidRetried) {
+      this._androidRetried = true;
+      console.log('[VideoError] Android: Trying download workaround...');
+      wx.showLoading({ title: '加载视频...' });
+      
+      wx.downloadFile({
+        url: videoUrl,
+        success: function(res) {
+          wx.hideLoading();
+          if (res.statusCode === 200 && res.tempFilePath) {
+            console.log('[VideoError] Android: Downloaded to:', res.tempFilePath);
+            // Update video URL to local file
+            self.setData({
+              'currentExampleScene.videoUrl': res.tempFilePath
+            });
+            setTimeout(() => self.playExampleVideo(), 100);
+          } else {
+            console.error('[VideoError] Android: Download failed, status:', res.statusCode);
+            wx.showToast({ title: errorText, icon: 'none', duration: 3000 });
+          }
+        },
+        fail: function(err) {
+          wx.hideLoading();
+          console.error('[VideoError] Android: Download error:', err);
+          wx.showToast({ title: errorText, icon: 'none', duration: 3000 });
+        }
+      });
+      return;
+    }
+    
+    this._androidRetried = false;
     wx.showToast({
-      title: '视频加载失败',
-      icon: 'none'
+      title: errorText,
+      icon: 'none',
+      duration: 3000
     });
   },
 

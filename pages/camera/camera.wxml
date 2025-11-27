@@ -1,7 +1,11 @@
 <!-- pages/camera/camera.wxml -->
 <view class="camera-container">
   <!-- 相机预览容器 -->
-  <view id="previewContainer" class="preview-container">
+  <view id="previewContainer" class="preview-container"
+    bindtouchstart="onCameraTouchStart"
+    bindtouchmove="onCameraTouchMove"
+    bindtouchend="onCameraTouchEnd"
+  >
     <!-- 相机预览 -->
     <camera 
       class="camera-preview"
@@ -99,6 +103,11 @@
         <text class="control-icon">{{showHints ? '>' : '<'}}</text>
         <text class="control-label">指导</text>
       </view>
+    </view>
+
+    <!-- 缩放指示器 -->
+    <view wx:if="{{zoomLevel > 1}}" class="zoom-indicator" bindtap="resetZoom">
+      <text class="zoom-text">{{zoomLevel.toFixed(1)}}x</text>
     </view>
 
     <!-- KTV提词器覆盖层：底部显示逐字高亮 -->

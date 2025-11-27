@@ -13,6 +13,10 @@ Page({
     recordedVideos: [],
     cameraPosition: 'back', // 'front' | 'back'
     flashMode: 'off', // 'off' | 'on' | 'auto'
+    zoomLevel: 1, // Camera zoom level (1x to 5x)
+    maxZoom: 5, // Maximum zoom level
+    minZoom: 1, // Minimum zoom level
+    lastTouchDistance: 0, // For pinch gesture
     recordTime: 0,
     maxRecordTime: 60,
     showOverlay: true,
@@ -755,6 +759,86 @@ Page({
   switchCamera() {
     const newPosition = this.data.cameraPosition === 'front' ? 'back' : 'front'
     this.setData({ cameraPosition: newPosition })
+  },
+
+  // 相机缩放 - 处理触摸开始
+  onCameraTouchStart(e) {
+    if (e.touches.length === 2) {
+      const touch1 = e.touches[0]
+      const touch2 = e.touches[1]
+      const distance = Math.sqrt(
+        Math.pow(touch2.clientX - touch1.clientX, 2) +
+        Math.pow(touch2.clientY - touch1.clientY, 2)
+      )
+      this.setData({ lastTouchDistance: distance })
+    }
+  },
+
+  // 相机缩放 - 处理触摸移动 (pinch gesture)
+  onCameraTouchMove(e) {
+    if (e.touches.length === 2 && this.data.lastTouchDistance > 0) {
+      const touch1 = e.touches[0]
+      const touch2 = e.touches[1]
+      const distance = Math.sqrt(
+        Math.pow(touch2.clientX - touch1.clientX, 2) +
+        Math.pow(touch2.clientY - touch1.clientY, 2)
+      )
+      
+      const scale = distance / this.data.lastTouchDistance
+      let newZoom = this.data.zoomLevel * scale
+      
+      // Clamp zoom level
+      newZoom = Math.max(this.data.minZoom, Math.min(this.data.maxZoom, newZoom))
+      
+      // Apply zoom to camera
+      if (this.cameraContext) {
+        this.cameraContext.setZoom({
+          zoom: newZoom,
+          success: () => {
+            this.setData({ 
+              zoomLevel: newZoom,
+              lastTouchDistance: distance
+            })
+          },
+          fail: (err) => {
+            console.error('Zoom failed:', err)
+          }
+        })
+      }
+    }
+  },
+
+  // 相机缩放 - 处理触摸结束
+  onCameraTouchEnd() {
+    this.setData({ lastTouchDistance: 0 })
+  },
+
+  // 手动设置缩放级别 (用于滑块)
+  onZoomChange(e) {
+    const newZoom = parseFloat(e.detail.value)
+    if (this.cameraContext) {
+      this.cameraContext.setZoom({
+        zoom: newZoom,
+        success: () => {
+          this.setData({ zoomLevel: newZoom })
+        },
+        fail: (err) => {
+          console.error('Zoom failed:', err)
+        }
+      })
+    }
+  },
+
+  // 重置缩放
+  resetZoom() {
+    if (this.cameraContext) {
+      this.cameraContext.setZoom({
+        zoom: 1,
+        success: () => {
+          this.setData({ zoomLevel: 1 })
+        }
+      })
+    }
   },
 
   // 切换闪光灯

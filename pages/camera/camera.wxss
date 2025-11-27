@@ -154,6 +154,25 @@
   font-weight: 500;
 }
 
+/* 缩放指示器 */
+.zoom-indicator {
+  position: absolute;
+  bottom: 280rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  padding: 12rpx 24rpx;
+  border-radius: 32rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+  z-index: 100;
+}
+
+.zoom-text {
+  color: #fff;
+}
+
 .recording-dot {
   width: 16rpx;
   height: 16rpx;
