@@ -185,7 +185,18 @@ Page({
     // 使用统一的关键要素系统
     if (hasKeyElements) {
       console.log('使用关键要素覆盖，数量:', currentScene.keyElementsWithBoxes.length)
-      updateData.keyElements = this.processKeyElements(currentScene.keyElementsWithBoxes)
+      
+      // 获取目标尺寸（如果场景数据中有提供）
+      const targetDimensions = currentScene.targetDimensions || {
+        width: currentScene.targetWidth || 750,
+        height: currentScene.targetHeight || 1334
+      }
+      
+      // 检查是否为像素坐标模式
+      const isPixelMode = currentScene.pixelCoordinates === true
+      console.log('坐标模式:', isPixelMode ? '像素坐标' : '归一化坐标', '目标尺寸:', targetDimensions)
+      
+      updateData.keyElements = this.processKeyElements(currentScene.keyElementsWithBoxes, isPixelMode ? targetDimensions : null)
     } else {
       console.log('无关键要素数据')
       updateData.keyElements = []
@@ -267,6 +278,7 @@ Page({
   },
 
   // 更新关键要素像素坐标
+  // 支持两种坐标模式：归一化(0-1)和像素坐标
   updateKeyElementsPixels(containerW, containerH, offsetX, offsetY, drawnW, drawnH, colors) {
     const elements = this.data.keyElements || []
 
@@ -285,11 +297,34 @@ Page({
       }
       
       const box = element.box
-      // Original dimensions
-      const origWidth = box.width * drawnW
-      const origHeight = box.height * drawnH
-      const origLeft = offsetX + box.x * drawnW
-      const origTop = offsetY + box.y * drawnH
+      let origLeft, origTop, origWidth, origHeight
+      
+      if (element.isPixelCoords) {
+        // 像素坐标模式 - 按比例缩放到当前容器
+        const targetW = box.targetWidth || 750
+        const targetH = box.targetHeight || 1334
+        
+        // 计算缩放比例
+        const scaleX = drawnW / targetW
+        const scaleY = drawnH / targetH
+        
+        // 转换像素坐标到当前容器
+        origLeft = offsetX + box.x * scaleX
+        origTop = offsetY + box.y * scaleY
+        origWidth = box.width * scaleX
+        origHeight = box.height * scaleY
+        
+        console.log(`KeyElement "${element.name}" 像素坐标转换:`)
+        console.log(`  原始: [${box.x}, ${box.y}, ${box.width}, ${box.height}] @ ${targetW}x${targetH}`)
+        console.log(`  缩放: scaleX=${scaleX.toFixed(3)}, scaleY=${scaleY.toFixed(3)}`)
+        console.log(`  结果: [${origLeft.toFixed(1)}, ${origTop.toFixed(1)}, ${origWidth.toFixed(1)}, ${origHeight.toFixed(1)}]`)
+      } else {
+        // 归一化坐标模式 (0-1) - 传统方式
+        origWidth = box.width * drawnW
+        origHeight = box.height * drawnH
+        origLeft = offsetX + box.x * drawnW
+        origTop = offsetY + box.y * drawnH
+      }
       
       // Scaled dimensions (30% smaller)
       const width = origWidth * SCALE_FACTOR
@@ -299,10 +334,19 @@ Page({
       const left = origLeft + (origWidth - width) / 2
       const top = origTop + (origHeight - height) / 2
       
+      // 边界检查 - 确保不超出容器
+      const clampedLeft = Math.max(0, Math.min(left, containerW - width))
+      const clampedTop = Math.max(0, Math.min(top, containerH - height))
+      const clampedWidth = Math.min(width, containerW - clampedLeft)
+      const clampedHeight = Math.min(height, containerH - clampedTop)
+      
       const color = colors[i % colors.length]
 
       overlayRectsPixels.push({
-        left, top, width, height,
+        left: clampedLeft, 
+        top: clampedTop, 
+        width: clampedWidth, 
+        height: clampedHeight,
         colorHex: color,
         name: element.name,
         confidence: element.confidence
@@ -386,10 +430,15 @@ Page({
 
   /**
    * 处理关键要素数组，规范化字段名称并验证数据
+   * 支持两种坐标模式：
+   * 1. 归一化坐标 (0-1): 传统模式，需要乘以容器尺寸
+   * 2. 像素坐标 (>1): 新模式，直接使用像素值，需要按比例缩放到当前容器
+   * 
    * @param {Array} keyElements - 关键要素数组 [{name, box: [x,y,w,h] or null, confidence}]
+   * @param {Object} targetDimensions - 可选，像素坐标的目标尺寸 {width, height}
    * @returns {Array} 处理后的关键要素数组
    */
-  processKeyElements(keyElements) {
+  processKeyElements(keyElements, targetDimensions) {
     if (!Array.isArray(keyElements)) {
       console.warn('keyElements is not an array:', keyElements)
       return []
@@ -401,30 +450,57 @@ Page({
         name: element.name || '',
         confidence: confidence,
         confidencePercent: Math.round(confidence * 100),
-        box: null // Will be set below if box exists
+        box: null, // Will be set below if box exists
+        isPixelCoords: false // Flag to indicate coordinate type
       }
 
       // 处理边界框（如果存在）
       if (element.box && Array.isArray(element.box) && element.box.length === 4) {
         const [x, y, width, height] = element.box
         
-        // 验证并规范化坐标
-        processed.box = {
-          x: Math.max(0, Math.min(1, x)),
-          y: Math.max(0, Math.min(1, y)),
-          width: Math.max(0, Math.min(1, width)),
-          height: Math.max(0, Math.min(1, height))
-        }
+        // 检测坐标类型：如果任何值 > 1，则为像素坐标
+        const isPixelCoords = x > 1 || y > 1 || width > 1 || height > 1
+        processed.isPixelCoords = isPixelCoords
+        
+        if (isPixelCoords) {
+          // 像素坐标模式 - 存储原始像素值和目标尺寸
+          console.log(`KeyElement ${index} (${processed.name}): 像素坐标模式 [${x}, ${y}, ${width}, ${height}]`)
+          
+          // 获取目标尺寸（从场景数据或默认值）
+          const targetW = targetDimensions?.width || 750
+          const targetH = targetDimensions?.height || 1334
+          
+          processed.box = {
+            x: x,
+            y: y,
+            width: width,
+            height: height,
+            targetWidth: targetW,
+            targetHeight: targetH
+          }
+          
+          console.log(`KeyElement ${index}: 目标尺寸 ${targetW}x${targetH}`)
+        } else {
+          // 归一化坐标模式 (0-1)
+          console.log(`KeyElement ${index} (${processed.name}): 归一化坐标模式 [${x}, ${y}, ${width}, ${height}]`)
+          
+          processed.box = {
+            x: Math.max(0, Math.min(1, x)),
+            y: Math.max(0, Math.min(1, y)),
+            width: Math.max(0, Math.min(1, width)),
+            height: Math.max(0, Math.min(1, height))
+          }
 
-        // 验证边界框完整性
-        if (processed.box.x + processed.box.width > 1) {
-          console.warn(`KeyElement ${index} (${processed.name}): x + width exceeds bounds, clamping`)
-          processed.box.width = 1 - processed.box.x
-        }
+          // 验证边界框完整性
+          if (processed.box.x + processed.box.width > 1) {
+            console.warn(`KeyElement ${index} (${processed.name}): x + width exceeds bounds, clamping`)
+            processed.box.width = 1 - processed.box.x
+          }
 
-        if (processed.box.y + processed.box.height > 1) {
-          console.warn(`KeyElement ${index} (${processed.name}): y + height exceeds bounds, clamping`)
-          processed.box.height = 1 - processed.box.y
+          if (processed.box.y + processed.box.height > 1) {
+            console.warn(`KeyElement ${index} (${processed.name}): y + height exceeds bounds, clamping`)
+            processed.box.height = 1 - processed.box.y
+          }
         }
 
         // 过滤掉无效的边界框
