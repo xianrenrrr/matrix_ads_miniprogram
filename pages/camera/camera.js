@@ -38,11 +38,16 @@ Page({
     cameraInstructions: '',
     movementInstructions: '',
     deviceOrientationText: '',
-    audioNotesText: ''
+    audioNotesText: '',
+    // 平台检测
+    isHarmonyOS: false
   },
 
   onLoad(options) {
     logger.log('录制页面加载', options)
+    
+    // 检测HarmonyOS平台 (zoom slider fallback)
+    this.detectPlatform()
 
     // 保存传入的参数
     this.setData({
@@ -74,6 +79,27 @@ Page({
   onHide() {
     logger.log('录制页面隐藏')
     this.stopRecording()
+  },
+
+  // 检测平台 (HarmonyOS需要zoom slider)
+  detectPlatform() {
+    try {
+      const systemInfo = wx.getSystemInfoSync()
+      const platform = (systemInfo.platform || '').toLowerCase()
+      const system = (systemInfo.system || '').toLowerCase()
+      
+      // HarmonyOS检测 - pinch zoom不工作，需要slider
+      const isHarmonyOS = platform.includes('harmony') || 
+                          system.includes('harmony') || 
+                          system.includes('鸿蒙')
+      
+      if (isHarmonyOS) {
+        console.log('[Platform] HarmonyOS detected - enabling zoom slider')
+        this.setData({ isHarmonyOS: true })
+      }
+    } catch (e) {
+      console.warn('[Platform] Detection failed:', e)
+    }
   },
 
   // 初始化相机
@@ -837,7 +863,7 @@ Page({
     this.setData({ cameraPosition: newPosition })
   },
 
-  // 相机缩放 - 处理触摸开始
+  // 相机缩放 - 处理触摸开始 (iOS pinch gesture)
   onCameraTouchStart(e) {
     if (e.touches.length === 2) {
       const touch1 = e.touches[0]
@@ -850,7 +876,7 @@ Page({
     }
   },
 
-  // 相机缩放 - 处理触摸移动 (pinch gesture)
+  // 相机缩放 - 处理触摸移动 (iOS pinch gesture)
   onCameraTouchMove(e) {
     if (e.touches.length === 2 && this.data.lastTouchDistance > 0) {
       const touch1 = e.touches[0]
@@ -861,25 +887,14 @@ Page({
       )
       
       const scale = distance / this.data.lastTouchDistance
-      let newZoom = this.data.zoomLevel * scale
-      
-      // Clamp zoom level
+      let newZoom = Math.round(this.data.zoomLevel * scale * 10) / 10
       newZoom = Math.max(this.data.minZoom, Math.min(this.data.maxZoom, newZoom))
       
-      // Apply zoom to camera
-      if (this.cameraContext) {
-        this.cameraContext.setZoom({
-          zoom: newZoom,
-          success: () => {
-            this.setData({ 
-              zoomLevel: newZoom,
-              lastTouchDistance: distance
-            })
-          },
-          fail: (err) => {
-            console.error('Zoom failed:', err)
-          }
-        })
+      // Only update if zoom changed
+      if (Math.abs(newZoom - this.data.zoomLevel) >= 0.1) {
+        this.applyZoom(newZoom, distance)
+      } else {
+        this.setData({ lastTouchDistance: distance })
       }
     }
   },
@@ -889,32 +904,37 @@ Page({
     this.setData({ lastTouchDistance: 0 })
   },
 
-  // 手动设置缩放级别 (用于滑块)
-  onZoomChange(e) {
-    const newZoom = parseFloat(e.detail.value)
-    if (this.cameraContext) {
+  // 应用缩放 (兼容iOS/Android/HarmonyOS)
+  applyZoom(newZoom, touchDistance) {
+    const self = this
+    if (this.cameraContext && typeof this.cameraContext.setZoom === 'function') {
       this.cameraContext.setZoom({
         zoom: newZoom,
         success: () => {
-          this.setData({ zoomLevel: newZoom })
+          self.setData({ 
+            zoomLevel: newZoom,
+            lastTouchDistance: touchDistance || self.data.lastTouchDistance
+          })
         },
-        fail: (err) => {
-          console.error('Zoom failed:', err)
+        fail: () => {
+          // Fallback: update UI only
+          self.setData({ 
+            zoomLevel: newZoom,
+            lastTouchDistance: touchDistance || self.data.lastTouchDistance
+          })
         }
+      })
+    } else {
+      self.setData({ 
+        zoomLevel: newZoom,
+        lastTouchDistance: touchDistance || self.data.lastTouchDistance
       })
     }
   },
 
-  // 重置缩放
-  resetZoom() {
-    if (this.cameraContext) {
-      this.cameraContext.setZoom({
-        zoom: 1,
-        success: () => {
-          this.setData({ zoomLevel: 1 })
-        }
-      })
-    }
+  // 滑块缩放 (Android/HarmonyOS)
+  onZoomChange(e) {
+    this.applyZoom(parseFloat(e.detail.value))
   },
 
   // 切换闪光灯

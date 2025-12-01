@@ -154,23 +154,30 @@
   font-weight: 500;
 }
 
-/* 缩放指示器 */
-.zoom-indicator {
+/* 缩放滑块容器 (HarmonyOS/Android) */
+.zoom-slider-container {
   position: absolute;
-  bottom: 280rpx;
+  bottom: 260rpx;
   left: 50%;
   transform: translateX(-50%);
-  background-color: rgba(0, 0, 0, 0.6);
-  color: white;
-  padding: 12rpx 24rpx;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 8rpx 20rpx;
   border-radius: 32rpx;
-  font-size: 28rpx;
-  font-weight: 500;
   z-index: 100;
 }
 
-.zoom-text {
+.zoom-slider {
+  width: 200rpx;
+}
+
+.zoom-label {
   color: #fff;
+  font-size: 24rpx;
+  min-width: 40rpx;
+  text-align: center;
 }
 
 .recording-dot {

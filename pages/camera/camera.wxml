@@ -105,9 +105,21 @@
       </view>
     </view>
 
-    <!-- 缩放指示器 -->
-    <view wx:if="{{zoomLevel > 1}}" class="zoom-indicator" bindtap="resetZoom">
-      <text class="zoom-text">{{zoomLevel.toFixed(1)}}x</text>
+    <!-- 缩放滑块 (仅HarmonyOS - Android和iOS pinch手势正常工作) -->
+    <view wx:if="{{isHarmonyOS}}" class="zoom-slider-container">
+      <text class="zoom-label">1x</text>
+      <slider 
+        class="zoom-slider"
+        min="1" 
+        max="{{maxZoom}}" 
+        step="0.1"
+        value="{{zoomLevel}}"
+        activeColor="#FFD700"
+        backgroundColor="rgba(255,255,255,0.3)"
+        block-size="20"
+        bindchange="onZoomChange"
+      />
+      <text class="zoom-label">{{maxZoom}}x</text>
     </view>
 
     <!-- KTV提词器覆盖层：底部显示逐字高亮 -->
