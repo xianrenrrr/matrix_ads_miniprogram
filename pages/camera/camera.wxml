@@ -91,10 +91,12 @@
         <text class="control-icon">↻</text>
         <text class="control-label">翻转</text>
       </view>
+      <!-- DEPRECATED: 辅助线功能已禁用
       <view class="control-btn" bindtap="toggleOverlay">
         <text class="control-icon">⊞</text>
         <text class="control-label">辅助线</text>
       </view>
+      -->
       <view class="control-btn" bindtap="toggleKtv">
         <text class="control-icon">♪</text>
         <text class="control-label">提词器</text>

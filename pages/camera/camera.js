@@ -19,7 +19,7 @@ Page({
     lastTouchDistance: 0, // For pinch gesture
     recordTime: 0,
     maxRecordTime: 60,
-    showOverlay: true,
+    showOverlay: false, // DEPRECATED: 辅助线功能已禁用
     currentScript: '',
     sceneProgress: 0,
     showScriptSidebar: false, // 显示提词器侧边栏
